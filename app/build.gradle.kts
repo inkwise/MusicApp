@@ -32,6 +32,47 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget("17"))
         }
     }
+    
+    val releaseStoreFile =
+        project.findProperty("RELEASE_STORE_FILE") as String?
+            ?: error("RELEASE_STORE_FILE not found")
+
+    val releaseStorePassword =
+        project.findProperty("RELEASE_STORE_PASSWORD") as String?
+            ?: error("RELEASE_STORE_PASSWORD not found")
+
+    val releaseKeyAlias =
+        project.findProperty("RELEASE_KEY_ALIAS") as String?
+            ?: error("RELEASE_KEY_ALIAS not found")
+
+    val releaseKeyPassword =
+        project.findProperty("RELEASE_KEY_PASSWORD") as String?
+            ?: error("RELEASE_KEY_PASSWORD not found")
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(releaseStoreFile)
+            storePassword = releaseStorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
+        }
+    }
+    
+    buildTypes {
+        
+
+        release {
+        	//签名
+        	signingConfig = signingConfigs.getByName("release")
+            // 关闭代码混淆/压缩
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
 }
 
 dependencies {
@@ -45,4 +86,21 @@ dependencies {
     implementation(libs.androidx.material3)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    
+    // Icons Extended
+    implementation("androidx.compose.material:material-icons-extended")
+    // 添加这两行 Navigation 依赖
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
+    
+    // 如果还没有，也需要这些基础依赖
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+
 }
