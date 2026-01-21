@@ -15,12 +15,6 @@ fun CloudSongsScreen() {
                 .fillMaxSize()
                 .padding(16.dp),
     ) {
-        Text(
-            text = "云端歌曲",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp),
-        )
-
         LazyColumn {
             items(10) { index ->
                 Card(

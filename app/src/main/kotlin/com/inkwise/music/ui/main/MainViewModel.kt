@@ -1,6 +1,8 @@
 package com.inkwise.music.ui.main
 
 import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.inkwise.music.data.repository.MusicRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,9 +16,12 @@ data class MainUiState(
     val currentRoute: String = "home",
 )
 
+
 class MainViewModel(
-    private val repository: MusicRepository = MusicRepository(),
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val repository = MusicRepository(application)
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 

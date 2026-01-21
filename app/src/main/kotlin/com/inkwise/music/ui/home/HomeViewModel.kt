@@ -1,10 +1,14 @@
 package com.inkwise.music.ui.home
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.inkwise.music.data.repository.MusicRepository
 
 class HomeViewModel(
-    private val repository: MusicRepository = MusicRepository(),
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val repository = MusicRepository(application)
+
     // 主页的业务逻辑
 }

@@ -94,13 +94,19 @@ dependencies {
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
-    // Icons Extended
     implementation("androidx.compose.material:material-icons-extended")
-    // 添加这两行 Navigation 依赖
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
     
-    // 如果还没有，也需要这些基础依赖
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    
+    val media3Version = "1.2.1"
+    implementation("androidx.media3:media3-exoplayer:$media3Version")
+    implementation("androidx.media3:media3-session:$media3Version")
+    implementation("androidx.media3:media3-ui:$media3Version")
+    implementation("androidx.media3:media3-common:$media3Version")
+    
+    implementation("androidx.lifecycle:lifecycle-service:2.7.0")
+    implementation("com.google.guava:guava:31.1-android")
 
 }

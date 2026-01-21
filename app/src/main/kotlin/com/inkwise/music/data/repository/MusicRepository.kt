@@ -1,34 +1,52 @@
 package com.inkwise.music.data.repository
 
+import android.content.Context
+import android.net.Uri
 import com.inkwise.music.data.model.Song
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class MusicRepository {
-    // 获取本地歌曲
-    fun getLocalSongs(): Flow<List<Song>> =
-        flow {
-            delay(500) // 模拟加载
-            emit(
-                listOf(
-                    Song("1", "本地歌曲 1", "歌手 A", 180000, true),
-                    Song("2", "本地歌曲 2", "歌手 B", 200000, true),
-                    Song("3", "本地歌曲 3", "歌手 C", 210000, true),
+class MusicRepository(private val context: Context) {
+    
+    // 获取本地歌曲列表
+    fun getLocalSongs(): Flow<List<Song>> = flow {
+        // 这里应该扫描本地音乐文件
+        // 示例数据
+        emit(
+            listOf(
+                Song(
+                    id = "1",
+                    title = "本地歌曲 1",
+                    artist = "歌手 A",
+                    duration = 180000,
+                    uri = Uri.parse("/storage/emulated/0/Documents/音乐/Whatya Want From Me - Dunn.mp3"),
+                    isLocal = true
                 ),
+                Song(
+                    id = "2",
+                    title = "本地歌曲 2",
+                    artist = "歌手 B",
+                    duration = 200000,
+                    uri = Uri.parse("/storage/emulated/0/Documents/音乐/9420 - 麦小兜.flac"),
+                    isLocal = true
+                )
             )
-        }
-
+        )
+    }
+    
     // 获取云端歌曲
-    fun getCloudSongs(): Flow<List<Song>> =
-        flow {
-            delay(500) // 模拟网络请求
-            emit(
-                listOf(
-                    Song("4", "云端歌曲 1", "歌手 D", 190000, false),
-                    Song("5", "云端歌曲 2", "歌手 E", 220000, false),
-                    Song("6", "云端歌曲 3", "歌手 F", 195000, false),
-                ),
+    fun getCloudSongs(): Flow<List<Song>> = flow {
+        emit(
+            listOf(
+                Song(
+                    id = "3",
+                    title = "云端歌曲 1",
+                    artist = "歌手 C",
+                    duration = 190000,
+                    uri = Uri.parse("/storage/emulated/0/Documents/音乐/爱您不需要理由 - 李克勤.flac"),
+                    isLocal = false
+                )
             )
-        }
+        )
+    }
 }

@@ -1,3 +1,5 @@
+
+// ui/home/HomeScreen.kt
 package com.inkwise.music.ui.home
 
 import androidx.compose.foundation.layout.*
@@ -15,56 +17,54 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun HomeScreen(
     onNavigateToLocal: () -> Unit,
     onNavigateToCloud: () -> Unit,
-    viewModel: HomeViewModel = viewModel(),
+    viewModel: HomeViewModel = viewModel()
 ) {
     Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "欢迎来到音乐播放器",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 48.dp),
+            modifier = Modifier.padding(bottom = 48.dp)
         )
-
+        
         // 本地歌曲按钮
         ElevatedButton(
             onClick = onNavigateToLocal,
-            modifier =
-                Modifier
-                    .fillMaxWidth(0.7f)
-                    .height(80.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .height(80.dp)
         ) {
             Icon(
                 Icons.Default.MusicNote,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text("本地歌曲", style = MaterialTheme.typography.titleLarge)
         }
-
+        
         Spacer(modifier = Modifier.height(24.dp))
-
+        
         // 云歌曲按钮
         ElevatedButton(
             onClick = onNavigateToCloud,
-            modifier =
-                Modifier
-                    .fillMaxWidth(0.7f)
-                    .height(80.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .height(80.dp)
         ) {
             Icon(
                 Icons.Default.Cloud,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text("云端歌曲", style = MaterialTheme.typography.titleLarge)
         }
     }
 }
+
