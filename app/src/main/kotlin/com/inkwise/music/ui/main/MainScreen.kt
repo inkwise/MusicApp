@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.inkwise.music.ui.home.HomeScreen
 import com.inkwise.music.ui.local.LocalSongsScreen
 import com.inkwise.music.ui.cloud.CloudSongsScreen
+import com.inkwise.music.ui.queue.PlayQueueBottomSheet
 //import androidx.compose.material.icons.automirrored.filled.QueueMusic
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -221,7 +222,8 @@ fun BottomDrawerContent(
 ) {
     val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
-    
+    var showPlayQueue by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -375,12 +377,18 @@ fun BottomDrawerContent(
         
         // 播放队列按钮
         TextButton(
-            onClick = { /* 显示播放队列 */ },
+            onClick = { showPlayQueue = true },
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Default.QueueMusic, "播放队列")
             Spacer(modifier = Modifier.width(8.dp))
             Text("播放队列")
         }
+        if (showPlayQueue) {
+            PlayQueueBottomSheet(
+                onDismiss = { showPlayQueue = false }
+            )
+        }
+        
     }
 }
