@@ -15,11 +15,11 @@ import kotlinx.coroutines.launch
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
     
     private val repository = MusicRepository(application)
-    private val playerManager = MusicPlayerManager(application)
+    //private val MusicPlayerManager = MusicMusicPlayerManager(application)
     
-    val playbackState: StateFlow<PlaybackState> = playerManager.playbackState
-    val playQueue: StateFlow<List<Song>> = playerManager.playQueue
-    val currentIndex: StateFlow<Int> = playerManager.currentIndex
+    val playbackState: StateFlow<PlaybackState> = MusicPlayerManager.playbackState
+    val playQueue: StateFlow<List<Song>> = MusicPlayerManager.playQueue
+    val currentIndex: StateFlow<Int> = MusicPlayerManager.currentIndex
     
     private val _uiState = MutableStateFlow(PlayerUiState())
     val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
@@ -38,58 +38,58 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     
     // 播放歌曲列表
     fun playSongs(songs: List<Song>, startIndex: Int = 0) {
-        playerManager.setPlayQueue(songs, startIndex)
-        playerManager.play()
+        MusicPlayerManager.setPlayQueue(songs, startIndex)
+        MusicPlayerManager.play()
     }
     
     // 播放/暂停
     fun playPause() {
-        playerManager.playPause()
+        MusicPlayerManager.playPause()
     }
     
     // 下一曲
     fun skipToNext() {
-        playerManager.skipToNext()
+        MusicPlayerManager.skipToNext()
     }
     
     // 上一曲
     fun skipToPrevious() {
-        playerManager.skipToPrevious()
+        MusicPlayerManager.skipToPrevious()
     }
     
     // 跳转到指定歌曲
     fun skipToIndex(index: Int) {
-        playerManager.skipToIndex(index)
+        MusicPlayerManager.skipToIndex(index)
     }
     
     // 跳转进度
     fun seekTo(position: Long) {
-        playerManager.seekTo(position)
+        MusicPlayerManager.seekTo(position)
     }
     
     // 切换随机播放
     fun toggleShuffle() {
-        playerManager.toggleShuffle()
+        MusicPlayerManager.toggleShuffle()
     }
     
     // 切换循环模式
     fun toggleRepeatMode() {
-        playerManager.toggleRepeatMode()
+        MusicPlayerManager.toggleRepeatMode()
     }
     
     // 添加到播放队列
     fun addToQueue(song: Song) {
-        playerManager.addToQueue(song)
+        MusicPlayerManager.addToQueue(song)
     }
     
     // 从队列移除
     fun removeFromQueue(index: Int) {
-        playerManager.removeFromQueue(index)
+        MusicPlayerManager.removeFromQueue(index)
     }
     
     override fun onCleared() {
         super.onCleared()
-        playerManager.release()
+        MusicPlayerManager.release()
     }
 }
 

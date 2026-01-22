@@ -386,7 +386,8 @@ fun BottomDrawerContent(
         }
         if (showPlayQueue) {
             PlayQueueBottomSheet(
-                onDismiss = { showPlayQueue = false }
+                onDismiss = { showPlayQueue = false },
+                playerViewModel = playerViewModel 
             )
         }
         

@@ -18,7 +18,7 @@ import com.inkwise.music.ui.player.PlayerViewModel
 @Composable
 fun PlayQueueBottomSheet(
     onDismiss: () -> Unit,
-    playerViewModel: PlayerViewModel = viewModel()
+    playerViewModel: PlayerViewModel
 ) {
     val playQueue by playerViewModel.playQueue.collectAsState()
     val currentIndex by playerViewModel.currentIndex.collectAsState()

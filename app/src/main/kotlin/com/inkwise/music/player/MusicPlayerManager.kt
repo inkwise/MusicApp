@@ -16,9 +16,18 @@ import com.inkwise.music.service.MusicService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
-class MusicPlayerManager(private val context: Context) {
-    
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancel
+object MusicPlayerManager{
+    //进度条协程
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var progressJob: Job? = null
     private var mediaController: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
     
@@ -31,17 +40,23 @@ class MusicPlayerManager(private val context: Context) {
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex: StateFlow<Int> = _currentIndex.asStateFlow()
     
-    init {
-        initializeController()
+    private lateinit var appContext: Context
+
+    fun init(context: Context) {
+        if (!::appContext.isInitialized) {
+            appContext = context.applicationContext
+            initializeController()
+        }
     }
+    
     
     private fun initializeController() {
         val sessionToken = SessionToken(
-            context,
-            ComponentName(context, MusicService::class.java)
+            appContext,
+            ComponentName(appContext, MusicService::class.java)
         )
         
-        controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
+        controllerFuture = MediaController.Builder(appContext, sessionToken).buildAsync()
         controllerFuture?.addListener({
             mediaController = controllerFuture?.get()
             mediaController?.addListener(PlayerListener())
@@ -175,8 +190,13 @@ class MusicPlayerManager(private val context: Context) {
     }
     
     // 播放器监听器
-    private inner class PlayerListener : Player.Listener {
+    private class PlayerListener : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
+            if (isPlaying) {
+                startProgressUpdates()
+            } else {
+                stopProgressUpdates()
+            }
             updatePlaybackState()
         }
         
@@ -212,7 +232,24 @@ class MusicPlayerManager(private val context: Context) {
         }
     }
     
+    private fun startProgressUpdates() {
+        if (progressJob != null) return
+    
+        progressJob = scope.launch {
+            while (isActive) {
+                updatePlaybackState()
+                delay(500) // 200~500ms 都可以
+            }
+        }
+    }
+    
+    private fun stopProgressUpdates() {
+        progressJob?.cancel()
+        progressJob = null
+    }
     fun release() {
+        stopProgressUpdates()
+        scope.cancel()
         mediaController?.release()
         controllerFuture?.let { 
             MediaController.releaseFuture(it)
