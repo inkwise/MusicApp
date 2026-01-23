@@ -89,7 +89,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     
     override fun onCleared() {
         super.onCleared()
-        MusicPlayerManager.release()
+       // MusicPlayerManager.release()
     }
 }
 

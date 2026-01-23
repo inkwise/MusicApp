@@ -41,6 +41,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+// Compose runtime
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
+
+// Compose UI platform
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+
+// Compose unit
+import androidx.compose.ui.unit.dp
+
+// 你的 dimens 定义
+import com.inkwise.music.ui.theme.AppDimens
+import com.inkwise.music.ui.theme.LocalAppDimens
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,10 +62,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ComposeEmptyActivityTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    //MainScreen()
-                    AllFilesPermissionScreen()
-                    
+                val configuration = LocalConfiguration.current
+                val density = LocalDensity.current
+        
+                val dimens = remember(configuration, density) {
+                    with(density) {
+                        val sheetPeekHeightDp = 80.dp
+                        // 示例：测试用 px 宽度（比如 100dp 转 px）
+                        val testWidthPx = 100.dp.toPx().toInt()
+                        AppDimens(
+                            sheetPeekHeightDp = sheetPeekHeightDp,
+                            testWidthPx = testWidthPx
+                        )
+                    }
+                }
+        
+                CompositionLocalProvider(
+                    LocalAppDimens provides dimens
+                ) {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        AllFilesPermissionScreen()
+                    }
                 }
             }
         }

@@ -238,7 +238,7 @@ object MusicPlayerManager{
         progressJob = scope.launch {
             while (isActive) {
                 updatePlaybackState()
-                delay(500) // 200~500ms 都可以
+                delay(1000) // 200~500ms 都可以
             }
         }
     }

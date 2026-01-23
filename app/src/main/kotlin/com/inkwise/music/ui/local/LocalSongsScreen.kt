@@ -26,7 +26,7 @@ fun formatTime(millis: Long): String {
 
 @Composable
 fun LocalSongsScreen(
-    playerViewModel: PlayerViewModel = viewModel(),
+    playerViewModel: PlayerViewModel=viewModel(),
     mainViewModel: com.inkwise.music.ui.main.MainViewModel = viewModel()
 ) {
     val uiState by playerViewModel.uiState.collectAsState()

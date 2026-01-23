@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    kotlin("kapt")
 }
 
 android {
@@ -108,5 +109,9 @@ dependencies {
     
     implementation("androidx.lifecycle:lifecycle-service:2.7.0")
     implementation("com.google.guava:guava:31.1-android")
-
+    //图片
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("jp.wasabeef:glide-transformations:4.3.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    
 }

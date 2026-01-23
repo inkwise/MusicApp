@@ -24,10 +24,223 @@ import com.inkwise.music.ui.home.HomeScreen
 import com.inkwise.music.ui.local.LocalSongsScreen
 import com.inkwise.music.ui.cloud.CloudSongsScreen
 import com.inkwise.music.ui.queue.PlayQueueBottomSheet
-//import androidx.compose.material.icons.automirrored.filled.QueueMusic
+import com.inkwise.music.ui.theme.LocalAppDimens
+import com.inkwise.music.R
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.toSize
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
+fun MainScreen(){
+    val dimens = LocalAppDimens.current
+    // ① BottomSheet 状态
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scope = rememberCoroutineScope()
+    
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = dimens.sheetPeekHeightDp,
+        sheetDragHandle = null,
+        sheetContainerColor = Color.Transparent,
+        sheetContent = {
+            Box {
+                playerScreen()
+                controlContent(
+                    onClick = {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
+                )
+            }
+        },
+    ) {
+        //主页面
+        MainScreen2()
+        
+    }
+}*/
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    val dimens = LocalAppDimens.current
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scope = rememberCoroutineScope()
+
+    var expandProgress by remember { mutableStateOf(0f) }
+    var initialOffset by remember { mutableStateOf<Float?>(null) }
+    val density = LocalDensity.current
+    val peekHeightPx = with(density) { dimens.sheetPeekHeightDp.toPx() }
+    
+    // 监听 BottomSheet 拖拽
+    LaunchedEffect(scaffoldState.bottomSheetState) {
+        snapshotFlow {
+            scaffoldState.bottomSheetState.requireOffset()
+        }.collect { offset: Float ->
+
+            // 第一次记录“收起时”的 offset
+            if (initialOffset == null) {
+                initialOffset = offset
+            }
+
+            val start = initialOffset ?: return@collect
+
+            expandProgress = ((start - offset) / peekHeightPx)
+            .coerceIn(0f, 1f)
+        }
+    }
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = dimens.sheetPeekHeightDp,
+        sheetDragHandle = null,
+        //sheetContainerColor = Color.Transparent,
+        sheetContent = {
+            Box {
+
+                // 背景播放器：展开时显示
+                playerScreen(
+                    modifier = Modifier.alpha(expandProgress)
+                )
+
+                // 控制栏：收起时显示
+                controlContent(
+                    modifier = Modifier.alpha(1f - expandProgress),
+                    onClick = {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
+                )
+                   Text("进度: $expandProgress")
+             
+            }
+        }
+    ) {
+        MainScreen2()
+    }
+}
+//手柄区域
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun controlContent(
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .clickable { onClick() }
+    ){
+        //控制层
+        controlContent2()
+    }
+}
+@Composable
+fun controlContent2(
+
+    modifier: Modifier = Modifier,
+    onIcon1Click: () -> Unit = {},
+    onIcon2Click: () -> Unit = {}
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        // 左侧图片（Glide）
+        AndroidView(
+            modifier = Modifier
+                .size(60.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            factory = { context ->
+                ImageView(context).apply {
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+                    Glide.with(this)
+                        .load(R.drawable.test)
+                        .into(this)
+                }
+            }
+        )
+
+        // 中间撑开
+        Spacer(modifier = Modifier.weight(1f))
+
+        // 右侧第一个 Icon
+        Icon(
+            imageVector = Icons.Default.Favorite,
+            contentDescription = "播放暂停",
+            modifier = Modifier
+                .size(28.dp)
+                .clickable { onIcon1Click() }
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 右侧第二个 Icon
+        Icon(
+            imageVector = Icons.Default.SkipNext,
+            contentDescription = "下一首",
+            modifier = Modifier
+                .size(28.dp)
+                .clickable { onIcon2Click() }
+        )
+    }
+}
+//播放器页面
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun playerScreen(
+    modifier: Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+
+        // 背景图片 + 高斯模糊
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { context ->
+                ImageView(context).apply {
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+
+                    Glide.with(this)
+                        .load(R.drawable.test) // drawable/test.jpg
+                        .transform(
+                            jp.wasabeef.glide.transformations.BlurTransformation(
+                                40, // 模糊半径（0~25）
+                                3   // 采样率，越大越省性能
+                            )
+                        )
+                        .into(this)
+                }
+            }
+        )
+        // 你原本的播放器内容（盖在上面）
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent)
+        ) {
+            // 播放器 UI 写这里
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen2(
     viewModel: MainViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -115,7 +328,7 @@ fun MainScreen(
     }
     
     // 底部抽屉 - 使用 ModalBottomSheet（带手柄）
-    if (uiState.bottomDrawerOpen) {
+   /* if (uiState.bottomDrawerOpen) {
         ModalBottomSheet(
             onDismissRequest = { viewModel.closeBottomDrawer() },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
@@ -141,7 +354,7 @@ fun MainScreen(
         ) {
             BottomDrawerContent()
         }
-    }
+    }*/
 }
 
 // 侧边栏内容

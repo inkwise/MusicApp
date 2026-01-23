@@ -31,7 +31,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+        <activity
+            android:name=".MusicApp$CrashActivity"
+            android:exported="false" />
         <!-- 音乐播放服务 -->
         <service
             android:name=".service.MusicService"
