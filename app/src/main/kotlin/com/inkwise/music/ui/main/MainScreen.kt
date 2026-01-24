@@ -34,6 +34,41 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
+
+import androidx.compose.ui.text.font.FontWeight
+
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+
+import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
+
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 /*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +153,6 @@ fun MainScreen() {
                         }
                     }
                 )
-                   Text("进度: $expandProgress")
              
             }
         }
@@ -126,6 +160,25 @@ fun MainScreen() {
         MainScreen2()
     }
 }
+
+data class Song2(
+    val id: Int,
+    val name: String,
+    val artist: String
+)
+
+// 测试用的歌曲列表
+val mockSongList = listOf(
+    Song2(1, "晴天", "周杰伦"),
+    Song2(2, "七里香", "周杰伦"),
+    Song2(3, "稻香", "周杰伦"),
+    Song2(4, "青花瓷", "周杰伦"),
+    Song2(5, "夜曲", "周杰伦"),
+    Song2(6, "简单爱", "周杰伦"),
+    Song2(7, "告白气球", "周杰伦"),
+    Song2(8, "等你下课", "周杰伦")
+)
+
 //手柄区域
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,12 +186,23 @@ fun controlContent(
     modifier: Modifier,
     onClick: () -> Unit
 ) {
+    var index by remember { mutableIntStateOf(1) }
+    val songs =         mockSongList
+    
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(100.dp)
-            .clickable { onClick() }
+            .clickable(
+                indication = null, // 🚫 去掉波纹
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                onClick()
+            }
     ){
+        // 滑动控件
+       // MusicPlayerTestScreen()
+       SwipeSongSwitcherTest()
         //控制层
         controlContent2()
     }
@@ -197,12 +261,227 @@ fun controlContent2(
         )
     }
 }
+/*
+@Composable
+fun SwipeSongSwitcher(
+    current: String,
+    prev: String,
+    next: String,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    height: Dp = 64.dp
+) {
+    val scope = rememberCoroutineScope()
+
+    // 整体横向偏移
+    val offsetX = remember { Animatable(0f) }
+
+    // 屏幕宽度（用于阈值判断）
+    var widthPx by remember { mutableFloatStateOf(1f) }
+        val showPrevAlpha by remember {
+        derivedStateOf {
+            if (offsetX.value > 0f) 1f else 0f
+        }
+    }
+    
+    val showNextAlpha by remember {
+        derivedStateOf {
+            if (offsetX.value < 0f) 1f else 0f
+        }
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .onSizeChanged { widthPx = it.width.toFloat() }
+            .clipToBounds()
+            .draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta ->
+                    scope.launch {
+                        offsetX.snapTo(
+                            (offsetX.value + delta)
+                                .coerceIn(-widthPx, widthPx)
+                        )
+                    }
+                },
+                onDragStopped = {
+                    when {
+                        offsetX.value > widthPx * 0.25f -> onNext()
+                        offsetX.value < -widthPx * 0.25f -> onPrev()
+                    }
+                    scope.launch {
+                        offsetX.animateTo(
+                            0f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                        )
+                    }
+                }
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .fillMaxHeight()
+        ) {
+        
+            if (offsetX.value > 0) {
+                // show prev
+            }
+            
+            if (offsetX.value < 0) {
+                // show next
+            }
+            SongItem(prev, height, modifier = Modifier.alpha(showPrevAlpha))
+            SongItem(current, height, modifier = Modifier.alpha(1f))
+            SongItem(next, height, modifier = Modifier.alpha(showNextAlpha))
+            
+            
+            
+            
+        }
+    }
+}*/
+@Composable
+fun SwipeSongSwitcher(
+    current: String,
+    prev: String,
+    next: String,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    height: Dp = 64.dp
+) {
+    val scope = rememberCoroutineScope()
+
+    // 位移动画
+    val offsetX = remember { Animatable(0f) }
+
+    // 宽度（用于阈值判断）
+    var widthPx by remember { mutableFloatStateOf(1f) }
+
+    // ⭐ 显隐状态（关键）
+    var showPrev by remember { mutableStateOf(false) }
+    var showNext by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .onSizeChanged { widthPx = it.width.toFloat() }
+            .clipToBounds()
+            .draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta ->
+                    scope.launch {
+                        val newOffset = (offsetX.value + delta)
+                            .coerceIn(-widthPx, widthPx)
+
+                        offsetX.snapTo(newOffset)
+
+                        // ⭐ 根据方向立刻更新显隐
+                        showPrev = newOffset > 0f
+                        showNext = newOffset < 0f
+                    }
+                },
+                onDragStopped = {
+                    // ⭐ 松手瞬间直接隐藏
+                    showPrev = false
+                    showNext = false
+
+                    when {
+                        offsetX.value > widthPx * 0.25f -> onPrev()
+                        offsetX.value < -widthPx * 0.25f -> onNext()
+                    }
+
+                    scope.launch {
+                        offsetX.animateTo(
+                            0f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                        )
+                    }
+                }
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .fillMaxHeight()
+        ) {
+
+            // 上一首（只负责显示，不参与逻辑）
+            SongItem(
+                title = prev,
+                height = height,
+                modifier = Modifier.alpha(if (showPrev) 1f else 0f)
+            )
+
+            // 当前歌曲（永远显示）
+            SongItem(
+                title = current,
+                height = height,
+                modifier = Modifier.alpha(1f)
+            )
+
+            // 下一首
+            SongItem(
+                title = next,
+                height = height,
+                modifier = Modifier.alpha(if (showNext) 1f else 0f)
+            )
+        }
+    }
+}
+@Composable
+fun SongItem(
+    title: String,
+    height: Dp,
+    modifier: Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .width(100.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1
+        )
+    }
+}
+@Composable
+fun SwipeSongSwitcherTest() {
+    var index by remember { mutableIntStateOf(1) }
+
+    val songs = listOf(
+        "稻香",
+        "七里香",
+        "晴天",
+        "测试"
+    )
+
+    SwipeSongSwitcher(
+        prev = songs[(index - 1 + songs.size) % songs.size],
+        current = songs[index],
+        next = songs[(index + 1) % songs.size],
+        onPrev = {
+            index = (index + 1) % songs.size
+        },
+        onNext = {
+            index = (index - 1 + songs.size) % songs.size
+            
+        }
+    )
+}
+
 //播放器页面
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun playerScreen(
     modifier: Modifier
 ) {
+            
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -234,9 +513,13 @@ fun playerScreen(
                 .background(Color.Transparent)
         ) {
             // 播放器 UI 写这里
+            
+            
         }
     }
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -606,3 +889,4 @@ fun BottomDrawerContent(
         
     }
 }
+

@@ -114,4 +114,8 @@ dependencies {
     implementation("jp.wasabeef:glide-transformations:4.3.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
     
+    implementation("androidx.compose.foundation:foundation:1.6.0") // 或更高版本
+    
+    //implementation(libs.androidx.compose.animation.core)
+    
 }
