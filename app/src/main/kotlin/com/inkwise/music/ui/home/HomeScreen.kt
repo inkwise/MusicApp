@@ -13,6 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+// 放在檔案最上面，其他 import 旁邊
+
+import androidx.compose.foundation.lazy.LazyColumn          // LazyColumn
+import androidx.compose.foundation.lazy.items               // items(items = xxx) { }
+
+import androidx.compose.runtime.collectAsState              // collectAsState()
+import androidx.compose.runtime.getValue                    // by xxx 的語法需要
 
 @Composable
 fun HomeScreen(
