@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
+import androidx.hilt.navigation.compose.hiltViewModel
+import javax.inject.Inject
 data class MainUiState(
     val bottomDrawerOpen: Boolean = false,
     val sidebarOpen: Boolean = false,
@@ -19,7 +20,7 @@ data class MainUiState(
 
 class MainViewModel @Inject constructor(
     private val repository: MusicRepository
-) : viewModel() {
+) : hiltViewModel() {
 
     //private val repository = MusicRepository(application)
     private val _uiState = MutableStateFlow(MainUiState())
