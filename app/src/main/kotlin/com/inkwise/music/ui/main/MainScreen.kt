@@ -69,38 +69,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-/*
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainScreen(){
-    val dimens = LocalAppDimens.current
-    // ① BottomSheet 状态
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val scope = rememberCoroutineScope()
-    
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = dimens.sheetPeekHeightDp,
-        sheetDragHandle = null,
-        sheetContainerColor = Color.Transparent,
-        sheetContent = {
-            Box {
-                playerScreen()
-                controlContent(
-                    onClick = {
-                        scope.launch {
-                            scaffoldState.bottomSheetState.expand()
-                        }
-                    }
-                )
-            }
-        },
-    ) {
-        //主页面
-        MainScreen2()
-        
-    }
-}*/
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
@@ -261,87 +230,11 @@ fun controlContent2(
         )
     }
 }
-/*
-@Composable
-fun SwipeSongSwitcher(
-    current: String,
-    prev: String,
-    next: String,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
-    height: Dp = 64.dp
-) {
-    val scope = rememberCoroutineScope()
 
-    // 整体横向偏移
-    val offsetX = remember { Animatable(0f) }
 
-    // 屏幕宽度（用于阈值判断）
-    var widthPx by remember { mutableFloatStateOf(1f) }
-        val showPrevAlpha by remember {
-        derivedStateOf {
-            if (offsetX.value > 0f) 1f else 0f
-        }
-    }
-    
-    val showNextAlpha by remember {
-        derivedStateOf {
-            if (offsetX.value < 0f) 1f else 0f
-        }
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height)
-            .onSizeChanged { widthPx = it.width.toFloat() }
-            .clipToBounds()
-            .draggable(
-                orientation = Orientation.Horizontal,
-                state = rememberDraggableState { delta ->
-                    scope.launch {
-                        offsetX.snapTo(
-                            (offsetX.value + delta)
-                                .coerceIn(-widthPx, widthPx)
-                        )
-                    }
-                },
-                onDragStopped = {
-                    when {
-                        offsetX.value > widthPx * 0.25f -> onNext()
-                        offsetX.value < -widthPx * 0.25f -> onPrev()
-                    }
-                    scope.launch {
-                        offsetX.animateTo(
-                            0f,
-                            animationSpec = spring(stiffness = Spring.StiffnessMedium)
-                        )
-                    }
-                }
-            )
-    ) {
-        Row(
-            modifier = Modifier
-                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .fillMaxHeight()
-        ) {
-        
-            if (offsetX.value > 0) {
-                // show prev
-            }
-            
-            if (offsetX.value < 0) {
-                // show next
-            }
-            SongItem(prev, height, modifier = Modifier.alpha(showPrevAlpha))
-            SongItem(current, height, modifier = Modifier.alpha(1f))
-            SongItem(next, height, modifier = Modifier.alpha(showNextAlpha))
-            
-            
-            
-            
-        }
-    }
-}*/
+
+
+
 @Composable
 fun SwipeSongSwitcher(
     current: String,
@@ -596,7 +489,9 @@ fun MainScreen2(
                     composable("home") {
                         HomeScreen(
                             onNavigateToLocal = { navController.navigate("local") },
-                            onNavigateToCloud = { navController.navigate("cloud") }
+                            onNavigateToCloud = { navController.navigate("cloud") },
+                            onRefresh = {},
+						    onCreatePlaylist = {},
                         )
                     }
                     composable("local") {

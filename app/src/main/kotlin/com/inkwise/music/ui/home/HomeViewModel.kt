@@ -19,4 +19,14 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+        
+    fun refreshPlaylists() {
+    // TODO: 重新从数据库或者网络加载数据
+	}
+	
+	fun createPlaylist(title: String) {
+	    viewModelScope.launch {
+	        // TODO: 调用 DAO 插入新歌单
+	    }
+	}
 }
