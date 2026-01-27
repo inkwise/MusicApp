@@ -45,4 +45,7 @@ interface PlaylistDao {
     @Transaction
     @Query("SELECT * FROM playlists")
     fun getAllPlaylistsWithSongs(): Flow<List<PlaylistWithSongs>>
+    
+    @Insert
+    suspend fun insert(playlist: PlaylistEntity)
 }

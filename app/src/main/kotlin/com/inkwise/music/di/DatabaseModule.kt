@@ -21,4 +21,7 @@ object DatabaseModule {
 
     @Provides
     fun providePlaylistDao(db: MusicDatabase) = db.playlistDao()
+    @Provides
+    fun provideSongDao(db: MusicDatabase) = db.songDao()
+    
 }

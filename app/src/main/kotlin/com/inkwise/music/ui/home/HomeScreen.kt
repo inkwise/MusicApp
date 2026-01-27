@@ -26,7 +26,7 @@ fun HomeScreen(
     onNavigateToCloud: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val playlists by viewModel.playlists.collectAsState()
+    val playlists by viewModel.songs.collectAsState()
 
     Column(
         modifier = Modifier

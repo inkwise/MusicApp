@@ -7,7 +7,7 @@ import com.inkwise.music.data.model.PlaylistEntity
 import com.inkwise.music.data.model.PlaylistSongEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-
+import com.inkwise.music.data.model.PlaylistWithSongs
 class MusicRepository(
     private val songDao: SongDao,
     private val playlistDao: PlaylistDao

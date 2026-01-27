@@ -64,7 +64,7 @@ class LocalViewModel : ViewModel() {
                         val path = cursor.getString(dataCol) ?: ""
 
                         val song = Song(
-                            id = id.toString(),
+                            id = id,
                             title = title,
                             artist = artist,
                             duration = duration,

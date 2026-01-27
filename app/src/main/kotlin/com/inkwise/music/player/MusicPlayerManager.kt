@@ -1,5 +1,6 @@
 package com.inkwise.music.player
 
+import android.net.Uri
 import android.content.ComponentName
 import android.content.Context
 import androidx.media3.common.MediaItem
@@ -70,13 +71,13 @@ object MusicPlayerManager{
         
         val mediaItems = songs.map { song ->
             MediaItem.Builder()
-                .setMediaId(song.id)
+                .setMediaId(song.id.toString())
                 .setUri(song.uri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(song.title)
                         .setArtist(song.artist)
-                        .setArtworkUri(song.albumArt)
+                        .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
                         .build()
                 )
                 .build()
@@ -166,7 +167,7 @@ object MusicPlayerManager{
         _playQueue.value = currentQueue
         
         val mediaItem = MediaItem.Builder()
-            .setMediaId(song.id)
+            .setMediaId(song.id.toString())
             .setUri(song.uri)
             .setMediaMetadata(
                 MediaMetadata.Builder()
