@@ -49,7 +49,7 @@ fun LocalSongsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "扫描歌曲",
+                text = "扫描",
                 style = MaterialTheme.typography.headlineMedium
             )
 
