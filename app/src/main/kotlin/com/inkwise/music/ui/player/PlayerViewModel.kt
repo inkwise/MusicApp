@@ -1,7 +1,7 @@
 package com.inkwise.music.ui.player
 
+import androidx.lifecycle.ViewModel
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.inkwise.music.data.model.PlaybackState
 import com.inkwise.music.data.model.Song
@@ -16,11 +16,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-	application: Application,
 	private val repository: MusicRepository
-	) : AndroidViewModel(application) {
+	) : ViewModel(application) {
     
-    //private val MusicPlayerManager = MusicMusicPlayerManager(application)
     
     val playbackState: StateFlow<PlaybackState> = MusicPlayerManager.playbackState
     val playQueue: StateFlow<List<Song>> = MusicPlayerManager.playQueue
