@@ -1,6 +1,7 @@
 package com.inkwise.music.ui.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,16 +12,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
+
 data class MainUiState(
     val bottomDrawerOpen: Boolean = false,
     val sidebarOpen: Boolean = false,
     val currentRoute: String = "home",
 )
 
-
+@HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: MusicRepository
-) : hiltViewModel() {
+) : viewModel() {
 
     //private val repository = MusicRepository(application)
     private val _uiState = MutableStateFlow(MainUiState())
