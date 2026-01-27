@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import com.inkwise.music.ui.theme.AppDimens
 import com.inkwise.music.ui.theme.LocalAppDimens
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
