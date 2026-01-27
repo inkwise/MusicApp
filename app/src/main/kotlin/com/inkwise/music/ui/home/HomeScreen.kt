@@ -20,66 +20,106 @@ import androidx.compose.foundation.lazy.items               // items(items = xxx
 
 import androidx.compose.runtime.collectAsState              // collectAsState()
 import androidx.compose.runtime.getValue                    // by xxx 的語法需要
-
 @Composable
 fun HomeScreen(
     onNavigateToLocal: () -> Unit,
     onNavigateToCloud: () -> Unit,
+    onRefresh: () -> Unit,
+    onCreatePlaylist: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-	val playlists by viewModel.playlists.collectAsState()
+    val playlists by viewModel.playlists.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(24.dp)
     ) {
-        Text(
-            text = "欢迎来到音乐播放器",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 48.dp)
-        )
-        
-        // 本地歌曲按钮
-        ElevatedButton(
-            onClick = onNavigateToLocal,
+
+        // 本地 & 云端按钮横向排列
+        Row(
             modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .height(80.dp)
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                Icons.Default.MusicNote,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text("本地歌曲", style = MaterialTheme.typography.titleLarge)
+            ElevatedButton(
+                onClick = onNavigateToLocal,
+                modifier = Modifier.weight(1f).height(64.dp)
+            ) {
+                Icon(
+                    Icons.Default.MusicNote,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("本地歌曲", style = MaterialTheme.typography.titleMedium)
+            }
+
+            ElevatedButton(
+                onClick = onNavigateToCloud,
+                modifier = Modifier.weight(1f).height(64.dp)
+            ) {
+                Icon(
+                    Icons.Default.Cloud,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("云端歌曲", style = MaterialTheme.typography.titleMedium)
+            }
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // 云歌曲按钮
-        ElevatedButton(
-            onClick = onNavigateToCloud,
+
+        // 刷新 + 创建歌单按钮
+        Row(
             modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .height(80.dp)
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                Icons.Default.Cloud,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text("云端歌曲", style = MaterialTheme.typography.titleLarge)
+            Button(
+                onClick = onRefresh,
+                modifier = Modifier.weight(1f).height(48.dp)
+            ) {
+                Text("刷新")
+            }
+
+            Button(
+                onClick = onCreatePlaylist,
+                modifier = Modifier.weight(1f).height(48.dp)
+            ) {
+                Text("创建歌单")
+            }
         }
-        
-        LazyColumn {
-	        items(playlists) {
-	            Text(it.title, Modifier.padding(16.dp))
-	        }
-	    }
+
+        // 歌单列表
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(playlists) { playlist ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 0.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 如果有封面可以用 Image
+                        // Image(painter = painterResource(id = playlist.coverRes), contentDescription = null, modifier = Modifier.size(48.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(playlist.title, style = MaterialTheme.typography.titleMedium)
+                            Text("${playlist.songs.size} 首歌曲", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
