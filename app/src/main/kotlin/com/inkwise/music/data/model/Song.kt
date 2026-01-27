@@ -12,7 +12,8 @@ data class Song(
     val title: String,
     val artist: String,
     val duration: Long,
-    val uri: Uri,  // 歌曲文件路径
+    val uri: String,  // 歌曲文件路径
+    val path: String,
     val albumArt: Uri? = null,  // 专辑封面
     val isLocal: Boolean = true
 )
