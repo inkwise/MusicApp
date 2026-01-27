@@ -11,10 +11,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class PlayerViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class PlayerViewModel @Inject constructor(
+	application: Application,
+	private val repository: MusicRepository
+	) : AndroidViewModel(application) {
     
-    private val repository = MusicRepository(application)
     //private val MusicPlayerManager = MusicMusicPlayerManager(application)
     
     val playbackState: StateFlow<PlaybackState> = MusicPlayerManager.playbackState
