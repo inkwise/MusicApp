@@ -2,6 +2,8 @@ package com.inkwise.music.data.model
 
 import androidx.room.Entity 
 import androidx.room.PrimaryKey
+import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(tableName = "playlists")
 data class PlaylistEntity(

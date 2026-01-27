@@ -4,7 +4,8 @@ import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ColumnInfo
-
+import androidx.room.ForeignKey
+import androidx.room.Index
 @Entity(tableName = "songs",
 	foreignKeys = [
         ForeignKey(
