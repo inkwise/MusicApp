@@ -2,6 +2,10 @@ package com.inkwise.music.data.model
 
 
 import android.net.Uri
+import androidx.room.Entity 
+import androidx.room.ForeignKey 
+import androidx.room.Index
+ import androidx.room.PrimaryKey
 
 data class Song(
     val id: String,
@@ -13,7 +17,6 @@ data class Song(
     val isLocal: Boolean = true
 )
 
-import androidx.room.Entity import androidx.room.ForeignKey import androidx.room.Index import androidx.room.PrimaryKey
 
 @Entity( tableName = "songs", 
 	foreignKeys = [ ForeignKey( entity = Playlist::class, parentColumns = ["id"], childColumns = ["playlistId"], onDelete = ForeignKey.CASCADE ) ], indices = [Index("playlistId")] ) 
