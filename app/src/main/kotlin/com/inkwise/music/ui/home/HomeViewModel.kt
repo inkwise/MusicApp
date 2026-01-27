@@ -13,7 +13,7 @@ import com.inkwise.music.data.model.PlaylistEntity
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    dao: PlaylistDao
+    private val dao: PlaylistDao   // ✅ 变成成员属性
 ) : ViewModel() {
 
     val playlists = dao.observePlaylists()
