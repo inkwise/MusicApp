@@ -17,7 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun HomeScreen(
     onNavigateToLocal: () -> Unit,
     onNavigateToCloud: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     Column(
         modifier = Modifier
