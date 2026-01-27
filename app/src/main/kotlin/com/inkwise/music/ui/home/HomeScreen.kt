@@ -115,7 +115,7 @@ fun HomeScreen(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(playlist.title, style = MaterialTheme.typography.titleMedium)
-                            Text("${playlist.songs.size} 首歌曲", style = MaterialTheme.typography.bodySmall)
+                            //Text("${playlist.size} 首歌曲", style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
