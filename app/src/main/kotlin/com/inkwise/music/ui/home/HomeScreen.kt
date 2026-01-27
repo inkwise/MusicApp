@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun HomeScreen(
@@ -19,6 +20,8 @@ fun HomeScreen(
     onNavigateToCloud: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+	val playlists by viewModel.playlists.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -65,5 +68,11 @@ fun HomeScreen(
             Spacer(modifier = Modifier.width(16.dp))
             Text("云端歌曲", style = MaterialTheme.typography.titleLarge)
         }
+        
+        LazyColumn {
+	        items(playlists) {
+	            Text(it.title, Modifier.padding(16.dp))
+	        }
+	    }
     }
 }
