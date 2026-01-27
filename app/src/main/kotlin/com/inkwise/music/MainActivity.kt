@@ -1,6 +1,6 @@
 package com.inkwise.music
 
-
+import dagger.hilt.android.AndroidEntryPoint   // ← 這一行最關鍵！
 import android.os.Environment
 import android.content.Context
 import android.content.Intent
