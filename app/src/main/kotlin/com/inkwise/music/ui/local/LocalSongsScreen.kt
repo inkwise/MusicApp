@@ -16,8 +16,7 @@ import com.inkwise.music.ui.player.PlayerViewModel
 // clickable
 import androidx.compose.foundation.clickable
 
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 @Composable
 fun LocalSongsScreen(
