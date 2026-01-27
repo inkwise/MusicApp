@@ -12,3 +12,15 @@ data class Song(
     val albumArt: Uri? = null,  // 专辑封面
     val isLocal: Boolean = true
 )
+
+import androidx.room.Entity import androidx.room.ForeignKey import androidx.room.Index import androidx.room.PrimaryKey
+
+@Entity( tableName = "songs", 
+	foreignKeys = [ ForeignKey( entity = Playlist::class, parentColumns = ["id"], childColumns = ["playlistId"], onDelete = ForeignKey.CASCADE ) ], indices = [Index("playlistId")] ) 
+data class SongEntity( 
+	@PrimaryKey(autoGenerate = true)
+	 val id: Long = 0, 
+	 val playlistId: Long, 
+	 val title: String,
+	  val artist: String? = null
+)
