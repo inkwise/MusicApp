@@ -30,7 +30,10 @@ class HomeViewModel @Inject constructor(
 	fun createPlaylist(title: String) {
 	    viewModelScope.launch {
 	        // TODO: 调用 DAO 插入新歌单
-	        val newPlaylist = PlaylistEntity(title = title)
+	        val newPlaylist = PlaylistEntity(
+	        	title = title,
+	        	coverUri="测试图片",
+	        	description="测试说明")
         	dao.insert(newPlaylist)
 	    }
 	}
