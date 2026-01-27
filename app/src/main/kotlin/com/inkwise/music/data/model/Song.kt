@@ -6,17 +6,7 @@ import androidx.room.PrimaryKey
 import androidx.room.ColumnInfo
 import androidx.room.ForeignKey
 import androidx.room.Index
-@Entity(tableName = "songs",
-	foreignKeys = [
-        ForeignKey(
-            entity = PlaylistEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["playlistId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
-    indices = [Index("playlistId")]
-)
+@Entity(tableName = "songs")
 data class Song(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,            // Room 自增主键
