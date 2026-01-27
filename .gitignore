@@ -29,7 +29,3 @@ google-services.json
 
 # Android Profiling
 *.hprof
-
-.gitignore
-run.sh
-格式化.sh
