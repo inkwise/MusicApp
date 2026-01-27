@@ -490,8 +490,7 @@ fun MainScreen2(
                         HomeScreen(
                             onNavigateToLocal = { navController.navigate("local") },
                             onNavigateToCloud = { navController.navigate("cloud") },
-                            onRefresh = {},
-						    onCreatePlaylist = {},
+                            
                         )
                     }
                     composable("local") {

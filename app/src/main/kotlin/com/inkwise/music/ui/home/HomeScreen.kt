@@ -24,8 +24,6 @@ import androidx.compose.runtime.getValue                    // by xxx 的語法�
 fun HomeScreen(
     onNavigateToLocal: () -> Unit,
     onNavigateToCloud: () -> Unit,
-    onRefresh: () -> Unit,
-    onCreatePlaylist: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val playlists by viewModel.playlists.collectAsState()
@@ -78,14 +76,18 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Button(
-                onClick = onRefresh,
+                onClick = {
+                	viewModel.refreshPlaylists()
+                },
                 modifier = Modifier.weight(1f).height(48.dp)
             ) {
                 Text("刷新")
             }
 
             Button(
-                onClick = onCreatePlaylist,
+                onClick = {
+                	viewModel.createPlaylist("测试歌单")
+                },
                 modifier = Modifier.weight(1f).height(48.dp)
             ) {
                 Text("创建歌单")

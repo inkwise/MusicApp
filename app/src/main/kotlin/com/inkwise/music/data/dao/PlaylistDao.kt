@@ -16,4 +16,7 @@ interface PlaylistDao {
     @Transaction
     @Query("SELECT * FROM playlists WHERE id = :id")
     suspend fun getPlaylist(id: Long): PlaylistWithSongs
+    
+    @Insert
+    suspend fun insert(playlist: PlaylistEntity)
 }

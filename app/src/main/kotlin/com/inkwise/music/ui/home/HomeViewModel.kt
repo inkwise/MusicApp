@@ -7,6 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -27,6 +29,8 @@ class HomeViewModel @Inject constructor(
 	fun createPlaylist(title: String) {
 	    viewModelScope.launch {
 	        // TODO: 调用 DAO 插入新歌单
+	        val newPlaylist = PlaylistEntity(title = title)
+        	dao.insert(newPlaylist)
 	    }
 	}
 }
