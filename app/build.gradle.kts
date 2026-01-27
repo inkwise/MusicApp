@@ -115,8 +115,7 @@ dependencies {
     implementation("com.google.guava:guava:31.1-android")
     //图片
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    implementation("jp.wasabeef:glide-transformations:4.16.0")
-    ksp("com.github.bumptech.glide:compiler:4.16.0")
+    implementation("jp.wasabeef:glide-transformations:4.3.0")
     
     implementation("androidx.compose.foundation:foundation:1.6.0") // 或更高版本
     //implementation(libs.androidx.compose.animation.core)
