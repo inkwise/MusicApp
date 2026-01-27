@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.inkwise.music.data.model.Song
-import com.inkwise.music.ui.local.formatTime
 
 @Composable
 fun SongItem(
@@ -67,6 +66,7 @@ fun SongItem(
                 )
                 Text(
                     text = "${song.artist} • ${formatTime(song.duration)}",
+                    
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
@@ -78,4 +78,11 @@ fun SongItem(
             }
         }
     }
+}
+
+fun formatTime(millis: Long): String {
+    val totalSeconds = millis / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return String.format("%d:%02d", minutes, seconds)
 }
