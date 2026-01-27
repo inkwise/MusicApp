@@ -17,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
 	private val repository: MusicRepository
-	) : ViewModel(application) {
+	) : ViewModel() {
     
     
     val playbackState: StateFlow<PlaybackState> = MusicPlayerManager.playbackState
