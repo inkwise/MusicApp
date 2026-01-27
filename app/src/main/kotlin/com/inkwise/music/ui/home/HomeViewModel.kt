@@ -1,14 +1,22 @@
 package com.inkwise.music.ui.home
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import com.inkwise.music.data.repository.MusicRepository
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.inkwise.music.data.dao.PlaylistDao
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
-class HomeViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    dao: PlaylistDao
+) : ViewModel() {
 
-    private val repository = MusicRepository(application)
-
-    // 主页的业务逻辑
+    val playlists = dao.observePlaylists()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 }
