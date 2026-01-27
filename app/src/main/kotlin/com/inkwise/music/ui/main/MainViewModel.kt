@@ -17,11 +17,11 @@ data class MainUiState(
 )
 
 
-class MainViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+class MainViewModel @Inject constructor(
+    private val repository: MusicRepository
+) : viewModel() {
 
-    private val repository = MusicRepository(application)
+    //private val repository = MusicRepository(application)
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
