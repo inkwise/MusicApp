@@ -22,7 +22,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 @Composable
 fun LocalSongsScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
-    mainViewModel: com.inkwise.music.ui.main.MainViewModel = viewModel(),
+    mainViewModel: com.inkwise.music.ui.main.MainViewModel = hiltViewModel(),
     localViewModel: LocalViewModel = viewModel()
 ) {
     val context = LocalContext.current
