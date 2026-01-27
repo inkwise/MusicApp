@@ -7,12 +7,15 @@ import com.inkwise.music.data.dao.SongDao
 
 import com.inkwise.music.data.model.PlaylistEntity
 import com.inkwise.music.data.model.Song
+import com.inkwise.music.data.model.PlaylistSongEntity
+
 
 
 @Database(
     entities = [
         PlaylistEntity::class,
-        Song::class
+        Song::class,
+        PlaylistSongEntity::class
         
     ],
     version = 1,
