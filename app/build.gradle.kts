@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("kapt")
-    alias("com.google.dagger.hilt.android")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
