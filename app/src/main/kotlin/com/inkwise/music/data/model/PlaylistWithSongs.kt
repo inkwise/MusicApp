@@ -13,7 +13,7 @@ data class PlaylistWithSongs(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            value = PlaylistSongEntity::class,
+            value = PlaylistWithSongs::class,
             parentColumn = "playlistId",
             entityColumn = "songId"
         )
