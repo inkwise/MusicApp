@@ -3,6 +3,7 @@ package com.inkwise.music.data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Insert
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import com.inkwise.music.data.model.PlaylistEntity
