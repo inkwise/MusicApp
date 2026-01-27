@@ -12,5 +12,5 @@ data class PlaylistWithSongs(
         parentColumn = "id",
         entityColumn = "playlistId"
     )
-    val songs: List<SongEntity>
+    val songs: List<Song>
 )
