@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.application)  // ← 必须有这个！它是 android {} 的来源
     alias(libs.plugins.kotlin.android)
@@ -130,15 +129,5 @@ dependencies {
   	ksp ("androidx.room:room-compiler:2.6.1" )
 	implementation ("androidx.room:room-ktx:2.6.1")
 	
-}
 
-dependencies {
-
-    // 可选：测试支持（如果有 unit/integration tests）
-    // testImplementation("com.google.dagger:hilt-android-testing:2.59")
-    // kspTest("com.google.dagger:hilt-compiler:2.59")
-    // androidTestImplementation("com.google.dagger:hilt-android-testing:2.59")
-    // kspAndroidTest("com.google.dagger:hilt-compiler:2.59")
-
-    // ... 你的其他依赖不变（如 Room ksp、Glide ksp 等）
 }
