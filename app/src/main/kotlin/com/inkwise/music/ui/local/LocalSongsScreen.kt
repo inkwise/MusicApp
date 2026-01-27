@@ -16,11 +16,12 @@ import com.inkwise.music.ui.player.PlayerViewModel
 // clickable
 import androidx.compose.foundation.clickable
 
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 @Composable
 fun LocalSongsScreen(
-    playerViewModel: PlayerViewModel = viewModel(),
+    playerViewModel: PlayerViewModel = hiltViewModel(),
     mainViewModel: com.inkwise.music.ui.main.MainViewModel = viewModel(),
     localViewModel: LocalViewModel = viewModel()
 ) {
