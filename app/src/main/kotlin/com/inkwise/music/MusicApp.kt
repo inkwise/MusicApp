@@ -20,8 +20,9 @@ import java.lang.Thread.UncaughtExceptionHandler
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import dagger.hilt.android.HiltAndroidApp
 
-
+@HiltAndroidApp 
 class MusicApp : Application() {
     override fun onCreate() {
         super.onCreate()
