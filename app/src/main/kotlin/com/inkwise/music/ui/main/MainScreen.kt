@@ -69,7 +69,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.inkwise.music.ui.player.PlayerViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
@@ -417,7 +418,7 @@ fun playerScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen2(
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberNavController()
@@ -608,7 +609,7 @@ fun DrawerMenuItem(
 // 底部抽屉组件（带手柄）- 集成播放器
 @Composable
 fun BottomDrawerContent(
-    playerViewModel: com.inkwise.music.ui.player.PlayerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
