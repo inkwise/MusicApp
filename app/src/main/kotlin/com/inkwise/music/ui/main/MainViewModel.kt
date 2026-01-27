@@ -1,7 +1,6 @@
 package com.inkwise.music.ui.main
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +22,7 @@ data class MainUiState(
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: MusicRepository
-) : viewModel() {
+) : ViewModel() {
 
     //private val repository = MusicRepository(application)
     private val _uiState = MutableStateFlow(MainUiState())
