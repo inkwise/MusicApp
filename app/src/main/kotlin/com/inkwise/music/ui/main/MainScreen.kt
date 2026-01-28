@@ -412,15 +412,13 @@ fun SongItem(
     }
 }
 @Composable
-fun SwipeSongSwitcherTest() {
+fun SwipeSongSwitcherTest(
+	playerViewModel: PlayerViewModel = hiltViewModel()
+) {
     var index by remember { mutableIntStateOf(1) }
-
-    val songs = listOf(
-        "稻香",
-        "七里香",
-        "晴天",
-        "测试"
-    )
+	val playQueue by playerViewModel.playQueue.collectAsState()
+    
+    val songs = playQueue
 
     SwipeSongSwitcher(
         prev = songs[(index - 1 + songs.size) % songs.size],
