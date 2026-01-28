@@ -257,7 +257,8 @@ fun SongPage(
     ) {
         if (song != null) {
             Text(
-                text = song.title
+                text = song.title,
+                maxLines = 1, 
             )
         }
     }
