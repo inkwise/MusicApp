@@ -227,21 +227,29 @@ fun ReboundHorizontalDrag(
         SongPage(
             song = playQueue.getOrNull(currentIndex - 1),
             //enabled = currentIndex > 0,
-            modifier = itemModifier
+            modifier = itemModifier,
+            backgroundColor = Color.Green,
+            alignRight = false
+        
         )
 
         // 🎵 当前
         SongPage(
             song = playQueue.getOrNull(currentIndex),
         //    enabled = true,
-            modifier = itemModifier
+            modifier = itemModifier,
+            backgroundColor = Color.Red,
+            alignRight = true
         )
 
         // ➡ 下一首
         SongPage(
             song = playQueue.getOrNull(currentIndex + 1),
         //    enabled = currentIndex < playQueue.lastIndex,
-            modifier = itemModifier
+            modifier = itemModifier,
+            backgroundColor = Color.Blue,
+            alignRight = true
+        
         )
     }
 }
@@ -249,13 +257,19 @@ fun ReboundHorizontalDrag(
 		
     }
 }
+
+
+
 @Composable
 fun SongPage(
 	modifier :Modifier,
     song: Song?
+    backgroundColor: Color,
+    alignRight: Boolean = false,
 ) {
     Box(
-        modifier = modifier
+        modifier = modifier.background(backgroundColor),
+        contentAlignment = if (alignRight) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         if (song != null) {
             Text(
