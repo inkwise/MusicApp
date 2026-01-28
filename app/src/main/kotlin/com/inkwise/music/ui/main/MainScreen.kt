@@ -84,7 +84,93 @@ fun SwipeSongSwitcher(
     	onNext={}
     )
 }
+@Composable
+fun ReboundHorizontalDrag(
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    playerViewModel: PlayerViewModel = hiltViewModel()
+) {
+    val playQueue by playerViewModel.playQueue.collectAsState()
+    val currentIndex by playerViewModel.currentIndex.collectAsState()
 
+    val scope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
+
+    val triggerDistance = 120f
+    val triggerVelocity = 1200f
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .background(Color.Black)
+            .draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta ->
+                    scope.launch {
+                        offsetX.snapTo(offsetX.value + delta)
+                    }
+                },
+                onDragStopped = { velocity ->
+                    val drag = offsetX.value
+
+                    val shouldPrev =
+                        drag > triggerDistance && currentIndex > 0
+
+                    val shouldNext =
+                        drag < -triggerDistance && currentIndex < playQueue.lastIndex
+
+                    if (shouldPrev) onPrev()
+                    else if (shouldNext) onNext()
+
+                    scope.launch {
+                        offsetX.animateTo(
+                            0f,
+                            spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            ),
+                            initialVelocity = velocity
+                        )
+                    }
+                }
+            )
+    ) {
+        val pageWidthPx = constraints.maxWidth.toFloat()
+
+        Row(
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        x = (-pageWidthPx + offsetX.value).roundToInt(),
+                        y = 0
+                    )
+                }
+                .width((pageWidthPx * 3).toDp())
+                .fillMaxHeight()
+        ) {
+
+            // ⬅ 上一首
+            SongPage(
+                song = playQueue.getOrNull(currentIndex - 1),
+                enabled = currentIndex > 0
+            )
+
+            // 🎵 当前
+            SongPage(
+                song = playQueue.getOrNull(currentIndex),
+                enabled = true
+            )
+
+            // ➡ 下一首
+            SongPage(
+                song = playQueue.getOrNull(currentIndex + 1),
+                enabled = currentIndex < playQueue.lastIndex
+            )
+        }
+    }
+}
+/*
 @Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,
@@ -144,6 +230,28 @@ fun ReboundHorizontalDrag(
             )
     ){
     	
+    }
+}*/
+@Composable
+fun SongPage(
+    song: Song?,
+    enabled: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .aspectRatio(1f)
+            .background(
+                if (enabled) Color.DarkGray else Color.Black
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (song != null) {
+            Text(
+                text = song.title,
+                color = Color.White
+            )
+        }
     }
 }
 
