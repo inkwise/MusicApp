@@ -158,7 +158,7 @@ fun controlContent(
             }
     ){
         // 滑动控件
-       SwipeSongSwitcherTest()
+       //SwipeSongSwitcherTest()
         //控制层
         controlContent2()
     }
