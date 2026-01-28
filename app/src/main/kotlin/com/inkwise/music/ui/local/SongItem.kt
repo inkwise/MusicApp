@@ -47,18 +47,13 @@ fun SongItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.MusicNote,
-                    contentDescription = null,
-                    tint = if (isPlaying) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )/*
+                
                 AsyncImage(
 				    model = song.albumArt,
 				    contentDescription = null,
 				    modifier = Modifier.size(48.dp),
 				    contentScale = ContentScale.Crop
-				)*/
+				)
                 
             }
 
