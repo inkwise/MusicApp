@@ -162,11 +162,14 @@ fun ReboundHorizontalDrag(
 
     val triggerDistance = 120f          // 触发距离（px）
     val triggerVelocity = 1200f          // 触发速度（px/s）
-    val dynamicAlpha by remember {
-        derivedStateOf {
-            if (offsetX.value > 0) 0.0f else 1.0f 
-        }
-    }
+    
+    // 将位移距离转为布尔值
+	val isVisible by remember {
+	    derivedStateOf {
+	        offsetX.value <= 0f 
+	    }
+	}
+	
 
     BoxWithConstraints(
         modifier = Modifier
@@ -204,7 +207,9 @@ fun ReboundHorizontalDrag(
                         offsetX.animateTo(
                             targetValue = 0f,
                             animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                // 决定回去的力度，StiffnessLow 会更柔和
+            					//stiffness = Spring.StiffnessMedium 
                                 stiffness = Spring.StiffnessMedium
                             ),
                             initialVelocity = velocity
@@ -238,8 +243,8 @@ fun ReboundHorizontalDrag(
             //enabled = currentIndex > 0,
             modifier = itemModifier,
             backgroundColor = Color.Green,
-            alignRight = true
-        
+            alignRight = true,
+        	isVisible=isVisible
         )
 
         // 🎵 当前
@@ -248,18 +253,18 @@ fun ReboundHorizontalDrag(
         //    enabled = true,
             modifier = itemModifier,
             backgroundColor = Color.Red,
-            alignRight = false
+            alignRight = false,
+            isVisible=true
         )
 
         // ➡ 下一首
         SongPage(
             song = playQueue.getOrNull(currentIndex + 1),
         //    enabled = currentIndex < playQueue.lastIndex,
-            modifier = itemModifier.graphicsLayer(
-	            alpha = dynamicAlpha
-	        ),
+            modifier = itemModifier
             backgroundColor = Color.Blue,
-            alignRight = false
+            alignRight = false,
+            isVisible=isVisible
         
         )
     }		
@@ -274,12 +279,13 @@ fun SongPage(
     song: Song?,
     backgroundColor: Color,
     alignRight: Boolean = false,
+    isVisible:Boolean,
 ) {
     Box(
         modifier = modifier.background(backgroundColor),
         contentAlignment = if (alignRight) Alignment.CenterEnd else Alignment.CenterStart
     ) {
-        if (song != null) {
+        if (song != null && isVisible) {
             Text(
                 text = song.title,
                 maxLines = 1, 
