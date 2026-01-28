@@ -132,23 +132,6 @@ fun MainScreen() {
     }
 }
 
-data class Song2(
-    val id: Int,
-    val name: String,
-    val artist: String
-)
-
-// 测试用的歌曲列表
-val mockSongList = listOf(
-    Song2(1, "晴天", "周杰伦"),
-    Song2(2, "七里香", "周杰伦"),
-    Song2(3, "稻香", "周杰伦"),
-    Song2(4, "青花瓷", "周杰伦"),
-    Song2(5, "夜曲", "周杰伦"),
-    Song2(6, "简单爱", "周杰伦"),
-    Song2(7, "告白气球", "周杰伦"),
-    Song2(8, "等你下课", "周杰伦")
-)
 
 //手柄区域
 @OptIn(ExperimentalMaterial3Api::class)
@@ -172,7 +155,6 @@ fun controlContent(
             }
     ){
         // 滑动控件
-       // MusicPlayerTestScreen()
        SwipeSongSwitcherTest()
         //控制层
         controlContent2()
@@ -185,7 +167,7 @@ fun controlContent2(
     onIcon2Click: () -> Unit = {},
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
-	    val playbackState by playerViewModel.playbackState.collectAsState()
+	val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
 	val coverUri = currentSong?.albumArt
     Row(
@@ -240,15 +222,7 @@ fun controlContent2(
         // 中间撑开
         Spacer(modifier = Modifier.weight(1f))
 
-        // 右侧第一个 Icon
-        /*
-        Icon(
-            imageVector = Icons.Default.Favorite,
-            contentDescription = "播放暂停",
-            modifier = Modifier
-                .size(28.dp)
-                .clickable { onIcon1Click() }
-        )*/
+        
 		IconButton(onClick = { playerViewModel.playPause() }) {
                 Icon(
                     if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -393,27 +367,28 @@ fun SwipeSongSwitcher(
 
             // 上一首（只负责显示，不参与逻辑）
             SongItem(
-                title = prev,
+                title = "测试",
                 height = height,
                 modifier = Modifier.alpha(if (showPrev) 1f else 0f)
             )
 
             // 当前歌曲（永远显示）
             SongItem(
-                title = current,
+                title = "测试",
                 height = height,
                 modifier = Modifier.alpha(1f)
             )
 
             // 下一首
             SongItem(
-                title = next,
+                title = "测试",
                 height = height,
                 modifier = Modifier.alpha(if (showNext) 1f else 0f)
             )
         }
     }
 }
+
 @Composable
 fun SongItem(
     title: String,
