@@ -148,7 +148,7 @@ fun ReboundHorizontalDrag(
                         y = 0
                     )
                 }
-                .width(300dp)
+                .width(300.dp)
                 .fillMaxHeight()
         ) {
 
