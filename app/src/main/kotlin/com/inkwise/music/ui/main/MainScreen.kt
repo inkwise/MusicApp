@@ -1,8 +1,6 @@
 package com.inkwise.music.ui.main
 
 
-import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -221,27 +219,36 @@ fun controlContent2(
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
-            ) {/*
-                Icon(
-                    Icons.Default.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )*/
- 				Box(
+            ) {
+            
+            	Box(
     modifier = Modifier
         .size(64.dp)
         .clip(RoundedCornerShape(8.dp))
         .background(MaterialTheme.colorScheme.surfaceVariant),
     contentAlignment = Alignment.Center
 ) {
-    AsyncImage(
-        model = coverUri,
-        contentDescription = currentSong?.title,
+    AndroidView(
         modifier = Modifier.matchParentSize(),
-        contentScale = ContentScale.Crop
+        factory = { context ->
+            ImageView(context).apply {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+        },
+        update = { imageView ->
+            val uri = coverUri
+            if (uri != null) {
+                Glide.with(imageView)
+                    .load(uri)
+                    .into(imageView)
+            } else {
+                // 没有封面时，清空 ImageView，避免残影
+                imageView.setImageDrawable(null)
+            }
+        }
     )
 
+    // 🎵 Icon 占位（只在没封面时显示）
     if (coverUri == null) {
         Icon(
             imageVector = Icons.Default.MusicNote,
