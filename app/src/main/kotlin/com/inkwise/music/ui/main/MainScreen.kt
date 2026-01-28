@@ -180,7 +180,6 @@ fun controlContent(
 }
 @Composable
 fun controlContent2(
-
     modifier: Modifier = Modifier,
     onIcon1Click: () -> Unit = {},
     onIcon2Click: () -> Unit = {},

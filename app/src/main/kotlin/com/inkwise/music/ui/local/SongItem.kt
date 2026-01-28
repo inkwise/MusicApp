@@ -45,13 +45,20 @@ fun SongItem(
                             Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                     ),
                 contentAlignment = Alignment.Center
-            ) {
+            ) {/*
                 Icon(
                     Icons.Default.MusicNote,
                     contentDescription = null,
                     tint = if (isPlaying) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                )*/
+                AsyncImage(
+				    model = song.albumArt,
+				    contentDescription = null,
+				    modifier = Modifier.size(24.dp),
+				    contentScale = ContentScale.Crop
+				)
+                
             }
 
             Spacer(modifier = Modifier.width(12.dp))
