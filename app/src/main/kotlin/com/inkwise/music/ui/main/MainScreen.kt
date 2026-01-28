@@ -263,7 +263,7 @@ fun ReboundHorizontalDrag(
 @Composable
 fun SongPage(
 	modifier :Modifier,
-    song: Song?
+    song: Song?,
     backgroundColor: Color,
     alignRight: Boolean = false,
 ) {
