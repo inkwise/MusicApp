@@ -406,8 +406,7 @@ fun playerScreen(
                 .fillMaxSize()
                 .background(Color.Transparent)
         ) {
-            // 播放器 UI 写这里
-            
+            BottomDrawerContent()
             
         }
     }
