@@ -74,11 +74,47 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 
 @Composable
-SwipeSongSwitcher(){
-
+fun SwipeSongSwitcher(
+	playerViewModel: PlayerViewModel = hiltViewModel()
+){
+	val playQueue by playerViewModel.playQueue.collectAsState()
+    val currentIndex by playerViewModel.currentIndex.collectAsState()
 }
 
+@Composable
+fun ReboundDragDemo() {
+    val scope = rememberCoroutineScope()
+    val offsetY = remember { Animatable(0f) }
 
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .offset { IntOffset(0, offsetY.value.roundToInt()) }
+            .background(Color.Red)
+            .draggable(
+                orientation = Orientation.Vertical,
+                state = rememberDraggableState { delta ->
+                    // 1:1 跟手
+                    scope.launch {
+                        offsetY.snapTo(offsetY.value + delta)
+                    }
+                },
+                onDragStopped = { velocity ->
+                    // 松手 → 回到原位
+                    scope.launch {
+                        offsetY.animateTo(
+                            targetValue = 0f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            ),
+                            initialVelocity = velocity
+                        )
+                    }
+                }
+            )
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,10 +185,6 @@ fun controlContent(
     onClick: () -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
-    var index by remember { mutableIntStateOf(1) }
-    val playQueue by playerViewModel.playQueue.collectAsState()
-    
-    val songs =  playQueue
     
     Box(
         modifier = modifier
