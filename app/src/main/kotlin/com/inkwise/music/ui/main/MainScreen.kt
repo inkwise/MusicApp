@@ -182,8 +182,12 @@ fun controlContent2(
 
     modifier: Modifier = Modifier,
     onIcon1Click: () -> Unit = {},
-    onIcon2Click: () -> Unit = {}
+    onIcon2Click: () -> Unit = {},
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
+	    val playbackState by playerViewModel.playbackState.collectAsState()
+    val currentSong = playbackState.currentSong
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -191,8 +195,10 @@ fun controlContent2(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+    
 
         // 左侧图片（Glide）
+        /*
         AndroidView(
             modifier = Modifier
                 .size(60.dp)
@@ -205,20 +211,40 @@ fun controlContent2(
                         .into(this)
                 }
             }
-        )
-
+        )*/
+		Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.MusicNote,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         // 中间撑开
         Spacer(modifier = Modifier.weight(1f))
 
         // 右侧第一个 Icon
+        /*
         Icon(
             imageVector = Icons.Default.Favorite,
             contentDescription = "播放暂停",
             modifier = Modifier
                 .size(28.dp)
                 .clickable { onIcon1Click() }
-        )
-
+        )*/
+		IconButton(onClick = { playerViewModel.playPause() }) {
+                Icon(
+                    if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    contentDescription = if (playbackState.isPlaying) "暂停" else "播放",
+                    modifier = Modifier.size(32.dp)
+                )
+        }
         Spacer(modifier = Modifier.width(12.dp))
 
         // 右侧第二个 Icon
@@ -231,6 +257,58 @@ fun controlContent2(
         )
     }
 }
+/*
+// 播放器控制区域
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 封面
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.MusicNote,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // 歌曲信息
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = currentSong?.title ?: "未播放",
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1
+                )
+                Text(
+                    text = currentSong?.artist ?: "无",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            }
+            
+            // 播放按钮
+            IconButton(onClick = { playerViewModel.playPause() }) {
+                Icon(
+                    if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    contentDescription = if (playbackState.isPlaying) "暂停" else "播放",
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+
+*/
 
 
 
