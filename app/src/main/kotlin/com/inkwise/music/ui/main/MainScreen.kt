@@ -166,12 +166,12 @@ fun ReboundHorizontalDrag(
     // 将位移距离转为布尔值
 	val isVisible by remember {
 	    derivedStateOf {
-	        offsetX.value < 0f 
+	        offsetX.value > 0f 
 	    }
 	}
 	val isVisible2 by remember {
 	    derivedStateOf {
-	        offsetX.value > 0f 
+	        offsetX.value < 0f 
 	    }
 	}
 	
@@ -226,7 +226,7 @@ fun ReboundHorizontalDrag(
     ){
     	
     // 这里拿到的 maxWidth 是该布局能占据的最大宽度
-    val halfWidth = maxWidth * 0.6f
+    val halfWidth = maxWidth * 0.5f
 
     Row(
         modifier = Modifier
@@ -293,11 +293,6 @@ fun SongPage(
         if (song != null && isVisible) {
             Text(
                 text = song.title,
-                maxLines = 1, 
-            )
-        }else{
-        	Text(
-                text = "歌曲为空",
                 maxLines = 1, 
             )
         }
