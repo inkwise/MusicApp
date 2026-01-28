@@ -162,7 +162,9 @@ fun ReboundHorizontalDrag(
 
     Box(
         modifier = Modifier
-            .size(200.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()
+            
             .offset { IntOffset(offsetX.value.roundToInt(), 0) }
            // .background(Color.Red)
             .draggable(
