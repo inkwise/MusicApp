@@ -203,20 +203,47 @@ fun ReboundHorizontalDrag(
                 }
             )
     ){
-    	Row(
-		    modifier = Modifier
-		        .fillMaxHeight()
-		        // 关键：Row 默认限制在父布局宽度内，
-		        // 我们需要手动指定它应该是屏幕宽度的 1.5 倍（因为 3 个 50%）
-		        .width(screenWidth * 1.5f),
-		    verticalAlignment = Alignment.CenterVertically
-		) {
-		    val pageModifier = Modifier.weight(1f) // 每个人拿 1/3 的总宽度 (即 1.5f / 3 = 0.5f)
-		
-		    SongPage(song = playQueue.getOrNull(currentIndex - 1), modifier = pageModifier)
-		    SongPage(song = playQueue.getOrNull(currentIndex), modifier = pageModifier)
-		    SongPage(song = playQueue.getOrNull(currentIndex + 1), modifier = pageModifier)
-		}
+    	BoxWithConstraints(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center // 确保内容整体居中
+) {
+    // 这里拿到的 maxWidth 是该布局能占据的最大宽度
+    val halfWidth = maxWidth * 0.5f
+
+    Row(
+        modifier = Modifier
+            .fillMaxHeight()
+            // 总宽度：3个 50% = 1.5倍
+            .width(halfWidth * 3) 
+            // 关键：为了让中间的布局居中，我们需要向左偏移半个组件的宽度（即 25% 的总显示宽度）
+            .offset(x = -halfWidth * 0.5f), 
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val itemModifier = Modifier.width(halfWidth)
+
+        // ⬅ 上一首
+        SongPage(
+            song = playQueue.getOrNull(currentIndex - 1),
+            enabled = currentIndex > 0,
+            modifier = itemModifier
+        )
+
+        // 🎵 当前
+        SongPage(
+            song = playQueue.getOrNull(currentIndex),
+            enabled = true,
+            modifier = itemModifier
+        )
+
+        // ➡ 下一首
+        SongPage(
+            song = playQueue.getOrNull(currentIndex + 1),
+            enabled = currentIndex < playQueue.lastIndex,
+            modifier = itemModifier
+        )
+    }
+}
+
 		
     }
 }
