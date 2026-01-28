@@ -32,7 +32,7 @@ fun SongItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -56,7 +56,7 @@ fun SongItem(
                 AsyncImage(
 				    model = song.albumArt,
 				    contentDescription = null,
-				    modifier = Modifier.size(24.dp),
+				    modifier = Modifier.size(48.dp),
 				    contentScale = ContentScale.Crop
 				)
                 
