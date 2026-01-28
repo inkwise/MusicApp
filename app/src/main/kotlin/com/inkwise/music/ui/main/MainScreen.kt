@@ -105,7 +105,6 @@ fun ReboundHorizontalDrag(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-            .background(Color.Black)
             .draggable(
                 orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->
@@ -243,15 +242,12 @@ fun SongPage(
         modifier = Modifier
             .fillMaxHeight()
             .aspectRatio(1f)
-            .background(
-                if (enabled) Color.DarkGray else Color.Black
-            ),
+     ,
         contentAlignment = Alignment.Center
     ) {
         if (song != null) {
             Text(
-                text = song.title,
-                color = Color.White
+                text = song.title
             )
         }
     }
