@@ -382,8 +382,8 @@ fun controlContent(
     ){
         // 滑动控件
        ReboundHorizontalDrag(
-	    	onPrev={},
-	    	onNext={}
+	    	onPrev={playerViewModel.skipToPrevious()},
+	    	onNext={playerViewModel.skipToNext()}
 	    )
         //控制层
         controlContent2()
