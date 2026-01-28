@@ -224,21 +224,21 @@ fun ReboundHorizontalDrag(
         // ⬅ 上一首
         SongPage(
             song = playQueue.getOrNull(currentIndex - 1),
-            enabled = currentIndex > 0,
+            //enabled = currentIndex > 0,
             modifier = itemModifier
         )
 
         // 🎵 当前
         SongPage(
             song = playQueue.getOrNull(currentIndex),
-            enabled = true,
+        //    enabled = true,
             modifier = itemModifier
         )
 
         // ➡ 下一首
         SongPage(
             song = playQueue.getOrNull(currentIndex + 1),
-            enabled = currentIndex < playQueue.lastIndex,
+        //    enabled = currentIndex < playQueue.lastIndex,
             modifier = itemModifier
         )
     }
