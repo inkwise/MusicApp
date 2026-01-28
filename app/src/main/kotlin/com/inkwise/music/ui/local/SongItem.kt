@@ -1,5 +1,6 @@
 package com.inkwise.music.ui.local
-
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.inkwise.music.data.model.Song
-
+import androidx.compose.ui.res.painterResource
 @Composable
 fun SongItem(
     song: Song,
