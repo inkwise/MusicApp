@@ -74,7 +74,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
-
+/*
 
 @Composable
 fun ReboundHorizontalDrag2(
@@ -144,7 +144,7 @@ fun ReboundHorizontalDrag2(
         }
     }
 }
-
+*/
 @Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,
@@ -164,7 +164,6 @@ fun ReboundHorizontalDrag(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            
             .offset { IntOffset(offsetX.value.roundToInt(), 0) }
            // .background(Color.Red)
             .draggable(
@@ -210,7 +209,7 @@ fun ReboundHorizontalDrag(
     contentAlignment = Alignment.Center // 确保内容整体居中
 ) {
     // 这里拿到的 maxWidth 是该布局能占据的最大宽度
-    val halfWidth = maxWidth * 0.5f
+    val halfWidth = maxWidth * 0.3f
 
     Row(
         modifier = Modifier
