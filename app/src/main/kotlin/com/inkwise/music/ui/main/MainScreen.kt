@@ -166,7 +166,12 @@ fun ReboundHorizontalDrag(
     // 将位移距离转为布尔值
 	val isVisible by remember {
 	    derivedStateOf {
-	        offsetX.value <= 0f 
+	        offsetX.value < 0f 
+	    }
+	}
+	val isVisible2 by remember {
+	    derivedStateOf {
+	        offsetX.value > 0f 
 	    }
 	}
 	
@@ -261,10 +266,10 @@ fun ReboundHorizontalDrag(
         SongPage(
             song = playQueue.getOrNull(currentIndex + 1),
         //    enabled = currentIndex < playQueue.lastIndex,
-            modifier = itemModifier
+            modifier = itemModifier,
             backgroundColor = Color.Blue,
             alignRight = false,
-            isVisible=isVisible
+            isVisible=isVisible2
         
         )
     }		
