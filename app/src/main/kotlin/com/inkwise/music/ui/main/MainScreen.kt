@@ -87,7 +87,7 @@ fun SwipeSongSwitcher(
     )
 }
 @Composable
-fun ReboundHorizontalDrag(
+fun ReboundHorizontalDrag2(
     onPrev: () -> Unit,
     onNext: () -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
@@ -171,7 +171,7 @@ fun ReboundHorizontalDrag(
         }
     }
 }
-/*
+
 @Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,
@@ -191,7 +191,7 @@ fun ReboundHorizontalDrag(
         modifier = Modifier
             .size(200.dp)
             .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-            .background(Color.Red)
+           // .background(Color.Red)
             .draggable(
                 orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->
@@ -230,9 +230,32 @@ fun ReboundHorizontalDrag(
                 }
             )
     ){
-    	
+    	Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
+
+            // ⬅ 上一首
+            SongPage(
+                song = playQueue.getOrNull(currentIndex - 1),
+                enabled = currentIndex > 0
+            )
+
+            // 🎵 当前
+            SongPage(
+                song = playQueue.getOrNull(currentIndex),
+                enabled = true
+            )
+
+            // ➡ 下一首
+            SongPage(
+                song = playQueue.getOrNull(currentIndex + 1),
+                enabled = currentIndex < playQueue.lastIndex
+            )
+        }
     }
-}*/
+}
 @Composable
 fun SongPage(
     song: Song?,
