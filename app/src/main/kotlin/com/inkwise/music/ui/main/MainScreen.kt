@@ -218,8 +218,8 @@ fun ReboundHorizontalDrag(
             // 总宽度：3个 50% = 1.5倍
             .width(halfWidth * 3) 
             // 关键：为了让中间的布局居中，我们需要向左偏移半个组件的宽度（即 25% 的总显示宽度）
-            .offset(x = -halfWidth * 0.5f), 
-        verticalAlignment = Alignment.CenterVertically
+           // .offset(x = -halfWidth * 0.5f), 
+        //verticalAlignment = Alignment.CenterVertically
     ) {
         val itemModifier = Modifier.width(halfWidth)
 
@@ -274,6 +274,11 @@ fun SongPage(
         if (song != null) {
             Text(
                 text = song.title,
+                maxLines = 1, 
+            )
+        }else{
+        	Text(
+                text = "歌曲为空",
                 maxLines = 1, 
             )
         }
