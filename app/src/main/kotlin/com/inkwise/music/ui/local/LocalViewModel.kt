@@ -58,7 +58,7 @@ class LocalViewModel : ViewModel() {
                     val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
 					val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
                     while (cursor.moveToNext()) {
-                        val id = cursor.getLong(idCol)
+                        val id = cursor.getInt(idCol)
                         val title = cursor.getString(titleCol) ?: "Unknown"
                         val artist = cursor.getString(artistCol) ?: "Unknown"
                         val duration = cursor.getLong(durationCol)
