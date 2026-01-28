@@ -370,21 +370,21 @@ fun SwipeSongSwitcher(
 
             // 上一首（只负责显示，不参与逻辑）
             SongItem(
-                title = "测试",
+                title = prev,
                 height = height,
                 modifier = Modifier.alpha(if (showPrev) 1f else 0f)
             )
 
             // 当前歌曲（永远显示）
             SongItem(
-                title = "测试",
+                title = current,
                 height = height,
                 modifier = Modifier.alpha(1f)
             )
 
             // 下一首
             SongItem(
-                title = "测试",
+                title = next,
                 height = height,
                 modifier = Modifier.alpha(if (showNext) 1f else 0f)
             )
