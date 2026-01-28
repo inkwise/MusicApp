@@ -187,7 +187,7 @@ fun controlContent2(
 ) {
 	    val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
-
+	val coverUri = currentSong?.albumArt
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -218,13 +218,23 @@ fun controlContent2(
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
-            ) {
+            ) {/*
                 Icon(
                     Icons.Default.MusicNote,
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                )*/
+                AsyncImage(
+    model = coverUri,
+    contentDescription = currentSong?.title,
+    modifier = Modifier
+        .size(64.dp)
+        .clip(RoundedCornerShape(8.dp)),
+    contentScale = ContentScale.Crop,
+    placeholder = painterResource(R.drawable.ic_music_placeholder),
+    error = painterResource(R.drawable.ic_music_placeholder)
+)
             }
         // 中间撑开
         Spacer(modifier = Modifier.weight(1f))
@@ -253,7 +263,7 @@ fun controlContent2(
             contentDescription = "下一首",
             modifier = Modifier
                 .size(28.dp)
-                .clickable { onIcon2Click() }
+                .clickable { playerViewModel.skipToNext() }
         )
     }
 }
