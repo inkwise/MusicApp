@@ -139,9 +139,12 @@ fun MainScreen() {
 fun controlContent(
     modifier: Modifier,
     onClick: () -> Unit
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     var index by remember { mutableIntStateOf(1) }
-    val songs =         mockSongList
+    val playQueue by playerViewModel.playQueue.collectAsState()
+    
+    val songs =  playQueue
     
     Box(
         modifier = modifier
