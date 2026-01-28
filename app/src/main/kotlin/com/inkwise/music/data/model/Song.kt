@@ -9,13 +9,13 @@ import androidx.room.Index
 @Entity(tableName = "songs")
 data class Song(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,            // Room 自增主键
+    val id: Long = 0,            // Room 自增主键
 	//本地媒体id
 	@ColumnInfo(name = "local_id")
-    val local_id: Int,
+    val local_id: Long,
     //云端id
 	@ColumnInfo(name = "cloud_id")
-    val cloud_id: Int,
+    val cloud_id: Long,
 	//标题
     @ColumnInfo(name = "title")
     val title: String,
