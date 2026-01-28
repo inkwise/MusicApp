@@ -115,6 +115,7 @@ dependencies {
     //图片
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("jp.wasabeef:glide-transformations:4.3.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
     
     implementation("androidx.compose.foundation:foundation:1.6.0") // 或更高版本
     //implementation(libs.androidx.compose.animation.core)
@@ -129,5 +130,5 @@ dependencies {
   	ksp ("androidx.room:room-compiler:2.6.1" )
 	implementation ("androidx.room:room-ktx:2.6.1")
 	
-
+	
 }
