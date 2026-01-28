@@ -198,21 +198,7 @@ fun controlContent2(
     ) {
     
 
-        // 左侧图片（Glide）
-        /*
-        AndroidView(
-            modifier = Modifier
-                .size(60.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            factory = { context ->
-                ImageView(context).apply {
-                    scaleType = ImageView.ScaleType.CENTER_CROP
-                    Glide.with(this)
-                        .load(R.drawable.test)
-                        .into(this)
-                }
-            }
-        )*/
+        
 		Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -221,13 +207,6 @@ fun controlContent2(
                 contentAlignment = Alignment.Center
             ) {
             
-            	Box(
-    modifier = Modifier
-        .size(64.dp)
-        .clip(RoundedCornerShape(8.dp))
-        .background(MaterialTheme.colorScheme.surfaceVariant),
-    contentAlignment = Alignment.Center
-) {
     AndroidView(
         modifier = Modifier.matchParentSize(),
         factory = { context ->
@@ -251,13 +230,13 @@ fun controlContent2(
     // 🎵 Icon 占位（只在没封面时显示）
     if (coverUri == null) {
         Icon(
-            imageVector = Icons.Default.MusicNote,
+            imageVector = Icons.Default.Pause,
             contentDescription = null,
             modifier = Modifier.size(32.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-}
+
             }
         // 中间撑开
         Spacer(modifier = Modifier.weight(1f))
