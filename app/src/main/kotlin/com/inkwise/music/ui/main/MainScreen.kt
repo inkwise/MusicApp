@@ -23,7 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.inkwise.music.ui.home.HomeScreen
-import com.inkwise.music.ui.data.model.Song
+import com.inkwise.music.data.model.Song
 import com.inkwise.music.ui.local.LocalSongsScreen
 import com.inkwise.music.ui.cloud.CloudSongsScreen
 import com.inkwise.music.ui.queue.PlayQueueBottomSheet
