@@ -215,6 +215,9 @@ fun ReboundHorizontalDrag(
             .fillMaxHeight()
             // 总宽度：3个 50% = 1.5倍
             .width(halfWidth * 3) 
+            // 关键点 2：使用 wrapContentWidth(unbounded = true)
+            // 这允许 Row 的宽度超过父布局的最大约束而不被强制压缩
+            .wrapContentWidth(align = Alignment.CenterHorizontally, unbounded = true)
             // 关键：为了让中间的布局居中，我们需要向左偏移半个组件的宽度（即 25% 的总显示宽度）
            // .offset(x = -halfWidth * 0.5f), 
         //verticalAlignment = Alignment.CenterVertically
@@ -227,7 +230,7 @@ fun ReboundHorizontalDrag(
             //enabled = currentIndex > 0,
             modifier = itemModifier,
             backgroundColor = Color.Green,
-            alignRight = false
+            alignRight = true
         
         )
 
@@ -237,7 +240,7 @@ fun ReboundHorizontalDrag(
         //    enabled = true,
             modifier = itemModifier,
             backgroundColor = Color.Red,
-            alignRight = true
+            alignRight = false
         )
 
         // ➡ 下一首
@@ -246,13 +249,10 @@ fun ReboundHorizontalDrag(
         //    enabled = currentIndex < playQueue.lastIndex,
             modifier = itemModifier,
             backgroundColor = Color.Blue,
-            alignRight = true
+            alignRight = false
         
         )
-    }
-
-
-		
+    }		
     }
 }
 
