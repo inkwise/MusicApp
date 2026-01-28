@@ -199,7 +199,7 @@ fun controlContent(
             }
     ){
         // 滑动控件
-       //SwipeSongSwitcher()
+       SwipeSongSwitcher()
         //控制层
         controlContent2()
     }
