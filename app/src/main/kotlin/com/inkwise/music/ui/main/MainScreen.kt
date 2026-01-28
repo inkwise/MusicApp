@@ -79,7 +79,10 @@ fun SwipeSongSwitcher(
 ){
 	val playQueue by playerViewModel.playQueue.collectAsState()
     val currentIndex by playerViewModel.currentIndex.collectAsState()
-    ReboundHorizontalDrag()
+    ReboundHorizontalDrag(
+    	onPrev={},
+    	onNext={}
+    )
 }
 
 @Composable
