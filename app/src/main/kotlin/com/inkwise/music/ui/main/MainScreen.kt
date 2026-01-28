@@ -138,7 +138,7 @@ fun MainScreen() {
 @Composable
 fun controlContent(
     modifier: Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     var index by remember { mutableIntStateOf(1) }
