@@ -75,17 +75,7 @@ import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 
-@Composable
-fun SwipeSongSwitcher(
-	playerViewModel: PlayerViewModel = hiltViewModel()
-){
-	val playQueue by playerViewModel.playQueue.collectAsState()
-    val currentIndex by playerViewModel.currentIndex.collectAsState()
-    ReboundHorizontalDrag(
-    	onPrev={},
-    	onNext={}
-    )
-}
+
 @Composable
 fun ReboundHorizontalDrag2(
     onPrev: () -> Unit,
@@ -231,42 +221,30 @@ fun ReboundHorizontalDrag(
             )
     ){
     	Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-        ) {
-
-            // ⬅ 上一首
-            SongPage(
-                song = playQueue.getOrNull(currentIndex - 1),
-                enabled = currentIndex > 0
-            )
-
-            // 🎵 当前
-            SongPage(
-                song = playQueue.getOrNull(currentIndex),
-                enabled = true
-            )
-
-            // ➡ 下一首
-            SongPage(
-                song = playQueue.getOrNull(currentIndex + 1),
-                enabled = currentIndex < playQueue.lastIndex
-            )
-        }
+		    modifier = Modifier
+		        .fillMaxHeight()
+		        // 关键：Row 默认限制在父布局宽度内，
+		        // 我们需要手动指定它应该是屏幕宽度的 1.5 倍（因为 3 个 50%）
+		        .width(screenWidth * 1.5f),
+		    verticalAlignment = Alignment.CenterVertically
+		) {
+		    val pageModifier = Modifier.weight(1f) // 每个人拿 1/3 的总宽度 (即 1.5f / 3 = 0.5f)
+		
+		    SongPage(song = playQueue.getOrNull(currentIndex - 1), modifier = pageModifier)
+		    SongPage(song = playQueue.getOrNull(currentIndex), modifier = pageModifier)
+		    SongPage(song = playQueue.getOrNull(currentIndex + 1), modifier = pageModifier)
+		}
+		
     }
 }
 @Composable
 fun SongPage(
+	modifier :Modifier,
     song: Song?,
     enabled: Boolean
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .aspectRatio(1f)
-     ,
-        contentAlignment = Alignment.Center
+        modifier = modifier
     ) {
         if (song != null) {
             Text(
@@ -358,7 +336,10 @@ fun controlContent(
             }
     ){
         // 滑动控件
-       SwipeSongSwitcher()
+       ReboundHorizontalDrag(
+	    	onPrev={},
+	    	onNext={}
+	    )
         //控制层
         controlContent2()
     }
