@@ -69,7 +69,7 @@ class LocalViewModel : ViewModel() {
 					        albumId
 					    ).toString()
                         val song = Song(
-                            id = id,
+                            localId = id,
                             title = title,
                             artist = artist,
                             duration = duration,

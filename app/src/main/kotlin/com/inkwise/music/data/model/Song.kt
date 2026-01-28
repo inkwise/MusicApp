@@ -12,10 +12,10 @@ data class Song(
     val id: Long = 0,            // Room 自增主键
 	//本地媒体id
 	@ColumnInfo(name = "local_id")
-    val localId: Long? = null,,
+    val localId: Long? = null,
     //云端id
 	@ColumnInfo(name = "cloud_id")
-    val cloudId: Long? = null,,
+    val cloudId: Long? = null,
 	//标题
     @ColumnInfo(name = "title")
     val title: String,
