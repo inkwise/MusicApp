@@ -38,7 +38,8 @@ class LocalViewModel : ViewModel() {
                     MediaStore.Audio.Media.TITLE,
                     MediaStore.Audio.Media.ARTIST,
                     MediaStore.Audio.Media.DURATION,
-                    MediaStore.Audio.Media.DATA
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.ALBUM_ID
                 )
                 val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
                 val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
@@ -55,14 +56,18 @@ class LocalViewModel : ViewModel() {
                     val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
                     val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                     val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-
+					val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
                     while (cursor.moveToNext()) {
                         val id = cursor.getLong(idCol)
                         val title = cursor.getString(titleCol) ?: "Unknown"
                         val artist = cursor.getString(artistCol) ?: "Unknown"
                         val duration = cursor.getLong(durationCol)
                         val path = cursor.getString(dataCol) ?: ""
-
+						val albumId = cursor.getLong(albumIdCol)
+						val albumArtUri = ContentUris.withAppendedId(
+					        Uri.parse("content://media/external/audio/albumart"),
+					        albumId
+					    ).toString()
                         val song = Song(
                             id = id,
                             title = title,
@@ -71,7 +76,8 @@ class LocalViewModel : ViewModel() {
                             path = path,
                             uri = ContentUris.withAppendedId(
                                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id
-                            ).toString()
+                            ).toString(),
+                            albumArt = albumArtUri   // ⭐ 保存封面
                         )
                         songs += song
                     }
