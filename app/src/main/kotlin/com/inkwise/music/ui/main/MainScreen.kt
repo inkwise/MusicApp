@@ -141,23 +141,6 @@ fun ReboundHorizontalDrag2(
                 .fillMaxHeight()
         ) {
 
-            // ⬅ 上一首
-            SongPage(
-                song = playQueue.getOrNull(currentIndex - 1),
-                enabled = currentIndex > 0
-            )
-
-            // 🎵 当前
-            SongPage(
-                song = playQueue.getOrNull(currentIndex),
-                enabled = true
-            )
-
-            // ➡ 下一首
-            SongPage(
-                song = playQueue.getOrNull(currentIndex + 1),
-                enabled = currentIndex < playQueue.lastIndex
-            )
         }
     }
 }
@@ -240,8 +223,7 @@ fun ReboundHorizontalDrag(
 @Composable
 fun SongPage(
 	modifier :Modifier,
-    song: Song?,
-    enabled: Boolean
+    song: Song?
 ) {
     Box(
         modifier = modifier
