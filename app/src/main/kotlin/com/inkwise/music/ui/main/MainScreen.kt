@@ -1,6 +1,9 @@
 package com.inkwise.music.ui.main
 
-
+import androidx.compose.ui.graphics.graphicsLayer
+// 如果你使用了 alpha 渐变逻辑，还需要这个
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -252,9 +255,9 @@ fun ReboundHorizontalDrag(
         SongPage(
             song = playQueue.getOrNull(currentIndex + 1),
         //    enabled = currentIndex < playQueue.lastIndex,
-            modifier = itemModifier .graphicsLayer {
-                alpha = dynamicAlpha
-            },
+            modifier = itemModifier.graphicsLayer(
+	            alpha = dynamicAlpha
+	        ),
             backgroundColor = Color.Blue,
             alignRight = false
         
