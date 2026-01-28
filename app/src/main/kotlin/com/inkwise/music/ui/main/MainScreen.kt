@@ -1,5 +1,8 @@
 package com.inkwise.music.ui.main
 
+
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -225,16 +228,29 @@ fun controlContent2(
                     modifier = Modifier.size(32.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )*/
-                AsyncImage(
-    model = coverUri,
-    contentDescription = currentSong?.title,
+ 				Box(
     modifier = Modifier
         .size(64.dp)
-        .clip(RoundedCornerShape(8.dp)),
-    contentScale = ContentScale.Crop,
-    placeholder = painterResource(R.drawable.ic_music_placeholder),
-    error = painterResource(R.drawable.ic_music_placeholder)
-)
+        .clip(RoundedCornerShape(8.dp))
+        .background(MaterialTheme.colorScheme.surfaceVariant),
+    contentAlignment = Alignment.Center
+) {
+    AsyncImage(
+        model = coverUri,
+        contentDescription = currentSong?.title,
+        modifier = Modifier.matchParentSize(),
+        contentScale = ContentScale.Crop
+    )
+
+    if (coverUri == null) {
+        Icon(
+            imageVector = Icons.Default.MusicNote,
+            contentDescription = null,
+            modifier = Modifier.size(32.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
             }
         // 中间撑开
         Spacer(modifier = Modifier.weight(1f))
