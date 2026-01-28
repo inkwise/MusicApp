@@ -159,6 +159,11 @@ fun ReboundHorizontalDrag(
 
     val triggerDistance = 120f          // 触发距离（px）
     val triggerVelocity = 1200f          // 触发速度（px/s）
+    val dynamicAlpha by remember {
+        derivedStateOf {
+            if (offsetX.value > 0) 0.0f else 1.0f 
+        }
+    }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -208,7 +213,7 @@ fun ReboundHorizontalDrag(
     ){
     	
     // 这里拿到的 maxWidth 是该布局能占据的最大宽度
-    val halfWidth = maxWidth * 0.4f
+    val halfWidth = maxWidth * 0.6f
 
     Row(
         modifier = Modifier
@@ -247,7 +252,9 @@ fun ReboundHorizontalDrag(
         SongPage(
             song = playQueue.getOrNull(currentIndex + 1),
         //    enabled = currentIndex < playQueue.lastIndex,
-            modifier = itemModifier,
+            modifier = itemModifier .graphicsLayer {
+                alpha = dynamicAlpha
+            },
             backgroundColor = Color.Blue,
             alignRight = false
         
