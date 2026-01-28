@@ -84,7 +84,7 @@ fun LocalSongsScreen(
                     itemsIndexed(songs) { index, song ->
                         SongItem(
                             song = song,
-                            isPlaying = playbackState.currentSong?.loaclId == song.loaclId,
+                            isPlaying = playbackState.currentSong?.localId == song.localId,
                             onClick = { playerViewModel.playSongs(songs, index) },
                             onMoreClick = { /* 更多操作 */ }
                         )
