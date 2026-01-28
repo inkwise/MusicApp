@@ -1,6 +1,7 @@
 package com.inkwise.music.ui.main
 
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -22,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.inkwise.music.ui.home.HomeScreen
+import com.inkwise.music.ui.data.model.Song
 import com.inkwise.music.ui.local.LocalSongsScreen
 import com.inkwise.music.ui.cloud.CloudSongsScreen
 import com.inkwise.music.ui.queue.PlayQueueBottomSheet
@@ -146,7 +148,7 @@ fun ReboundHorizontalDrag(
                         y = 0
                     )
                 }
-                .width((pageWidthPx * 3).toDp())
+                .width(300dp)
                 .fillMaxHeight()
         ) {
 
