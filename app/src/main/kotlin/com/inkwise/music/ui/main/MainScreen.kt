@@ -421,9 +421,9 @@ fun SwipeSongSwitcherTest(
     val songs = playQueue
 
     SwipeSongSwitcher(
-        prev = songs[(index - 1 + songs.size) % songs.size],
-        current = songs[index],
-        next = songs[(index + 1) % songs.size],
+        prev = songs[(index - 1 + songs.size) % songs.size].title,
+        current = songs[index].title,
+        next = songs[(index + 1) % songs.size].title,
         onPrev = {
             index = (index + 1) % songs.size
         },
