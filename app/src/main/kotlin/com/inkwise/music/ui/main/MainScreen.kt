@@ -72,6 +72,14 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
+
+@Composable
+SwipeSongSwitcher(){
+
+}
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
@@ -158,7 +166,7 @@ fun controlContent(
             }
     ){
         // 滑动控件
-       //SwipeSongSwitcherTest()
+       //SwipeSongSwitcher()
         //控制层
         controlContent2()
     }
@@ -181,7 +189,7 @@ fun controlContent2(
         verticalAlignment = Alignment.CenterVertically
     ) {
     
-
+/*
         
 		Box(
                 modifier = Modifier
@@ -221,7 +229,7 @@ fun controlContent2(
         )
     }
 
-            }
+            }*/
         // 中间撑开
         Spacer(modifier = Modifier.weight(1f))
 
@@ -245,152 +253,12 @@ fun controlContent2(
         )
     }
 }
-/*
-// 播放器控制区域
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 封面
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.MusicNote,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            // 歌曲信息
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = currentSong?.title ?: "未播放",
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1
-                )
-                Text(
-                    text = currentSong?.artist ?: "无",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-            }
-            
-            // 播放按钮
-            IconButton(onClick = { playerViewModel.playPause() }) {
-                Icon(
-                    if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (playbackState.isPlaying) "暂停" else "播放",
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-
-*/
 
 
 
 
 
-@Composable
-fun SwipeSongSwitcher(
-    current: String,
-    prev: String,
-    next: String,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
-    height: Dp = 64.dp
-) {
-    val scope = rememberCoroutineScope()
 
-    // 位移动画
-    val offsetX = remember { Animatable(0f) }
-
-    // 宽度（用于阈值判断）
-    var widthPx by remember { mutableFloatStateOf(1f) }
-
-    // ⭐ 显隐状态（关键）
-    var showPrev by remember { mutableStateOf(false) }
-    var showNext by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height)
-            .onSizeChanged { widthPx = it.width.toFloat() }
-            .clipToBounds()
-            .draggable(
-                orientation = Orientation.Horizontal,
-                state = rememberDraggableState { delta ->
-                    scope.launch {
-                        val newOffset = (offsetX.value + delta)
-                            .coerceIn(-widthPx, widthPx)
-
-                        offsetX.snapTo(newOffset)
-
-                        // ⭐ 根据方向立刻更新显隐
-                        showPrev = newOffset > 0f
-                        showNext = newOffset < 0f
-                    }
-                },
-                onDragStopped = {
-                    // ⭐ 松手瞬间直接隐藏
-                    showPrev = false
-                    showNext = false
-
-                    when {
-                        offsetX.value > widthPx * 0.25f -> onPrev()
-                        offsetX.value < -widthPx * 0.25f -> onNext()
-                    }
-
-                    scope.launch {
-                        offsetX.animateTo(
-                            0f,
-                            animationSpec = spring(stiffness = Spring.StiffnessMedium)
-                        )
-                    }
-                }
-            )
-    ) {
-        Row(
-            modifier = Modifier
-                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .fillMaxHeight()
-        ) {
-
-            // 上一首（只负责显示，不参与逻辑）
-            SongItem(
-                title = prev,
-                height = height,
-                modifier = Modifier.alpha(if (showPrev) 1f else 0f)
-            )
-
-            // 当前歌曲（永远显示）
-            SongItem(
-                title = current,
-                height = height,
-                modifier = Modifier.alpha(1f)
-            )
-
-            // 下一首
-            SongItem(
-                title = next,
-                height = height,
-                modifier = Modifier.alpha(if (showNext) 1f else 0f)
-            )
-        }
-    }
-}
 
 @Composable
 fun SongItem(
@@ -410,28 +278,6 @@ fun SongItem(
             maxLines = 1
         )
     }
-}
-@Composable
-fun SwipeSongSwitcherTest(
-	playerViewModel: PlayerViewModel = hiltViewModel()
-) {
-    var index by remember { mutableIntStateOf(1) }
-	val playQueue by playerViewModel.playQueue.collectAsState()
-    
-    val songs = playQueue
-
-    SwipeSongSwitcher(
-        prev = songs[(index - 1 + songs.size) % songs.size].title,
-        current = songs[index].title,
-        next = songs[(index + 1) % songs.size].title,
-        onPrev = {
-            index = (index + 1) % songs.size
-        },
-        onNext = {
-            index = (index - 1 + songs.size) % songs.size
-            
-        }
-    )
 }
 
 //播放器页面
