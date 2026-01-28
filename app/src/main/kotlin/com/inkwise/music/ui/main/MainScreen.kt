@@ -160,10 +160,11 @@ fun ReboundHorizontalDrag(
     val triggerDistance = 120f          // 触发距离（px）
     val triggerVelocity = 1200f          // 触发速度（px/s）
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
+            
             .offset { IntOffset(offsetX.value.roundToInt(), 0) }
            // .background(Color.Red)
             .draggable(
@@ -202,14 +203,12 @@ fun ReboundHorizontalDrag(
                         )
                     }
                 }
-            )
+            ),
+        contentAlignment = Alignment.Center // 确保内容整体居中    
     ){
-    	BoxWithConstraints(
-    modifier = Modifier.fillMaxSize(),
-    contentAlignment = Alignment.Center // 确保内容整体居中
-) {
+    	
     // 这里拿到的 maxWidth 是该布局能占据的最大宽度
-    val halfWidth = maxWidth * 0.3f
+    val halfWidth = maxWidth * 0.4f
 
     Row(
         modifier = Modifier
@@ -251,7 +250,7 @@ fun ReboundHorizontalDrag(
         
         )
     }
-}
+
 
 		
     }
