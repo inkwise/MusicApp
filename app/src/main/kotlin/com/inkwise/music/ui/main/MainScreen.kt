@@ -83,27 +83,52 @@ fun SwipeSongSwitcher(
 }
 
 @Composable
-fun ReboundDragDemo() {
+fun ReboundHorizontalDrag(
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    playerViewModel: PlayerViewModel = hiltViewModel()
+) {
+	
+	val playQueue by playerViewModel.playQueue.collectAsState()
+    val currentIndex by playerViewModel.currentIndex.collectAsState()
     val scope = rememberCoroutineScope()
-    val offsetY = remember { Animatable(0f) }
+    val offsetX = remember { Animatable(0f) }
+
+    val triggerDistance = 120f          // 触发距离（px）
+    val triggerVelocity = 1200f          // 触发速度（px/s）
 
     Box(
         modifier = Modifier
             .size(200.dp)
-            .offset { IntOffset(0, offsetY.value.roundToInt()) }
+            .offset { IntOffset(offsetX.value.roundToInt(), 0) }
             .background(Color.Red)
             .draggable(
-                orientation = Orientation.Vertical,
+                orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->
-                    // 1:1 跟手
                     scope.launch {
-                        offsetY.snapTo(offsetY.value + delta)
+                        offsetX.snapTo(offsetX.value + delta)
                     }
                 },
                 onDragStopped = { velocity ->
-                    // 松手 → 回到原位
+                    val drag = offsetX.value
+
+                    val shouldPrev =
+                        drag > triggerDistance ||
+                        velocity > triggerVelocity
+
+                    val shouldNext =
+                        drag < -triggerDistance ||
+                        velocity < -triggerVelocity
+
+                    if (shouldPrev) {
+                        onPrev()
+                    } else if (shouldNext) {
+                        onNext()
+                    }
+
+                    // 无论如何都回中
                     scope.launch {
-                        offsetY.animateTo(
+                        offsetX.animateTo(
                             targetValue = 0f,
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -114,7 +139,9 @@ fun ReboundDragDemo() {
                     }
                 }
             )
-    )
+    ){
+    	
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
