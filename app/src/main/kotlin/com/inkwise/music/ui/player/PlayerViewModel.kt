@@ -13,12 +13,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import com.inkwise.music.data.lyrics.LyricsSynchronizer
+import com.inkwise.music.data.model.LyricHighlight
+import com.inkwise.music.data.model.Lyrics
+import com.inkwise.music.data.repository.LyricsRepository
+import kotlinx.coroutines.flow.SharingStarted
 
+import kotlinx.coroutines.flow.stateIn
 @HiltViewModel
 class PlayerViewModel
     @Inject
     constructor(
         private val repository: MusicRepository,
+        private val lyricsRepository: LyricsRepository
     ) : ViewModel() {
         val playbackState: StateFlow<PlaybackState> = MusicPlayerManager.playbackState
         val playQueue: StateFlow<List<Song>> = MusicPlayerManager.playQueue
@@ -26,7 +35,15 @@ class PlayerViewModel
 
         private val _uiState = MutableStateFlow(PlayerUiState())
         val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
-
+		
+		val currentSong: StateFlow<Song?> =
+		    combine(playQueue, currentIndex) { queue, index ->
+		        queue.getOrNull(index)
+		    }.stateIn(
+		        scope = viewModelScope,
+		        started = SharingStarted.WhileSubscribed(5_000),
+		        initialValue = null
+		    )
         // 加载本地歌曲
         fun loadLocalSongs() {
             viewModelScope.launch {
