@@ -67,7 +67,8 @@ class LocalLyricsRepository @Inject constructor(): LyricsRepository {
 	}
 }*/
 class LocalLyricsRepository @Inject constructor(
-    private val musicRepository: MusicRepository
+    private val musicRepository: MusicRepository,
+    private val application: Application
 ) : LyricsRepository {
 
     private val cache = mutableMapOf<Long, Lyrics>()
@@ -76,7 +77,7 @@ class LocalLyricsRepository @Inject constructor(
         cache[songId]?.let { return it }
 
         val song = musicRepository.getSongById(songId) ?: return null
-
+		toast("正在读取内嵌歌词")
         // 1️⃣ 内嵌歌词（逐行）
         loadEmbeddedLyrics(song)?.let {
             cache[songId] = it
@@ -123,4 +124,11 @@ class LocalLyricsRepository @Inject constructor(
             null
         }
     }
+    
+    //测试用
+    private fun toast(msg: String) {
+	    Handler(Looper.getMainLooper()).post {
+	        Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
+	    }
+	}
 }
