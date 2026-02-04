@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.map
 import com.inkwise.music.data.lyrics.LyricsSynchronizer
 import com.inkwise.music.data.model.LyricHighlight
 import com.inkwise.music.data.model.Lyrics
+import com.inkwise.music.data.model.LyricLine
+
 import com.inkwise.music.data.model.LyricsUiState
 import com.inkwise.music.data.repository.LyricsRepository
 import kotlinx.coroutines.flow.SharingStarted
@@ -72,10 +74,14 @@ class PlayerViewModel
                 _lyricsState.value = _lyricsState.value.copy(lyrics = lyrics, highlight = null)
                 */
                 val lyrics = Lyrics(
+    songId = song.id,
+    language = "zh",
+    source = LyricsSource.LOCAL,   // 按你的枚举来
+    version = 1,
     lines = listOf(
-        LyricLine(0, "第一行歌词"),
-        LyricLine(2000, "第二行歌词"),
-        LyricLine(4000, "第三行歌词"),
+        LyricsLine(timeMs = 0, text = "第一行歌词"),
+        LyricsLine(timeMs = 2000, text = "第二行歌词"),
+        LyricsLine(timeMs = 4000, text = "第三行歌词"),
     )
 )
 
