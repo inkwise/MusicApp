@@ -28,7 +28,8 @@ class LocalLyricsRepository @Inject constructor(
     	toast("loadLyrics()")
 		
         cache[songId]?.let { return it }
-
+		toast("读取仓库")
+		
         val song = musicRepository.getSongById(songId) ?: return null
 		toast("正在读取内嵌歌词")
 		
