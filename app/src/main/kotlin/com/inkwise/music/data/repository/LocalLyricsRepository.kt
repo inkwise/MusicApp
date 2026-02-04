@@ -1,7 +1,7 @@
 package com.inkwise.music.data.repository
 
 import com.inkwise.music.data.model.Lyrics
-import kotlinx.coroutines.flow.Flow
+
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
@@ -9,7 +9,7 @@ import javax.inject.Inject
 import com.inkwise.music.data.model.*
 import com.inkwise.music.data.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
@@ -66,9 +66,8 @@ class LocalLyricsRepository @Inject constructor(): LyricsRepository {
 	    }
 	}
 }*/
-
 class LocalLyricsRepository @Inject constructor(
-    private val songRepository: MusicRepository
+    private val musicRepository: MusicRepository
 ) : LyricsRepository {
 
     private val cache = mutableMapOf<Long, Lyrics>()
@@ -76,9 +75,9 @@ class LocalLyricsRepository @Inject constructor(
     override suspend fun loadLyrics(songId: Long): Lyrics? {
         cache[songId]?.let { return it }
 
-        val song = songRepository.getSong(songId) ?: return null
+        val song = musicRepository.getSongById(songId) ?: return null
 
-        // 1️⃣ 内嵌歌词（无时间戳，逐行）
+        // 1️⃣ 内嵌歌词（逐行）
         loadEmbeddedLyrics(song)?.let {
             cache[songId] = it
             return it
@@ -107,7 +106,7 @@ class LocalLyricsRepository @Inject constructor(
                 .filter { it.isNotBlank() }
                 .mapIndexed { index, line ->
                     LyricLine(
-                        timeMs = index * 5_000L, // ⚠️ 无时间戳 → 伪时间
+                        timeMs = index * 5_000L, // ⚠️ 无时间戳 → 只能逐行
                         text = line,
                         tokens = null
                     )

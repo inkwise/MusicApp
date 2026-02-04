@@ -9,7 +9,8 @@ import com.inkwise.music.data.model.Song
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-
+import kotlinx.coroutines.flow.firstOrNull
+	
 class MusicRepository
     @Inject
     constructor(
@@ -47,4 +48,8 @@ class MusicRepository
                 }
             playlistDao.insertPlaylistSongs(playlistSongs)
         }
+    
+		suspend fun getSongById(songId: Long): Song? {
+		    return songDao.getSongById(songId)
+		}
     }
