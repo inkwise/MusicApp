@@ -20,6 +20,7 @@ import com.inkwise.music.data.model.LyricHighlight
 import com.inkwise.music.data.model.Lyrics
 import com.inkwise.music.data.model.LyricLine
 
+import com.inkwise.music.data.model.LyricsSource
 import com.inkwise.music.data.model.LyricsUiState
 import com.inkwise.music.data.repository.LyricsRepository
 import kotlinx.coroutines.flow.SharingStarted
@@ -79,9 +80,9 @@ class PlayerViewModel
     source = LyricsSource.LOCAL,   // 按你的枚举来
     version = 1,
     lines = listOf(
-        LyricsLine(timeMs = 0, text = "第一行歌词"),
-        LyricsLine(timeMs = 2000, text = "第二行歌词"),
-        LyricsLine(timeMs = 4000, text = "第三行歌词"),
+        LyricLine(timeMs = 0, text = "第一行歌词"),
+        LyricLine(timeMs = 2000, text = "第二行歌词"),
+        LyricLine(timeMs = 4000, text = "第三行歌词"),
     )
 )
 
