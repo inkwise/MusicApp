@@ -67,9 +67,20 @@ class PlayerViewModel
                 }
 
                 // 加载歌词
-                val lyrics = lyricsRepository.loadLyrics(song.id)
+             /*   val lyrics = lyricsRepository.loadLyrics(song.id)
                 synchronizer = lyrics?.let { LyricsSynchronizer(it) }
                 _lyricsState.value = _lyricsState.value.copy(lyrics = lyrics, highlight = null)
+                */
+                val lyrics = Lyrics(
+    lines = listOf(
+        LyricLine(0, "第一行歌词"),
+        LyricLine(2000, "第二行歌词"),
+        LyricLine(4000, "第三行歌词"),
+    )
+)
+
+synchronizer = LyricsSynchronizer(lyrics)
+_lyricsState.value = LyricsUiState(lyrics = lyrics)
             }
         }
     }
