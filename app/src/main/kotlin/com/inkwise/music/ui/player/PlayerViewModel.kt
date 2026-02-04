@@ -78,7 +78,7 @@ class PlayerViewModel
         viewModelScope.launch {
             playbackState.collect { state ->
                 val sync = synchronizer ?: return@collect
-                val highlight = sync.findHighlight(state.currentPosition)
+                val highlight = sync.findHighlight(state.currentPosition) // ✅ Long 类型
                 _lyricsState.value = _lyricsState.value.copy(highlight = highlight)
             }
         }

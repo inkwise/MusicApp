@@ -5,13 +5,12 @@ import com.inkwise.music.data.model.LyricLine
 import com.inkwise.music.data.model.LyricToken
 import com.inkwise.music.data.model.Lyrics
 
-class LyricsSynchronizer {
-
+class LyricsSynchronizer(private val lyrics: Lyrics) {
+	private val lines = lyrics.lines
+	
     fun findHighlight(
-        lyrics: Lyrics,
         positionMs: Long
     ): LyricHighlight? {
-        val lines = lyrics.lines
         if (lines.isEmpty()) return null
 
         val lineIndex = findLineIndex(lines, positionMs)
