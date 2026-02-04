@@ -101,6 +101,9 @@ fun LyricsView(viewModel: PlayerViewModel) {
                 color = if (isLineHighlighted) Color.Cyan else Color.White
             )
         }
+        Text(
+                text ="啥也没有" ,
+            )
     }
 }
 
