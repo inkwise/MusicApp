@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import com.inkwise.music.data.lyrics.LyricsSynchronizer
 import com.inkwise.music.data.model.LyricHighlight
 import com.inkwise.music.data.model.Lyrics
+import com.inkwise.music.data.model.LyricsUiState
 import com.inkwise.music.data.repository.LyricsRepository
 import kotlinx.coroutines.flow.SharingStarted
 
@@ -44,6 +45,48 @@ class PlayerViewModel
 		        started = SharingStarted.WhileSubscribed(5_000),
 		        initialValue = null
 		    )
+		//歌词
+		private val synchronizer = LyricsSynchronizer()	
+	    private val _lyricsState = MutableStateFlow(LyricsUiState())
+	    val lyricsState: StateFlow<LyricsUiState> = _lyricsState
+	    
+	    init {
+		    // 切歌时加载歌词
+		    viewModelScope.launch {
+		        currentSong.collect { song ->
+		            if (song == null) {
+		                _lyricsState.value = LyricsUiState()
+		                return@collect
+		            }
+		
+		            val lyrics = lyricsRepository.loadLyrics(song.id)
+		
+		            _lyricsState.value = LyricsUiState(
+		                lyrics = lyrics,
+		                highlight = null
+		            )
+		        }
+		    }
+		    
+		    // 同步歌词高亮
+		    viewModelScope.launch {
+		        playbackState
+		            .map { it.currentPosition }
+		            .collect { positionMs ->
+		                val lyrics = _lyricsState.value.lyrics ?: return@collect
+		
+		                val highlight = synchronizer.findHighlight(
+		                    lyrics = lyrics,
+		                    positionMs = positionMs
+		                )
+		
+		                _lyricsState.value = _lyricsState.value.copy(
+		                    highlight = highlight
+		                )
+		            }
+		    }
+		}
+	                
         // 加载本地歌曲
         fun loadLocalSongs() {
             viewModelScope.launch {
