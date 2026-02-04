@@ -1050,10 +1050,15 @@ fun BottomDrawerContent(
                                     .padding(16.dp),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                "歌词页面（占位）",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            val lyricsState by playerViewModel.lyricsState.collectAsState()
+
+		lyricsState.lyrics?.lines?.forEachIndexed { index, line ->
+		    val active = index == lyricsState.highlight?.lineIndex
+		    Text(
+		        text = line.text,
+		        color = if (active) Color.White else Color.Gray
+		    )
+		}
                         }
                     }
                 }
