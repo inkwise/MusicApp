@@ -77,7 +77,7 @@ class PlayerViewModel
                 val lyrics = Lyrics(
     songId = song.id,
     language = "zh",
-    source = LyricsSource.LOCAL,   // 按你的枚举来
+    source = LyricsSource.EMBEDDED,   // 按你的枚举来
     version = 1,
     lines = listOf(
         LyricLine(timeMs = 0, text = "第一行歌词"),
