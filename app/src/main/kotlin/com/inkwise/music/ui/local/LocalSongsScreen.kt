@@ -33,8 +33,8 @@ fun LocalSongsScreen(
 
     // 首次加载
     LaunchedEffect(Unit) {
-        localViewModel.loadLocalSongsFromStore()
-        localViewModel.scanSongs(context)
+        //localViewModel.loadLocalSongsFromStore()
+      //  localViewModel.scanSongs(context)
     }
 
     Column(
