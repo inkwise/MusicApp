@@ -37,55 +37,52 @@ class PlayerViewModel
         private val _uiState = MutableStateFlow(PlayerUiState())
         val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
 		
-		val currentSong: StateFlow<Song?> =
-		    combine(playQueue, currentIndex) { queue, index ->
-		        queue.getOrNull(index)
-		    }.stateIn(
-		        scope = viewModelScope,
-		        started = SharingStarted.WhileSubscribed(5_000),
-		        initialValue = null
-		    )
 		//歌词
-		private val synchronizer = LyricsSynchronizer()	
+		 
 	    private val _lyricsState = MutableStateFlow(LyricsUiState())
-	    val lyricsState: StateFlow<LyricsUiState> = _lyricsState
+	    val lyricsState: StateFlow<LyricsUiState> = _lyricsState.asStateFlow()
+	    private var synchronizer: LyricsSynchronizer? = null
+	
+	    // 当前歌曲对象
+	    val currentSong: StateFlow<Song?> = combine(playQueue, currentIndex) { queue, index ->
+	        queue.getOrNull(index)
+	    }.stateIn(
+	        scope = viewModelScope,
+	        started = SharingStarted.WhileSubscribed(5_000),
+	        initialValue = null
+	    )
 	    
 	    init {
-		    // 切歌时加载歌词
-		    viewModelScope.launch {
-		        currentSong.collect { song ->
-		            if (song == null) {
-		                _lyricsState.value = LyricsUiState()
-		                return@collect
-		            }
-		
-		            val lyrics = lyricsRepository.loadLyrics(song.id)
-		
-		            _lyricsState.value = LyricsUiState(
-		                lyrics = lyrics,
-		                highlight = null
-		            )
-		        }
-		    }
-		    
-		    // 同步歌词高亮
-		    viewModelScope.launch {
-		        playbackState
-		            .map { it.currentPosition }
-		            .collect { positionMs ->
-		                val lyrics = _lyricsState.value.lyrics ?: return@collect
-		
-		                val highlight = synchronizer.findHighlight(
-		                    lyrics = lyrics,
-		                    positionMs = positionMs
-		                )
-		
-		                _lyricsState.value = _lyricsState.value.copy(
-		                    highlight = highlight
-		                )
-		            }
-		    }
-		}
+        observeCurrentSong()
+        observePlayback()
+    }
+
+    private fun observeCurrentSong() {
+        viewModelScope.launch {
+            currentSong.collect { song ->
+                if (song == null) {
+                    _lyricsState.value = LyricsUiState()
+                    synchronizer = null
+                    return@collect
+                }
+
+                // 加载歌词
+                val lyrics = lyricsRepository.loadLyrics(song.id)
+                synchronizer = lyrics?.let { LyricsSynchronizer(it) }
+                _lyricsState.value = _lyricsState.value.copy(lyrics = lyrics, highlight = null)
+            }
+        }
+    }
+
+    private fun observePlayback() {
+        viewModelScope.launch {
+            playbackState.collect { state ->
+                val sync = synchronizer ?: return@collect
+                val highlight = sync.findHighlight(state.currentPosition)
+                _lyricsState.value = _lyricsState.value.copy(highlight = highlight)
+            }
+        }
+    }
 	                
         // 加载本地歌曲
         fun loadLocalSongs() {
