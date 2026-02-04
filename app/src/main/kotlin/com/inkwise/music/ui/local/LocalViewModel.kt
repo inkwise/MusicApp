@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+class LocalViewModel @Inject constructor(
+    private val musicRepository: MusicRepository
+) : ViewModel() {
 
-class LocalViewModel : ViewModel() {
     private val _localSongs = MutableStateFlow<List<Song>>(emptyList())
     val localSongs: StateFlow<List<Song>> = _localSongs.asStateFlow()
 

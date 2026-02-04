@@ -26,6 +26,23 @@ class MusicRepository
 
         fun getAllPlaylists(): Flow<List<PlaylistWithSongs>> = playlistDao.getAllPlaylistsWithSongs()
 
+
+		suspend fun saveScannedSongs(scanned: List<Song>) {
+	        // 只插入数据库里不存在的
+	        val newSongs = mutableListOf<Song>()
+	
+	        for (song in scanned) {
+	            val exist = songDao.getSongByPath(song.path)
+	            if (exist == null) {
+	                newSongs += song
+	            }
+	        }
+	
+	        if (newSongs.isNotEmpty()) {
+	            songDao.insertSongs(newSongs)
+	        }
+	    }
+	
         suspend fun insertSongs(songs: List<Song>) {
             songDao.insertSongs(songs)
         }
