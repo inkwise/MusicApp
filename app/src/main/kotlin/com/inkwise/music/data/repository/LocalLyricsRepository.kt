@@ -3,8 +3,9 @@ package com.inkwise.music.data.repository
 import com.inkwise.music.data.model.Lyrics
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class LocalLyricsRepository : LyricsRepository {
+class LocalLyricsRepository @Inject constructor(): LyricsRepository {
 
     private val cache = mutableMapOf<Long, Lyrics>()
 
