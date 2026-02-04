@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+
 class LocalViewModel @Inject constructor(
     private val musicRepository: MusicRepository
 ) : ViewModel() {
@@ -94,6 +97,7 @@ class LocalViewModel @Inject constructor(
 
                 _localSongs.value = songs
                 // TODO: 保存到 Room/Repository 持久化
+                musicRepository.saveScannedSongs(songs)
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

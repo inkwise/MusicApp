@@ -34,6 +34,6 @@ interface SongDao {
     @Query("DELETE FROM songs")
     suspend fun clearSongs()
     
-    @Query("SELECT * FROM song WHERE path = :path LIMIT 1")
+    @Query("SELECT * FROM songs WHERE path = :path LIMIT 1")
     suspend fun getSongByPath(path: String): Song?
 }
