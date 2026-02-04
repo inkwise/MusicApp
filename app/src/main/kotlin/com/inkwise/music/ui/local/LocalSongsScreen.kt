@@ -19,12 +19,12 @@ import androidx.compose.foundation.clickable
 import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-
+import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun LocalSongsScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     mainViewModel: com.inkwise.music.ui.main.MainViewModel = hiltViewModel(),
-    localViewModel: LocalViewModel = viewModel(),
+    localViewModel: LocalViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val playbackState by playerViewModel.playbackState.collectAsState()

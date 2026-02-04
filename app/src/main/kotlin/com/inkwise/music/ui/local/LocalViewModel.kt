@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.inkwise.music.data.repository.MusicRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 
+@HiltViewModel
 class LocalViewModel @Inject constructor(
     private val musicRepository: MusicRepository
 ) : ViewModel() {
