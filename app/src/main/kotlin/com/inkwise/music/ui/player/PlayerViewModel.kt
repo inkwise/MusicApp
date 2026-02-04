@@ -83,11 +83,11 @@ class PlayerViewModel
         LyricLine(timeMs = 0, text = "第一行歌词"),
         LyricLine(timeMs = 2000, text = "第二行歌词"),
         LyricLine(timeMs = 4000, text = "第三行歌词"),
-    )*/
+    )
 )
 
 synchronizer = LyricsSynchronizer(lyrics)
-_lyricsState.value = LyricsUiState(lyrics = lyrics)
+_lyricsState.value = LyricsUiState(lyrics = lyrics)*/
             }
         }
     }
