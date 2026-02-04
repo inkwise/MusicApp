@@ -1,7 +1,6 @@
 package com.inkwise.music
-import android.app.Application
-import com.inkwise.music.player.MusicPlayerManager
 import android.app.Activity
+import android.app.Application
 import android.content.*
 import android.content.pm.PackageInfo
 import android.content.res.Resources
@@ -15,14 +14,15 @@ import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import android.widget.ScrollView
 import android.widget.TextView
+import com.inkwise.music.player.MusicPlayerManager
+import dagger.hilt.android.HiltAndroidApp
 import java.io.*
 import java.lang.Thread.UncaughtExceptionHandler
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import dagger.hilt.android.HiltAndroidApp
 
-@HiltAndroidApp 
+@HiltAndroidApp
 class MusicApp : Application() {
     override fun onCreate() {
         super.onCreate()

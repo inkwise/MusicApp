@@ -7,11 +7,11 @@ data class PlaybackState(
     val duration: Long = 0L,
     val playbackSpeed: Float = 1f,
     val repeatMode: RepeatMode = RepeatMode.OFF,
-    val shuffleMode: Boolean = false
+    val shuffleMode: Boolean = false,
 )
 
 enum class RepeatMode {
-    OFF,      // 不循环
-    ONE,      // 单曲循环
-    ALL       // 列表循环
+    OFF, // 不循环
+    ONE, // 单曲循环
+    ALL, // 列表循环
 }

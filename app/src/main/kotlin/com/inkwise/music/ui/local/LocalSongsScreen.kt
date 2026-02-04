@@ -19,11 +19,12 @@ import androidx.compose.foundation.clickable
 import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+
 @Composable
 fun LocalSongsScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     mainViewModel: com.inkwise.music.ui.main.MainViewModel = hiltViewModel(),
-    localViewModel: LocalViewModel = viewModel()
+    localViewModel: LocalViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val playbackState by playerViewModel.playbackState.collectAsState()
@@ -37,25 +38,28 @@ fun LocalSongsScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { localViewModel.scanSongs(context) }, // 点击标题扫描
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { localViewModel.scanSongs(context) },
+            // 点击标题扫描
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "扫描",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
             )
 
             if (songs.isNotEmpty()) {
                 FilledTonalButton(
-                    onClick = { playerViewModel.playSongs(songs) }
+                    onClick = { playerViewModel.playSongs(songs) },
                 ) {
                     Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
@@ -70,12 +74,12 @@ fun LocalSongsScreen(
         PullToRefreshBox(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
@@ -86,7 +90,7 @@ fun LocalSongsScreen(
                             song = song,
                             isPlaying = playbackState.currentSong?.localId == song.localId,
                             onClick = { playerViewModel.playSongs(songs, index) },
-                            onMoreClick = { /* 更多操作 */ }
+                            onMoreClick = { /* 更多操作 */ },
                         )
                     }
                 }

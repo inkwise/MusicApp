@@ -1,9 +1,9 @@
 package com.inkwise.music.data.model
 
-import androidx.room.Entity 
-import androidx.room.PrimaryKey
+import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "playlists")
 data class PlaylistEntity(
@@ -11,5 +11,5 @@ data class PlaylistEntity(
     val id: Long = 0,
     val title: String,
     val description: String,
-    val coverUri: String?
+    val coverUri: String?,
 )

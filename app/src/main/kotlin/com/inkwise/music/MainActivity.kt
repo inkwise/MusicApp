@@ -1,6 +1,6 @@
 package com.inkwise.music
 
-import dagger.hilt.android.AndroidEntryPoint   // ← 這一行最關鍵！
+import dagger.hilt.android.AndroidEntryPoint // ← 這一行最關鍵！
 import android.os.Environment
 import android.content.Context
 import android.content.Intent
@@ -29,7 +29,6 @@ import com.inkwise.music.ui.theme.ComposeEmptyActivityTheme
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 
 import androidx.compose.ui.platform.LocalContext
 
@@ -65,21 +64,22 @@ class MainActivity : ComponentActivity() {
             ComposeEmptyActivityTheme {
                 val configuration = LocalConfiguration.current
                 val density = LocalDensity.current
-        
-                val dimens = remember(configuration, density) {
-                    with(density) {
-                        val sheetPeekHeightDp = 80.dp
-                        // 示例：测试用 px 宽度（比如 100dp 转 px）
-                        val testWidthPx = 100.dp.toPx().toInt()
-                        AppDimens(
-                            sheetPeekHeightDp = sheetPeekHeightDp,
-                            testWidthPx = testWidthPx
-                        )
+
+                val dimens =
+                    remember(configuration, density) {
+                        with(density) {
+                            val sheetPeekHeightDp = 80.dp
+                            // 示例：测试用 px 宽度（比如 100dp 转 px）
+                            val testWidthPx = 100.dp.toPx().toInt()
+                            AppDimens(
+                                sheetPeekHeightDp = sheetPeekHeightDp,
+                                testWidthPx = testWidthPx,
+                            )
+                        }
                     }
-                }
-        
+
                 CompositionLocalProvider(
-                    LocalAppDimens provides dimens
+                    LocalAppDimens provides dimens,
                 ) {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         AllFilesPermissionScreen()
@@ -90,14 +90,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun hasAllFilesPermission(): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+fun hasAllFilesPermission(): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         Environment.isExternalStorageManager()
     } else {
         true
     }
-}
-
 
 fun requestAllFilesPermission(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -128,17 +126,15 @@ fun AllFilesPermissionScreen() {
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {*/
-        
 
-
-        if (!granted) {
-            Button(onClick = {
-                requestAllFilesPermission(context)
-            }) {
-                Text("前往系统设置开启")
-            }
-        }else{
-            MainScreen()
+    if (!granted) {
+        Button(onClick = {
+            requestAllFilesPermission(context)
+        }) {
+            Text("前往系统设置开启")
         }
-    //}
+    } else {
+        MainScreen()
+    }
+    // }
 }

@@ -17,7 +17,7 @@ interface PlaylistDao {
     @Transaction
     @Query("SELECT * FROM playlists WHERE id = :id")
     suspend fun getPlaylist(id: Long): PlaylistWithSongs
-    
+
     @Insert
     suspend fun insert(playlist: PlaylistEntity)
 }*/
@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlaylistDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylist(playlist: PlaylistEntity)
 
@@ -45,7 +44,7 @@ interface PlaylistDao {
     @Transaction
     @Query("SELECT * FROM playlists")
     fun getAllPlaylistsWithSongs(): Flow<List<PlaylistWithSongs>>
-    
+
     @Insert
     suspend fun insert(playlist: PlaylistEntity)
 }

@@ -12,18 +12,18 @@ import androidx.room.Index
             entity = PlaylistEntity::class,
             parentColumns = ["id"],
             childColumns = ["playlistId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE,
         ),
         ForeignKey(
             entity = Song::class,
             parentColumns = ["id"],
             childColumns = ["songId"],
-            onDelete = ForeignKey.CASCADE
-        )
+            onDelete = ForeignKey.CASCADE,
+        ),
     ],
-    indices = [Index("playlistId"), Index("songId")]
+    indices = [Index("playlistId"), Index("songId")],
 )
 data class PlaylistSongEntity(
     val playlistId: Long,
-    val songId: Long
+    val songId: Long,
 )

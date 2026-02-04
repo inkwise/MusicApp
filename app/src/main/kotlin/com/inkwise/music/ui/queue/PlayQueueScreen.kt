@@ -17,72 +17,68 @@ import com.inkwise.music.ui.player.PlayerViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayQueueBottomSheet(
-    onDismiss: () -> Unit,
-    playerViewModel: PlayerViewModel
+    playerViewModel: PlayerViewModel,
 ) {
     val playQueue by playerViewModel.playQueue.collectAsState()
     val currentIndex by playerViewModel.currentIndex.collectAsState()
     val playbackState by playerViewModel.playbackState.collectAsState()
-    
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ) {
-        Column(
-            modifier = Modifier
+
+    Column(
+        modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp)
-        ) {
-            // 标题栏
-            Row(
-                modifier = Modifier
+                .padding(bottom = 32.dp),
+    ) {
+        // 标题栏
+        Row(
+            modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "播放队列",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                
-                Row {
-                    // 清空队列
-                    TextButton(onClick = { /* 清空队列 */ }) {
-                        Text("清空")
-                    }
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "播放队列",
+                style = MaterialTheme.typography.titleLarge,
+            )
+
+            Row {
+                // 清空队列
+                TextButton(onClick = { /* 清空队列*/ }) {
+                    Text("清空")
                 }
             }
-            
-            Text(
-                text = "${playQueue.size} 首歌曲",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            
-            Divider()
-            
-            // 播放队列列表
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                itemsIndexed(playQueue) { index, song ->
-                    val isCurrentSong = index == currentIndex
-                    
-                    QueueItem(
-                        song = song,
-                        isPlaying = isCurrentSong && playbackState.isPlaying,
-                        isCurrent = isCurrentSong,
-                        onClick = {
-                            playerViewModel.skipToIndex(index)
-                        },
-                        onRemove = {
-                            playerViewModel.removeFromQueue(index)
-                        }
-                    )
-                }
+        }
+
+        Text(
+            text = "${playQueue.size} 首歌曲",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+
+        Divider()
+
+        // 播放队列列表
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            itemsIndexed(playQueue) { index, song ->
+                val isCurrentSong = index == currentIndex
+
+                QueueItem(
+                    song = song,
+                    isPlaying = isCurrentSong && playbackState.isPlaying,
+                    isCurrent = isCurrentSong,
+                    onClick = {
+                        playerViewModel.skipToIndex(index)
+                    },
+                    onRemove = {
+                        playerViewModel.removeFromQueue(index)
+                    },
+                )
             }
         }
     }
@@ -94,65 +90,67 @@ fun QueueItem(
     isPlaying: Boolean,
     isCurrent: Boolean,
     onClick: () -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // 播放指示器或序号
         Box(
             modifier = Modifier.width(32.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             if (isPlaying) {
                 Icon(
                     Icons.Default.GraphicEq,
                     contentDescription = "正在播放",
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             } else if (isCurrent) {
                 Icon(
                     Icons.Default.PlayArrow,
                     contentDescription = "当前歌曲",
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
-        
+
         // 歌曲信息
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
             Text(
                 text = song.title,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
-                color = if (isCurrent) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
+                color =
+                    if (isCurrent) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
             )
             Text(
                 text = song.artist,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                maxLines = 1,
             )
         }
-        
+
         // 移除按钮
         IconButton(onClick = onRemove) {
             Icon(
                 Icons.Default.Close,
                 contentDescription = "移除",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

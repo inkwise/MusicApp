@@ -5,9 +5,10 @@ import androidx.compose.ui.unit.Dp
 
 data class AppDimens(
     val sheetPeekHeightDp: Dp,
-    val testWidthPx: Int
+    val testWidthPx: Int,
 )
 
-val LocalAppDimens = staticCompositionLocalOf<AppDimens> {
-    error("No AppDimens provided")
-}
+val LocalAppDimens =
+    staticCompositionLocalOf<AppDimens> {
+        error("No AppDimens provided")
+    }
