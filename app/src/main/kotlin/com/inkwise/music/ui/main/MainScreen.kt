@@ -87,6 +87,27 @@ import com.inkwise.music.ui.player.PlayerViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 
 @Composable
+fun LyricsView(viewModel: PlayerViewModel) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+
+    val lyrics = lyricsState.lyrics?.lines ?: emptyList()
+    val highlight = lyricsState.highlight
+
+    Column {
+        lyrics.forEachIndexed { index, line ->
+            val isLineHighlighted = highlight?.lineIndex == index
+            Text(
+                text = line.text,
+                color = if (isLineHighlighted) Color.Cyan else Color.White
+            )
+        }
+    }
+}
+
+
+
+
+@Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,
     onNext: () -> Unit,
@@ -1050,15 +1071,7 @@ fun BottomDrawerContent(
                                     .padding(16.dp),
                             contentAlignment = Alignment.Center,
                         ) {
-                            val lyricsState by playerViewModel.lyricsState.collectAsState()
-
-		lyricsState.lyrics?.lines?.forEachIndexed { index, line ->
-		    val active = index == lyricsState.highlight?.lineIndex
-		    Text(
-		        text = line.text,
-		        color = if (active) Color.White else Color.Gray
-		    )
-		}
+                            LyricsView(playerViewModel)
                         }
                     }
                 }
