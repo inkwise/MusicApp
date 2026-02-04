@@ -68,7 +68,7 @@ class LocalLyricsRepository @Inject constructor(): LyricsRepository {
 }*/
 
 class LocalLyricsRepository @Inject constructor(
-    private val songRepository: SongRepository
+    private val songRepository: MusicRepository
 ) : LyricsRepository {
 
     private val cache = mutableMapOf<Long, Lyrics>()
