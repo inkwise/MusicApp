@@ -24,11 +24,17 @@ class LocalViewModel @Inject constructor(
     private val _isScanning = MutableStateFlow(false)
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
-    /** 从持久化/缓存加载歌曲（如果有） */
-    fun loadLocalSongsFromStore() {
-        // TODO: 如果有 Room/Repository, 在这里加载历史数据
-    }
-
+    init {
+	    observeLocalSongs()
+	}
+	
+	private fun observeLocalSongs() {
+	    viewModelScope.launch {
+	        musicRepository.getLocalSongs().collect { songs ->
+	            _localSongs.value = songs
+	        }
+	    }
+	}
     /** 扫描本地音乐并更新 _localSongs */
     fun scanSongs(context: Context) {
         if (_isScanning.value) return
