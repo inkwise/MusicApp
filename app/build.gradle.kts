@@ -69,8 +69,8 @@ android {
         	//签名
         	signingConfig = signingConfigs.getByName("release")
             // 关闭代码混淆/压缩
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
