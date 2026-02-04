@@ -5,7 +5,7 @@ import com.inkwise.music.data.model.Lyrics
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.inkwise.music.data.model.*
 import com.inkwise.music.data.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
@@ -68,7 +68,7 @@ class LocalLyricsRepository @Inject constructor(): LyricsRepository {
 }*/
 class LocalLyricsRepository @Inject constructor(
     private val musicRepository: MusicRepository,
-    private val application: Application
+    @ApplicationContext private val context: Context
 ) : LyricsRepository {
 
     private val cache = mutableMapOf<Long, Lyrics>()
@@ -128,7 +128,7 @@ class LocalLyricsRepository @Inject constructor(
     //测试用
     private fun toast(msg: String) {
 	    Handler(Looper.getMainLooper()).post {
-	        Toast.makeText(application, msg, Toast.LENGTH_SHORT).show()
+	        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 	    }
 	}
 }
