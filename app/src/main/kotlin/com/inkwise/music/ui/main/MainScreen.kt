@@ -167,42 +167,32 @@ fun LyricsView(
         } finally {
             isProgrammaticScroll = false
         }*/
-        val layoutInfo = listState.layoutInfo
-val visibleItem = layoutInfo.visibleItemsInfo
-    .firstOrNull { it.index == index }
+ 		val layoutInfo = listState.layoutInfo
+val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
 
-if (visibleItem != null) {
+// 计算目标偏移量（修正公式）
+val targetOffset = if (visibleItem != null) {
     val viewportCenter = layoutInfo.viewportSize.height / 2
     val itemCenter = visibleItem.offset + visibleItem.size / 2
-    val delta = itemCenter - viewportCenter
-
-    isProgrammaticScroll = true
-    try {
-        listState.animateScrollBy(
-            value = delta.toFloat(),
-            animationSpec = tween(
-                durationMillis = 850,
-                easing = FastOutSlowInEasing
-            )
-        )
-    } finally {
-        isProgrammaticScroll = false
-    }
+    itemCenter - viewportCenter
 } else {
-    // item 不可见时，退回官方实现（非常重要）
-    isProgrammaticScroll = true
-    try {
-        listState.animateScrollToItem(
-            index = index,
-            scrollOffset = -layoutInfo.viewportSize.height / 2,
-            animationSpec = tween(
-                durationMillis = 850,
-                easing = FastOutSlowInEasing
-            )
+    null
+}
+
+isProgrammaticScroll = true
+try {
+    if (targetOffset != null) {
+        listState.animateScrollBy(
+            value = targetOffset.toFloat()
         )
-    } finally {
-        isProgrammaticScroll = false
+    } else {
+        listState.animateScrollToItem(
+            index,
+            -layoutInfo.viewportSize.height / 2
+        )
     }
+} finally {
+    isProgrammaticScroll = false
 }
         
 		
