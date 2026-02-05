@@ -95,6 +95,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 
 import androidx.compose.foundation.lazy.rememberLazyListState
 
+
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
@@ -107,67 +108,88 @@ fun LyricsView(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     
-    // 核心状态：用户是否正在操作（包含滑动中和松手后的 2 秒观察期）
-    var isUserInteracting by remember { mutableStateOf(false) }
-
+    var userScrolling by remember { mutableStateOf(false) }
+    var isProgrammaticScroll by remember { mutableStateOf(false) }
+    
     /* ------------------------------------------------ */
-    /* 1. 监听滚动状态：处理用户手动干预的逻辑 */
+    /* 监听用户手动滚动                                    */
     /* ------------------------------------------------ */
-    LaunchedEffect(listState.isScrollInProgress) {
-        if (listState.isScrollInProgress) {
-            // 用户手指正在滑动
-            isUserInteracting = true
-        } else {
-            // 用户松开手指，等待 2 秒后恢复自动滚动
-            // 如果在这 2 秒内再次滑动，此协程会被 LaunchedEffect 重启，重新计时
-            delay(2000)
-            isUserInteracting = false
-        }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (scrolling && !isProgrammaticScroll) {
+                    // 真实的用户滚动
+                    userScrolling = true
+                }
+            }
     }
-
+    
     /* ------------------------------------------------ */
-    /* 2. 自动回中：由高亮行变化或用户交互状态结束触发 */
+    /* 用户停止滚动 2 秒后，恢复自动回中                      */
     /* ------------------------------------------------ */
-    LaunchedEffect(highlight?.lineIndex, isUserInteracting) {
-        val index = highlight?.lineIndex ?: return@LaunchedEffect
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (!scrolling && userScrolling && !isProgrammaticScroll) {
+                    // 用户停止滚动，等待 2 秒
+                    delay(2_000)
+                    userScrolling = false
+                }
+            }
+    }
+    
+    /* ------------------------------------------------ */
+    /* 自动回中（只由高亮行变化触发）                        */
+    /* ------------------------------------------------ */
+    LaunchedEffect(highlight?.lineIndex) {
+        if (highlight == null) return@LaunchedEffect
+        if (userScrolling) return@LaunchedEffect
         
-        // 只有当用户没有在干预，且索引合法时才触发动画
-        if (!isUserInteracting && index in lyrics.indices) {
+        val index = highlight.lineIndex
+        if (index !in lyrics.indices) return@LaunchedEffect
+        
+        isProgrammaticScroll = true
+        try {
             listState.animateScrollToItem(
                 index = index,
-                // 将目标项滚动到屏幕约 1/2 的位置
                 scrollOffset = -listState.layoutInfo.viewportSize.height / 2
             )
+        } finally {
+            isProgrammaticScroll = false
         }
     }
-
+    
     /* ------------------------------------------------ */
-    /* 3. UI 布局 */
+    /* UI                                               */
     /* ------------------------------------------------ */
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        state = listState,
-        // 添加内边距让第一行和最后一行也能滚动到中心
-        contentPadding = PaddingValues(vertical = 200.dp) 
+        state = listState
     ) {
         itemsIndexed(lyrics) { index, line ->
             val isHighlighted = highlight?.lineIndex == index
-            
             Text(
                 text = line.text,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .clickable {
-                        // 手动点击跳转
                         viewModel.seekTo(line.timeMs)
-                        // 点击后立即关闭用户交互模式，触发对齐
-                        isUserInteracting = false 
+                        scope.launch {
+                            isProgrammaticScroll = true
+                            try {
+                                listState.animateScrollToItem(
+                                    index,
+                                    scrollOffset = -listState.layoutInfo.viewportSize.height / 2
+                                )
+                            } finally {
+                                isProgrammaticScroll = false
+                            }
+                        }
                     },
-                color = if (isHighlighted) Color.Cyan else Color.White.copy(alpha = 0.6f),
-                fontSize = if (isHighlighted) 20.sp else 16.sp,
-                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
-                lineHeight = 28.sp
+                color = if (isHighlighted) Color.Cyan else Color.White,
+                fontSize = if (isHighlighted) 18.sp else 15.sp,
+                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
             )
         }
     }
