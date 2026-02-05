@@ -539,7 +539,7 @@ fun playerScreen(
                 .fillMaxSize(),
         factory = { context ->
             ImageView(context).apply {
-                scaleType = ImageView.ScaleType.CENTER_CROP,
+                scaleType = ImageView.ScaleType.CENTER_CROP
                 rotation = 180f
             }
         },
