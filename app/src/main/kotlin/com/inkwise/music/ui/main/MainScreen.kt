@@ -548,8 +548,8 @@ fun playerScreen(
                     .load(coverUri)
                     .transform(
                         jp.wasabeef.glide.transformations.BlurTransformation(
-                            80,   // radius
-                            25     // sampling（越大越省性能）
+                            60,   // radius
+                            50     // sampling（越大越省性能）
                         )
                     )
                     .into(imageView)
@@ -564,7 +564,7 @@ fun playerScreen(
 		    modifier = Modifier
 		        .fillMaxSize()
 		        .blur(20.dp)
-		        .background(Color.White.copy(alpha = 0.25f))
+		        .background(Color.White.copy(alpha = 0.1f))
 		)
         // 你原本的播放器内容（盖在上面）
         Box(
