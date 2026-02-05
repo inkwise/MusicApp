@@ -179,12 +179,12 @@ fun LyricsView(
             val isHighlighted = highlight?.lineIndex == index
 
             val animatedFontSize by animateFloatAsState(
-                targetValue = if (isHighlighted) 20f else 15f,
+                targetValue = if (isHighlighted) 30f else 20f,
                 label = "lyrics_font_size"
             )
 
             val animatedAlpha by animateFloatAsState(
-                targetValue = if (isHighlighted) 1f else 0.6f,
+                targetValue = if (isHighlighted) 0.9f else 0.5f,
                 label = "lyrics_alpha"
             )
 
@@ -204,7 +204,7 @@ fun LyricsView(
                             }
                         }
                     },
-                color = Color.Cyan.copy(alpha = animatedAlpha),
+                color = Color.Balck.copy(alpha = animatedAlpha),
                 fontSize = animatedFontSize.sp,
                 fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
             )
@@ -458,7 +458,6 @@ fun ReboundHorizontalDrag(
                 song = playQueue.getOrNull(currentIndex - 1),
                 // enabled = currentIndex > 0,
                 modifier = itemModifier,
-                backgroundColor = Color.Green,
                 alignRight = true,
                 isVisible = isVisible,
             )
@@ -469,7 +468,6 @@ fun ReboundHorizontalDrag(
                 song = playQueue.getOrNull(currentIndex),
                 //    enabled = true,
                 modifier = itemModifier,
-                backgroundColor = Color.Red,
                 alignRight = false,
                 isVisible = true,
             )
@@ -480,7 +478,6 @@ fun ReboundHorizontalDrag(
                 song = playQueue.getOrNull(currentIndex + 1),
                 //    enabled = currentIndex < playQueue.lastIndex,
                 modifier = itemModifier,
-                backgroundColor = Color.Blue,
                 alignRight = false,
                 isVisible = isVisible2,
             )
@@ -493,7 +490,6 @@ fun SongPage(
     text: String,
     modifier: Modifier,
     song: Song?,
-    backgroundColor: Color,
     alignRight: Boolean = false,
     isVisible: Boolean,
 ) {
