@@ -1,5 +1,5 @@
 package com.inkwise.music.ui.main
-
+import jp.wasabeef.glide.transformations.BlurTransformation
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
