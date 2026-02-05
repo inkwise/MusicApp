@@ -539,7 +539,8 @@ fun playerScreen(
                 .fillMaxSize(),
         factory = { context ->
             ImageView(context).apply {
-                scaleType = ImageView.ScaleType.CENTER_CROP
+                scaleType = ImageView.ScaleType.CENTER_CROP,
+                rotation = 180f
             }
         },
         update = { imageView ->
@@ -548,8 +549,8 @@ fun playerScreen(
                     .load(coverUri)
                     .transform(
                         jp.wasabeef.glide.transformations.BlurTransformation(
-                            60,   // radius
-                            50     // sampling（越大越省性能）
+                            40,   // radius
+                            20     // sampling（越大越省性能）
                         )
                     )
                     .into(imageView)
@@ -563,7 +564,7 @@ fun playerScreen(
     	Box(
 		    modifier = Modifier
 		        .fillMaxSize()
-		        .blur(20.dp)
+		        .blur(10.dp)
 		        .background(Color.White.copy(alpha = 0.1f))
 		)
         // 你原本的播放器内容（盖在上面）
