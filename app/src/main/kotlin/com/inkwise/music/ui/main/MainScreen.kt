@@ -117,7 +117,7 @@ fun LyricsView(
     modifier: Modifier = Modifier
 ) {
     val lyricsState by viewModel.lyricsState.collectAsState()
-    val lyrics = lyricsState.lyrics?.lines ?: emptyList()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
     val highlight = lyricsState.highlight
 
     val listState = rememberLazyListState()
@@ -126,21 +126,31 @@ fun LyricsView(
     var userScrolling by remember { mutableStateOf(false) }
     var lastUserScrollTime by remember { mutableStateOf(0L) }
 
-    /* ---------- 监听用户手势 ---------- */
-    LaunchedEffect(listState.isScrollInProgress) {
-        if (listState.isScrollInProgress) {
-            userScrolling = true
-            lastUserScrollTime = System.currentTimeMillis()
-        }
+    /* ------------------------------------------------ */
+    /* 监听真实用户滚动（不会被程序滚动误触发）        */
+    /* ------------------------------------------------ */
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (scrolling) {
+                    userScrolling = true
+                    lastUserScrollTime = System.currentTimeMillis()
+                }
+            }
     }
 
-    /* ---------- 自动回中逻辑 ---------- */
-    LaunchedEffect(highlight?.lineIndex, userScrolling) {
+    /* ------------------------------------------------ */
+    /* 自动回中（只由高亮行变化触发）                    */
+    /* ------------------------------------------------ */
+    LaunchedEffect(highlight?.lineIndex) {
         if (highlight == null) return@LaunchedEffect
         if (userScrolling) return@LaunchedEffect
 
         val index = highlight.lineIndex
         if (index !in lyrics.indices) return@LaunchedEffect
+
+        // 等待 LazyColumn 完成测量
+        kotlinx.coroutines.yield()
 
         listState.animateScrollToItem(
             index = index,
@@ -148,11 +158,13 @@ fun LyricsView(
         )
     }
 
-    /* ---------- 松手 2 秒后回中 ---------- */
+    /* ------------------------------------------------ */
+    /* 用户松手 2 秒后，恢复自动回中                    */
+    /* ------------------------------------------------ */
     LaunchedEffect(userScrolling) {
         if (!userScrolling) return@LaunchedEffect
 
-        kotlinx.coroutines.delay(2_000)
+        delay(2_000)
 
         val now = System.currentTimeMillis()
         if (now - lastUserScrollTime >= 2_000) {
@@ -160,7 +172,9 @@ fun LyricsView(
         }
     }
 
-    /* ---------- UI ---------- */
+    /* ------------------------------------------------ */
+    /* UI                                                */
+    /* ------------------------------------------------ */
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState
@@ -172,9 +186,8 @@ fun LyricsView(
                 text = line.text,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .clickable {
-                        // 👇 点击歌词跳转时间
                         viewModel.seekTo(line.timeMs)
 
                         scope.launch {
@@ -191,8 +204,6 @@ fun LyricsView(
         }
     }
 }
-
-
 
 @Composable
 fun ReboundHorizontalDrag(
