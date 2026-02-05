@@ -224,11 +224,8 @@ fun LyricsView(
                             try {
                                 listState.animateScrollToItem(
                                     index,
-                                    scrollOffset = -listState.layoutInfo.viewportSize.height / 2,
-                                    animationSpec = tween(
-								        durationMillis = 550,
-								        easing = LinearOutSlowInEasing
-								    )
+                                    scrollOffset = -listState.layoutInfo.viewportSize.height / 2
+                                    
                                 )
                             } finally {
                                 isProgrammaticScroll = false
