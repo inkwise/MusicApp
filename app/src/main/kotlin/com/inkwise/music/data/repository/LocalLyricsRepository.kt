@@ -25,13 +25,11 @@ class LocalLyricsRepository @Inject constructor(
     private val cache = mutableMapOf<Long, Lyrics>()
 
     override suspend fun loadLyrics(songId: Long): Lyrics? {
-    	toast("loadLyrics()")
-		
+    	
         cache[songId]?.let { return it }
-		toast("读取仓库")
 		
         val song = musicRepository.getSongById(songId) ?: return null
-		toast("正在读取内嵌歌词")
+	//	toast("正在读取内嵌歌词")
 		
         // 1️⃣ 内嵌歌词（逐行）
         loadEmbeddedLyrics(song)?.let {
