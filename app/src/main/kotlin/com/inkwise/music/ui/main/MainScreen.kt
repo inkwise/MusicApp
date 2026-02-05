@@ -1,4 +1,19 @@
 package com.inkwise.music.ui.main
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.layoutInfo
+
+import androidx.compose.ui.text.font.FontWeight
+
+import androidx.compose.ui.Modifier.offset
+import androidx.compose.ui.Modifier.size
+
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.graphics.graphicsLayer
