@@ -48,7 +48,7 @@ class LocalLyricsRepository @Inject constructor(
     override fun observeLyrics(songId: Long): Flow<Lyrics?> = flow {
         emit(loadLyrics(songId))
     }
-
+/*
     private fun loadEmbeddedLyrics(song: Song): Lyrics? {
         return try {
             val audioFile = AudioFileIO.read(File(song.path))
@@ -78,7 +78,55 @@ class LocalLyricsRepository @Inject constructor(
         } catch (e: Exception) {
             null
         }
+    }*/
+    private fun loadEmbeddedLyrics(song: Song): Lyrics? {
+    return try {
+        val audioFile = AudioFileIO.read(File(song.path))
+        val tag = audioFile.tag ?: return null
+
+        val lyricText = tag.getFirst(FieldKey.LYRICS)
+        if (lyricText.isBlank()) return null
+
+        val timeLineRegex = Regex("""\[(\d{2}):(\d{2})\.(\d{2})]""")
+
+        val lines = lyricText
+            .lines()
+            .mapNotNull { rawLine ->
+                val match = timeLineRegex.find(rawLine) ?: return@mapNotNull null
+
+                val (mm, ss, xx) = match.destructured
+                val timeMs =
+                    mm.toLong() * 60_000 +
+                    ss.toLong() * 1_000 +
+                    xx.toLong() * 10
+
+                val text = rawLine
+                    .replace(timeLineRegex, "")
+                    .trim()
+
+                if (text.isBlank()) return@mapNotNull null
+
+                LyricLine(
+                    timeMs = timeMs,
+                    text = text,
+                    tokens = null
+                )
+            }
+            .sortedBy { it.timeMs }
+
+        if (lines.isEmpty()) return null
+
+        Lyrics(
+            songId = song.id,
+            lines = lines,
+            language = "unknown",
+            source = LyricsSource.EMBEDDED,
+            version = 1
+        )
+    } catch (e: Exception) {
+        null
     }
+}
     
     //测试用
     private fun toast(msg: String) {
