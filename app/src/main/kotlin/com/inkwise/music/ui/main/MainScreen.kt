@@ -553,9 +553,12 @@ fun playerScreen(
                             20     // sampling（越大越省性能）
                         )
                     )
+                    .transform(
+	        BlurTransformation(40, 20) // 最终效果
+	    )
                     .into(imageView)
             } else {
-                imageView.setImageDrawable(null)
+              //  imageView.setImageDrawable(null)
             }
         }
     )
@@ -565,7 +568,7 @@ fun playerScreen(
 		    modifier = Modifier
 		        .fillMaxSize()
 		        .blur(10.dp)
-		        .background(Color.White.copy(alpha = 0.1f))
+		        .background(Color.White.copy(alpha = 0.25f))
 		)
         // 你原本的播放器内容（盖在上面）
         Box(
