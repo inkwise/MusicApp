@@ -94,24 +94,85 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.itemsIndexed
 
 import androidx.compose.foundation.lazy.rememberLazyListState
-/*
-@Composable
-fun LyricsView(viewModel: PlayerViewModel) {
-    val lyricsState by viewModel.lyricsState.collectAsState()
 
-    val lyrics = lyricsState.lyrics?.lines ?: emptyList()
+@Composable
+fun LyricsView(
+    viewModel: PlayerViewModel,
+    modifier: Modifier = Modifier
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
     val highlight = lyricsState.highlight
 
-    Column {
-        lyrics.forEachIndexed { index, line ->
-            val isLineHighlighted = highlight?.lineIndex == index
-            Text(
-                text = line.text,
-                color = if (isLineHighlighted) Color.Cyan else Color.White
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    
+    // 核心状态：用户是否正在操作（包含滑动中和松手后的 2 秒观察期）
+    var isUserInteracting by remember { mutableStateOf(false) }
+
+    /* ------------------------------------------------ */
+    /* 1. 监听滚动状态：处理用户手动干预的逻辑 */
+    /* ------------------------------------------------ */
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) {
+            // 用户手指正在滑动
+            isUserInteracting = true
+        } else {
+            // 用户松开手指，等待 2 秒后恢复自动滚动
+            // 如果在这 2 秒内再次滑动，此协程会被 LaunchedEffect 重启，重新计时
+            delay(2000)
+            isUserInteracting = false
+        }
+    }
+
+    /* ------------------------------------------------ */
+    /* 2. 自动回中：由高亮行变化或用户交互状态结束触发 */
+    /* ------------------------------------------------ */
+    LaunchedEffect(highlight?.lineIndex, isUserInteracting) {
+        val index = highlight?.lineIndex ?: return@LaunchedEffect
+        
+        // 只有当用户没有在干预，且索引合法时才触发动画
+        if (!isUserInteracting && index in lyrics.indices) {
+            listState.animateScrollToItem(
+                index = index,
+                // 将目标项滚动到屏幕约 1/2 的位置
+                scrollOffset = -listState.layoutInfo.viewportSize.height / 2
             )
         }
     }
-}*/
+
+    /* ------------------------------------------------ */
+    /* 3. UI 布局 */
+    /* ------------------------------------------------ */
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        state = listState,
+        // 添加内边距让第一行和最后一行也能滚动到中心
+        contentPadding = PaddingValues(vertical = 200.dp) 
+    ) {
+        itemsIndexed(lyrics) { index, line ->
+            val isHighlighted = highlight?.lineIndex == index
+            
+            Text(
+                text = line.text,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .clickable {
+                        // 手动点击跳转
+                        viewModel.seekTo(line.timeMs)
+                        // 点击后立即关闭用户交互模式，触发对齐
+                        isUserInteracting = false 
+                    },
+                color = if (isHighlighted) Color.Cyan else Color.White.copy(alpha = 0.6f),
+                fontSize = if (isHighlighted) 20.sp else 16.sp,
+                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
+                lineHeight = 28.sp
+            )
+        }
+    }
+}
+/*
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
@@ -205,7 +266,7 @@ fun LyricsView(
         }
     }
 }
-
+*/
 @Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,
