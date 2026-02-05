@@ -14,6 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+
+import androidx.compose.ui.geometry.Offset
+
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayQueueBottomSheet(
