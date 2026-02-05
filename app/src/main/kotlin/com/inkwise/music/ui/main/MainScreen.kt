@@ -85,7 +85,7 @@ import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
-
+/*
 @Composable
 fun LyricsView(viewModel: PlayerViewModel) {
     val lyricsState by viewModel.lyricsState.collectAsState()
@@ -101,12 +101,88 @@ fun LyricsView(viewModel: PlayerViewModel) {
                 color = if (isLineHighlighted) Color.Cyan else Color.White
             )
         }
-        Text(
-                text ="啥也没有" ,
+    }
+}*/
+@Composable
+fun LyricsView(
+    viewModel: PlayerViewModel,
+    modifier: Modifier = Modifier
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines ?: emptyList()
+    val highlight = lyricsState.highlight
+
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    var userScrolling by remember { mutableStateOf(false) }
+    var lastUserScrollTime by remember { mutableStateOf(0L) }
+
+    /* ---------- 监听用户手势 ---------- */
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) {
+            userScrolling = true
+            lastUserScrollTime = System.currentTimeMillis()
+        }
+    }
+
+    /* ---------- 自动回中逻辑 ---------- */
+    LaunchedEffect(highlight?.lineIndex, userScrolling) {
+        if (highlight == null) return@LaunchedEffect
+        if (userScrolling) return@LaunchedEffect
+
+        val index = highlight.lineIndex
+        if (index !in lyrics.indices) return@LaunchedEffect
+
+        listState.animateScrollToItem(
+            index = index,
+            scrollOffset = -listState.layoutInfo.viewportSize.height / 2
+        )
+    }
+
+    /* ---------- 松手 2 秒后回中 ---------- */
+    LaunchedEffect(userScrolling) {
+        if (!userScrolling) return@LaunchedEffect
+
+        kotlinx.coroutines.delay(2_000)
+
+        val now = System.currentTimeMillis()
+        if (now - lastUserScrollTime >= 2_000) {
+            userScrolling = false
+        }
+    }
+
+    /* ---------- UI ---------- */
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        state = listState
+    ) {
+        itemsIndexed(lyrics) { index, line ->
+            val isHighlighted = highlight?.lineIndex == index
+
+            Text(
+                text = line.text,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+                    .clickable {
+                        // 👇 点击歌词跳转时间
+                        viewModel.seekTo(line.timeMs)
+
+                        scope.launch {
+                            listState.animateScrollToItem(
+                                index,
+                                scrollOffset = -listState.layoutInfo.viewportSize.height / 2
+                            )
+                        }
+                    },
+                color = if (isHighlighted) Color.Cyan else Color.White,
+                fontSize = if (isHighlighted) 18.sp else 15.sp,
+                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
             )
+        }
     }
 }
-
 
 
 
