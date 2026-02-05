@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.layoutInfo
 
-import androidx.compose.ui.text.font.FontWeight
 
 import androidx.compose.ui.Modifier.offset
 import androidx.compose.ui.Modifier.size
