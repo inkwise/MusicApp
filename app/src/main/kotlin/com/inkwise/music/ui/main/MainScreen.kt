@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import android.graphics.RenderEffect
 import android.graphics.Shader
+androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 // 如果你使用了 alpha 渐变逻辑，还需要这个
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
