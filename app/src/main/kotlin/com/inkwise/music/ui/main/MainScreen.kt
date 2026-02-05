@@ -7,8 +7,9 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import kotlinx.coroutines.delay
 // 动画核心
-
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.animateScrollBy
+
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.lazy.LazyColumn
@@ -150,7 +151,7 @@ fun LyricsView(
         if (highlight == null) return@LaunchedEffect
         if (userScrolling) return@LaunchedEffect
         
-        val index = highlight.lineIndex
+       /* val index = highlight.lineIndex
         if (index !in lyrics.indices) return@LaunchedEffect
         
         isProgrammaticScroll = true
@@ -165,7 +166,41 @@ fun LyricsView(
             )
         } finally {
             isProgrammaticScroll = false
-        }
+        }*/
+        
+        
+		val layoutInfo = listState.layoutInfo
+		val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
+		
+		// 计算目标偏移量
+		val targetOffset = if (visibleItem != null) {
+		    // 如果项已经可见，计算相对位移
+		    visibleItem.offset + (layoutInfo.viewportSize.height / 2)
+		} else {
+		    // 如果不可见，建议先用 scrollToItem 瞬间定位（不带动画）
+		    // 或者接受系统默认的 animateScrollToItem
+		    null
+		}
+		
+		isProgrammaticScroll = true
+		try {
+		    if (targetOffset != null) {
+		        // animateScrollBy 支持 animationSpec
+		        listState.animateScrollBy(
+		            value = targetOffset.toFloat(),
+		            animationSpec = tween(
+		                durationMillis = 850,
+		                easing = FastOutSlowInEasing
+		            )
+		        )
+		    } else {
+		        // 如果目标太远，建议直接用默认动画，或者分两步走
+		        listState.animateScrollToItem(index, -layoutInfo.viewportSize.height / 2)
+		    }
+		} finally {
+		    isProgrammaticScroll = false
+		}
+		
     }
     
     /* ------------------------------------------------ */
