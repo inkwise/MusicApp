@@ -85,6 +85,12 @@ import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
+
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.lazy.itemsIndexed
+
+import androidx.compose.foundation.lazy.rememberLazyListState
 /*
 @Composable
 fun LyricsView(viewModel: PlayerViewModel) {
