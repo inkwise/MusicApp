@@ -204,7 +204,7 @@ fun LyricsView(
                             }
                         }
                     },
-                color = Color.Balck.copy(alpha = animatedAlpha),
+                color = Color.Black.copy(alpha = animatedAlpha),
                 fontSize = animatedFontSize.sp,
                 fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
             )
@@ -496,7 +496,6 @@ fun SongPage(
     Column(
         modifier =
             modifier
-                .background(backgroundColor)
                 .fillMaxHeight(),
         horizontalAlignment =
             if (alignRight) {
