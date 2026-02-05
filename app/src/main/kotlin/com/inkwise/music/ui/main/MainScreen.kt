@@ -167,39 +167,44 @@ fun LyricsView(
         } finally {
             isProgrammaticScroll = false
         }*/
+        val layoutInfo = listState.layoutInfo
+val visibleItem = layoutInfo.visibleItemsInfo
+    .firstOrNull { it.index == index }
+
+if (visibleItem != null) {
+    val viewportCenter = layoutInfo.viewportSize.height / 2
+    val itemCenter = visibleItem.offset + visibleItem.size / 2
+    val delta = itemCenter - viewportCenter
+
+    isProgrammaticScroll = true
+    try {
+        listState.animateScrollBy(
+            value = delta.toFloat(),
+            animationSpec = tween(
+                durationMillis = 850,
+                easing = FastOutSlowInEasing
+            )
+        )
+    } finally {
+        isProgrammaticScroll = false
+    }
+} else {
+    // item 不可见时，退回官方实现（非常重要）
+    isProgrammaticScroll = true
+    try {
+        listState.animateScrollToItem(
+            index = index,
+            scrollOffset = -layoutInfo.viewportSize.height / 2,
+            animationSpec = tween(
+                durationMillis = 850,
+                easing = FastOutSlowInEasing
+            )
+        )
+    } finally {
+        isProgrammaticScroll = false
+    }
+}
         
-        
-		val layoutInfo = listState.layoutInfo
-		val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
-		
-		// 计算目标偏移量
-		val targetOffset = if (visibleItem != null) {
-		    // 如果项已经可见，计算相对位移
-		    visibleItem.offset + (layoutInfo.viewportSize.height / 2)
-		} else {
-		    // 如果不可见，建议先用 scrollToItem 瞬间定位（不带动画）
-		    // 或者接受系统默认的 animateScrollToItem
-		    null
-		}
-		
-		isProgrammaticScroll = true
-		try {
-		    if (targetOffset != null) {
-		        // animateScrollBy 支持 animationSpec
-		        listState.animateScrollBy(
-		            value = targetOffset.toFloat(),
-		            animationSpec = tween(
-		                durationMillis = 850,
-		                easing = FastOutSlowInEasing
-		            )
-		        )
-		    } else {
-		        // 如果目标太远，建议直接用默认动画，或者分两步走
-		        listState.animateScrollToItem(index, -layoutInfo.viewportSize.height / 2)
-		    }
-		} finally {
-		    isProgrammaticScroll = false
-		}
 		
     }
     
