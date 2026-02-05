@@ -151,9 +151,9 @@ fun LyricsView(
         if (highlight == null) return@LaunchedEffect
         if (userScrolling) return@LaunchedEffect
         
-       /* val index = highlight.lineIndex
+        val index = highlight.lineIndex
         if (index !in lyrics.indices) return@LaunchedEffect
-        
+        /*
         isProgrammaticScroll = true
         try {
             listState.animateScrollToItem(
