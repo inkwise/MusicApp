@@ -7,14 +7,10 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import kotlinx.coroutines.delay
 // 动画核心
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.spring
 
-// Lazy 列表动画（1.6+ 才有）
-import androidx.compose.foundation.lazy.animateScrollToItem
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 // 如果你使用了 alpha 渐变逻辑，还需要这个
