@@ -184,7 +184,7 @@ fun LyricsView(
             )
 
             val animatedAlpha by animateFloatAsState(
-                targetValue = if (isHighlighted) 0.9f else 0.5f,
+                targetValue = if (isHighlighted) 0.82f else 0.5f,
                 label = "lyrics_alpha"
             )
 
@@ -249,114 +249,7 @@ private suspend fun slowScrollToCenter(
         delay(16L)          // ~60fps
     }
 }
-/*
-@Composable
-fun LyricsView(
-    viewModel: PlayerViewModel,
-    modifier: Modifier = Modifier
-) {
-    val lyricsState by viewModel.lyricsState.collectAsState()
-    val lyrics = lyricsState.lyrics?.lines.orEmpty()
-    val highlight = lyricsState.highlight
 
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    
-    var userScrolling by remember { mutableStateOf(false) }
-    var isProgrammaticScroll by remember { mutableStateOf(false) }
-    
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { scrolling ->
-                if (scrolling && !isProgrammaticScroll) {
-                    // 真实的用户滚动
-                    userScrolling = true
-                }
-            }
-    }
-    
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { scrolling ->
-                if (!scrolling && userScrolling && !isProgrammaticScroll) {
-                    // 用户停止滚动，等待 2 秒
-                    delay(1_000)
-                    userScrolling = false
-                }
-            }
-    }
-    
-    LaunchedEffect(highlight?.lineIndex) {
-        if (highlight == null) return@LaunchedEffect
-        if (userScrolling) return@LaunchedEffect
-        
-        val index = highlight.lineIndex
-        if (index !in lyrics.indices) return@LaunchedEffect
-        
- 		val layoutInfo = listState.layoutInfo
-val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
-
-// 计算目标偏移量（修正公式）
-val targetOffset = if (visibleItem != null) {
-    val viewportCenter = layoutInfo.viewportSize.height / 2
-    val itemCenter = visibleItem.offset + visibleItem.size / 2
-    itemCenter - viewportCenter
-} else {
-    null
-}
-
-isProgrammaticScroll = true
-try {
-    if (targetOffset != null) {
-        listState.animateScrollBy(
-            value = targetOffset.toFloat()
-        )
-    } else {
-        listState.animateScrollToItem(
-            index,
-            -layoutInfo.viewportSize.height / 2
-        )
-    }
-} finally {
-    isProgrammaticScroll = false
-}
-        
-		
-    }
-    
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        state = listState
-    ) {
-        itemsIndexed(lyrics) { index, line ->
-            val isHighlighted = highlight?.lineIndex == index
-            Text(
-                text = line.text,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable {
-                        viewModel.seekTo(line.timeMs)
-                        scope.launch {
-                            isProgrammaticScroll = true
-                            try {
-                                listState.animateScrollToItem(
-                                    index,
-                                    scrollOffset = -listState.layoutInfo.viewportSize.height / 2
-                                    
-                                )
-                            } finally {
-                                isProgrammaticScroll = false
-                            }
-                        }
-                    },
-                color = if (isHighlighted) Color.Cyan else Color.White,
-                fontSize = if (isHighlighted) 18.sp else 15.sp,
-                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
-            )
-        }
-    }
-}*/
 
 @Composable
 fun ReboundHorizontalDrag(
@@ -640,29 +533,6 @@ fun playerScreen(
                 .fillMaxSize(),
     ) {
         // 背景图片 + 高斯模糊
-        
-       
-	/*
-	    if (coverUri != null) {
-	        AsyncImage(
-	            model = coverUri,
-	            contentDescription = null,
-	            contentScale = ContentScale.Crop,
-	            modifier = Modifier
-	                .matchParentSize()
-	                .graphicsLayer {
-	                    
-	                    renderEffect = RenderEffect
-        .createBlurEffect(
-            50f,
-            50f,
-            Shader.TileMode.CLAMP
-        )
-        .asComposeRenderEffect()
-	                }
-	        )
-	    }
-	    */
 		AndroidView(
         modifier =
             Modifier
@@ -678,8 +548,8 @@ fun playerScreen(
                     .load(coverUri)
                     .transform(
                         jp.wasabeef.glide.transformations.BlurTransformation(
-                            50,   // radius
-                            3     // sampling（越大越省性能）
+                            80,   // radius
+                            25     // sampling（越大越省性能）
                         )
                     )
                     .into(imageView)
@@ -689,6 +559,13 @@ fun playerScreen(
         }
     )
     
+    	//毛玻璃
+    	Box(
+		    modifier = Modifier
+		        .fillMaxSize()
+		        .blur(20.dp)
+		        .background(Color.White.copy(alpha = 0.25f))
+		)
         // 你原本的播放器内容（盖在上面）
         Box(
             modifier =
