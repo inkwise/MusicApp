@@ -101,7 +101,146 @@ import androidx.compose.foundation.lazy.itemsIndexed
 
 import androidx.compose.foundation.lazy.rememberLazyListState
 
+@Composable
+fun LyricsView(
+    viewModel: PlayerViewModel,
+    modifier: Modifier = Modifier
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
+    val highlight = lyricsState.highlight
 
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    var userScrolling by remember { mutableStateOf(false) }
+    var isProgrammaticScroll by remember { mutableStateOf(false) }
+
+    /* ------------------------------------------------ */
+    /* 监听用户手动滚动                                   */
+    /* ------------------------------------------------ */
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (scrolling && !isProgrammaticScroll) {
+                    userScrolling = true
+                }
+            }
+    }
+
+    /* ------------------------------------------------ */
+    /* 用户停止滚动 1 秒后，恢复自动回中                    */
+    /* ------------------------------------------------ */
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (!scrolling && userScrolling && !isProgrammaticScroll) {
+                    delay(1_000)
+                    userScrolling = false
+                }
+            }
+    }
+
+    /* ------------------------------------------------ */
+    /* 自动回中（只由高亮行变化触发）                        */
+    /* ------------------------------------------------ */
+    LaunchedEffect(highlight?.lineIndex) {
+        if (highlight == null) return@LaunchedEffect
+        if (userScrolling) return@LaunchedEffect
+
+        val index = highlight.lineIndex
+        if (index !in lyrics.indices) return@LaunchedEffect
+
+        isProgrammaticScroll = true
+        try {
+            slowScrollToCenter(listState, index)
+        } finally {
+            isProgrammaticScroll = false
+        }
+    }
+
+    /* ------------------------------------------------ */
+    /* UI                                               */
+    /* ------------------------------------------------ */
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        state = listState
+    ) {
+        itemsIndexed(lyrics) { index, line ->
+            val isHighlighted = highlight?.lineIndex == index
+
+            val animatedFontSize by animateFloatAsState(
+                targetValue = if (isHighlighted) 20f else 15f,
+                label = "lyrics_font_size"
+            )
+
+            val animatedAlpha by animateFloatAsState(
+                targetValue = if (isHighlighted) 1f else 0.6f,
+                label = "lyrics_alpha"
+            )
+
+            Text(
+                text = line.text,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clickable {
+                        viewModel.seekTo(line.timeMs)
+                        scope.launch {
+                            isProgrammaticScroll = true
+                            try {
+                                slowScrollToCenter(listState, index)
+                            } finally {
+                                isProgrammaticScroll = false
+                            }
+                        }
+                    },
+                color = Color.Cyan.copy(alpha = animatedAlpha),
+                fontSize = animatedFontSize.sp,
+                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
+            )
+        }
+    }
+}
+
+/* ------------------------------------------------ */
+/* 慢速滚动到居中（不使用 animationSpec）              */
+/* ------------------------------------------------ */
+private suspend fun slowScrollToCenter(
+    listState: LazyListState,
+    index: Int
+) {
+    val layoutInfo = listState.layoutInfo
+    val viewportCenter = layoutInfo.viewportSize.height / 2
+
+    val itemInfo = layoutInfo.visibleItemsInfo
+        .find { it.index == index }
+
+    val targetOffset = if (itemInfo != null) {
+        val itemCenter = itemInfo.offset + itemInfo.size / 2
+        itemCenter - viewportCenter
+    } else {
+        null
+    }
+
+    if (targetOffset == null) {
+        listState.scrollToItem(
+            index,
+            -viewportCenter
+        )
+        return
+    }
+
+    // 👇 手动分段慢滚
+    val steps = 30          // 越大越慢
+    val stepOffset = targetOffset / steps
+
+    repeat(steps) {
+        listState.scrollBy(stepOffset.toFloat())
+        delay(16L)          // ~60fps
+    }
+}
+/*
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
@@ -117,9 +256,6 @@ fun LyricsView(
     var userScrolling by remember { mutableStateOf(false) }
     var isProgrammaticScroll by remember { mutableStateOf(false) }
     
-    /* ------------------------------------------------ */
-    /* 监听用户手动滚动                                    */
-    /* ------------------------------------------------ */
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
             .collect { scrolling ->
@@ -130,43 +266,24 @@ fun LyricsView(
             }
     }
     
-    /* ------------------------------------------------ */
-    /* 用户停止滚动 2 秒后，恢复自动回中                      */
-    /* ------------------------------------------------ */
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
             .collect { scrolling ->
                 if (!scrolling && userScrolling && !isProgrammaticScroll) {
                     // 用户停止滚动，等待 2 秒
-                    delay(2_000)
+                    delay(1_000)
                     userScrolling = false
                 }
             }
     }
     
-    /* ------------------------------------------------ */
-    /* 自动回中（只由高亮行变化触发）                        */
-    /* ------------------------------------------------ */
     LaunchedEffect(highlight?.lineIndex) {
         if (highlight == null) return@LaunchedEffect
         if (userScrolling) return@LaunchedEffect
         
         val index = highlight.lineIndex
         if (index !in lyrics.indices) return@LaunchedEffect
-        /*
-        isProgrammaticScroll = true
-        try {
-            listState.animateScrollToItem(
-                index = index,
-                scrollOffset = -listState.layoutInfo.viewportSize.height / 2 ,
-                animationSpec = tween(
-			        durationMillis = 850, // 👈 慢一点
-			        easing = FastOutSlowInEasing
-			    )
-            )
-        } finally {
-            isProgrammaticScroll = false
-        }*/
+        
  		val layoutInfo = listState.layoutInfo
 val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
 
@@ -198,9 +315,6 @@ try {
 		
     }
     
-    /* ------------------------------------------------ */
-    /* UI                                               */
-    /* ------------------------------------------------ */
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState
@@ -233,7 +347,7 @@ try {
             )
         }
     }
-}
+}*/
 
 @Composable
 fun ReboundHorizontalDrag(
