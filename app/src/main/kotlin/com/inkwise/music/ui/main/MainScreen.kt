@@ -7,11 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.lazy.layoutInfo
-
-
-import androidx.compose.ui.Modifier.offset
-import androidx.compose.ui.Modifier.size
 
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.activity.compose.BackHandler
