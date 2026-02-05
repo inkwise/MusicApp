@@ -22,7 +22,30 @@ fun PlayQueueBottomSheet(
     val playQueue by playerViewModel.playQueue.collectAsState()
     val currentIndex by playerViewModel.currentIndex.collectAsState()
     val playbackState by playerViewModel.playbackState.collectAsState()
+	// ✅ 和 LazyColumn 绑定
+    val listState = rememberLazyListState()
+    // ✅ 和 listState 同作用域
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                // 向下拉 && 列表已经在顶部
+                if (
+                    available.y > 0 &&
+                    listState.firstVisibleItemIndex == 0 &&
+                    listState.firstVisibleItemScrollOffset == 0
+                ) {
+                    // 👉 交给 VerticalPager
+                    return Offset.Zero
+                }
 
+                // 👉 否则列表自己吃
+                return Offset(0f, available.y)
+            }
+        }
+    }
     Column(
         modifier =
             Modifier
@@ -63,7 +86,10 @@ fun PlayQueueBottomSheet(
 
         // 播放队列列表
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+        	state = listState,
+        	modifier = Modifier
+            	.fillMaxSize()
+            	.nestedScroll(nestedScrollConnection)
         ) {
             itemsIndexed(playQueue) { index, song ->
                 val isCurrentSong = index == currentIndex
