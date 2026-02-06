@@ -16,6 +16,7 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import kotlinx.coroutines.delay
 // 动画核心
+import androidx.compose.foundation.pager.nestedScrollConnection
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.pager.PagerDefaults
