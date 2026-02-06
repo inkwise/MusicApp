@@ -81,7 +81,7 @@ fun PlayQueueBottomSheet(
         	state = listState,
         	modifier = Modifier
             	//.fillMaxSize()
-            	.weight(1f),
+            	.weight(1f)
             .pointerInput(isAtTop) {
             awaitPointerEventScope {
                 while (true) {
