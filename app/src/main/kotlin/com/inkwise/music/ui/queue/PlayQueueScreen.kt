@@ -79,10 +79,26 @@ fun PlayQueueBottomSheet(
         // 播放队列列表
         LazyColumn(
         	state = listState,
-        	userScrollEnabled = !isAtTop,
         	modifier = Modifier
             	//.fillMaxSize()
-            	.weight(1f)
+            	.weight(1f),
+            .pointerInput(isAtTop) {
+            awaitPointerEventScope {
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val drag = event.changes.firstOrNull() ?: continue
+
+                    // 在顶部 + 向下拖
+                    if (isAtTop && drag.positionChange().y > 0f) {
+                        // 👉 不消费，交给 Pager
+                        return@awaitPointerEventScope
+                    }
+
+                    // 其他情况，正常给 LazyColumn
+                    drag.consume()
+                }
+            }
+        }
         ) {
             itemsIndexed(playQueue) { index, song ->
                 val isCurrentSong = index == currentIndex
