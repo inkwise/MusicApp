@@ -50,7 +50,7 @@ fun PlayQueueBottomSheet(
                 }
 
                 // 👉 否则列表自己吃
-                return Offset(0f, available.y)
+                return Offset.Zero
             }
         }
     }
@@ -96,7 +96,8 @@ fun PlayQueueBottomSheet(
         LazyColumn(
         	state = listState,
         	modifier = Modifier
-            	.fillMaxSize()
+            	//.fillMaxSize()
+            	.weight(1f)
             	.nestedScroll(nestedScrollConnection)
         ) {
             itemsIndexed(playQueue) { index, song ->
