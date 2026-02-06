@@ -18,7 +18,7 @@ import kotlinx.coroutines.delay
 // 动画核心
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
-
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.lazy.LazyColumn
