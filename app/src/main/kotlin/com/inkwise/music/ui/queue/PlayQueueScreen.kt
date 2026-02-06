@@ -26,34 +26,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 @Composable
 fun PlayQueueBottomSheet(
     playerViewModel: PlayerViewModel,
+    pagerNestedScrollConnection: NestedScrollConnection,
 ) {
     val playQueue by playerViewModel.playQueue.collectAsState()
     val currentIndex by playerViewModel.currentIndex.collectAsState()
     val playbackState by playerViewModel.playbackState.collectAsState()
 	// ✅ 和 LazyColumn 绑定
     val listState = rememberLazyListState()
-    // ✅ 和 listState 同作用域
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                // 向下拉 && 列表已经在顶部
-                if (
-                    available.y > 0 &&
-                    listState.firstVisibleItemIndex == 0 &&
-                    listState.firstVisibleItemScrollOffset == 0
-                ) {
-                    // 👉 交给 VerticalPager
-                    return Offset.Zero
-                }
-
-                // 👉 否则列表自己吃
-                return Offset.Zero
-            }
-        }
-    }
+    
     Column(
         modifier =
             Modifier
@@ -98,7 +78,7 @@ fun PlayQueueBottomSheet(
         	modifier = Modifier
             	//.fillMaxSize()
             	.weight(1f)
-            	.nestedScroll(nestedScrollConnection)
+            	.nestedScroll(pagerNestedScrollConnection)
         ) {
             itemsIndexed(playQueue) { index, song ->
                 val isCurrentSong = index == currentIndex

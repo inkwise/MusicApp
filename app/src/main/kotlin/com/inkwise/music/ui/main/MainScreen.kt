@@ -526,7 +526,7 @@ fun playerScreen(
 	val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
 	val coverUri = currentSong?.albumArt
-	
+	val pagerNestedScrollConnection = PagerDefaults.nestedScrollConnection(pagerState)
     Box(
         modifier =
             modifier
@@ -592,6 +592,7 @@ fun playerScreen(
                 1 -> {
                     PlayQueueBottomSheet(
                         playerViewModel = playerViewModel,
+                        pagerNestedScrollConnection = pagerNestedScrollConnection
                     )
                 }
             }
