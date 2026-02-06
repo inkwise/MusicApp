@@ -13,7 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.inkwise.music.ui.player.PlayerViewModel
-
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.awaitPointerEventScope
+import androidx.compose.ui.input.pointer.awaitPointerEvent
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.consume
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 
