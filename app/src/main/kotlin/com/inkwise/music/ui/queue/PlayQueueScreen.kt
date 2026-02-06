@@ -26,14 +26,18 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 @Composable
 fun PlayQueueBottomSheet(
     playerViewModel: PlayerViewModel,
-    pagerNestedScrollConnection: NestedScrollConnection,
 ) {
     val playQueue by playerViewModel.playQueue.collectAsState()
     val currentIndex by playerViewModel.currentIndex.collectAsState()
     val playbackState by playerViewModel.playbackState.collectAsState()
 	// ✅ 和 LazyColumn 绑定
     val listState = rememberLazyListState()
-    
+    val isAtTop by remember {
+	    derivedStateOf {
+	        listState.firstVisibleItemIndex == 0 &&
+	        listState.firstVisibleItemScrollOffset == 0
+	    }
+	}
     Column(
         modifier =
             Modifier
@@ -75,10 +79,10 @@ fun PlayQueueBottomSheet(
         // 播放队列列表
         LazyColumn(
         	state = listState,
+        	userScrollEnabled = !isAtTop,
         	modifier = Modifier
             	//.fillMaxSize()
             	.weight(1f)
-            	.nestedScroll(pagerNestedScrollConnection)
         ) {
             itemsIndexed(playQueue) { index, song ->
                 val isCurrentSong = index == currentIndex

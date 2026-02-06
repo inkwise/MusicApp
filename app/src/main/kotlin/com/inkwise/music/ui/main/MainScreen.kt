@@ -16,7 +16,6 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import kotlinx.coroutines.delay
 // 动画核心
-import androidx.compose.foundation.pager.nestedScrollConnection
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.pager.PagerDefaults
@@ -527,8 +526,7 @@ fun playerScreen(
 	val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
 	val coverUri = currentSong?.albumArt
-	val pagerNestedScrollConnection = PagerDefaults.nestedScrollConnection(pagerState)
-    Box(
+	Box(
         modifier =
             modifier
                 .fillMaxSize(),
@@ -593,7 +591,6 @@ fun playerScreen(
                 1 -> {
                     PlayQueueBottomSheet(
                         playerViewModel = playerViewModel,
-                        pagerNestedScrollConnection = pagerNestedScrollConnection
                     )
                 }
             }
