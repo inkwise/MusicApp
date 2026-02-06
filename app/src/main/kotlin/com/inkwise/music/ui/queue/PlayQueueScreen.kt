@@ -14,10 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.awaitPointerEventScope
-import androidx.compose.ui.input.pointer.awaitPointerEvent
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.input.pointer.consume
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 
@@ -87,21 +84,16 @@ fun PlayQueueBottomSheet(
             	//.fillMaxSize()
             	.weight(1f)
             .pointerInput(isAtTop) {
-            awaitPointerEventScope {
-                while (true) {
-                    val event = awaitPointerEvent()
-                    val drag = event.changes.firstOrNull() ?: continue
-
-                    // 在顶部 + 向下拖
-                    if (isAtTop && drag.positionChange().y > 0f) {
-                        // 👉 不消费，交给 Pager
-                        return@awaitPointerEventScope
+            detectVerticalDragGestures(
+                onVerticalDrag = { change, dragAmount ->
+                    if (isAtTop && dragAmount > 0f) {
+                        // 👇 在顶部向下拉：不消费，给 Pager
+                        return@detectVerticalDragGestures
                     }
-
-                    // 其他情况，正常给 LazyColumn
-                    drag.consume()
+                    // 👇 其他情况：列表自己处理
+                    change.consume()
                 }
-            }
+            )
         }
         ) {
             itemsIndexed(playQueue) { index, song ->
