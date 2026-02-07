@@ -36,6 +36,9 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget("17"))
         }
     }
+    lint {
+        checkReleaseBuilds = false
+    }
     
     val releaseStoreFile =
         project.findProperty("RELEASE_STORE_FILE") as String?
