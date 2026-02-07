@@ -78,6 +78,19 @@ fun PlayQueueBottomSheet(
         	modifier = Modifier
             	//.fillMaxSize()
             	.weight(1f)
+            	.nestedScroll(
+                    remember {
+                        object : NestedScrollConnection {
+                            override fun onPreScroll(
+                                available: Offset,
+                                source: NestedScrollSource
+                            ): Offset {
+                                // 让 Pager 优先处理滚动
+                                return Offset.Zero
+                            }
+                        }
+                    }
+                )
         
         ) {
             itemsIndexed(playQueue) { index, song ->
