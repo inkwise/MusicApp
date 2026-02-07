@@ -33,12 +33,7 @@ fun PlayQueueBottomSheet(
     val playbackState by playerViewModel.playbackState.collectAsState()
 	// ✅ 和 LazyColumn 绑定
     val listState = rememberLazyListState()
-    val isAtTop by remember {
-	    derivedStateOf {
-	        listState.firstVisibleItemIndex == 0 &&
-	        listState.firstVisibleItemScrollOffset == 0
-	    }
-	}
+    
     Column(
         modifier =
             Modifier
@@ -83,17 +78,6 @@ fun PlayQueueBottomSheet(
         	modifier = Modifier
             	//.fillMaxSize()
             	.weight(1f)
-            .pointerInput(isAtTop) {
-            detectVerticalDragGestures(
-                onVerticalDrag = { change, dragAmount ->
-                    if (isAtTop && dragAmount > 0f) {
-                        // 👇 在顶部向下拉：不消费，给 Pager
-                        return@detectVerticalDragGestures
-                    }
-                    // 👇 其他情况：列表自己处理
-                    change.consume()
-                }
-            )
         }
         ) {
             itemsIndexed(playQueue) { index, song ->
