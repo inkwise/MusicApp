@@ -78,7 +78,7 @@ fun PlayQueueBottomSheet(
         	modifier = Modifier
             	//.fillMaxSize()
             	.weight(1f)
-        }
+        
         ) {
             itemsIndexed(playQueue) { index, song ->
                 val isCurrentSong = index == currentIndex
