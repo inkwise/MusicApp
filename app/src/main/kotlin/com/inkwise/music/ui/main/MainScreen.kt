@@ -712,7 +712,7 @@ AsyncImage(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .blur(radius = 100.dp), // 在动画容器内部应用模糊
+                        .blur(radius = 120.dp), // 在动画容器内部应用模糊
             ) {
                 androidx.compose.foundation.Image(
                     painter =
@@ -737,7 +737,7 @@ AsyncImage(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(Color.White.copy(alpha = 0.75f)),
+                            .background(Color.White.copy(alpha = 0.7f)),
                 )
             }
         }
