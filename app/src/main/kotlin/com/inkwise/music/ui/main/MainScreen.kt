@@ -164,6 +164,49 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 
 @Composable
+fun MiniLyricsView(
+    viewModel: PlayerViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
+    val highlight = lyricsState.highlight
+
+    val listState = rememberLazyListState()
+
+    // 高亮变化时，自动滚动到中间
+    LaunchedEffect(highlight?.lineIndex) {
+        val index = highlight?.lineIndex ?: return@LaunchedEffect
+        if (index !in lyrics.indices) return@LaunchedEffect
+
+        slowScrollToCenter(listState, index)
+    }
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        state = listState,
+    ) {
+        itemsIndexed(lyrics) { index, line ->
+            val isHighlighted = highlight?.lineIndex == index
+
+            Text(
+                text = line.text,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                color = if (isHighlighted) {
+                    Color.Black
+                } else {
+                    Color.Black.copy(alpha = 0.5f)
+                },
+                fontSize = 20.sp,
+                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
+            )
+        }
+    }
+}
+
+@Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
     modifier: Modifier = Modifier,
@@ -689,7 +732,7 @@ AsyncImage(
 					
 					// 将提取到的颜色与黑色 (Black) 进行混合
 					// 0.3f 代表混合 30% 的黑色，70% 的原色。数值越大，颜色越深。
-					themeColor = lerp(extractedColor, Color.Black , 0.6f)
+					themeColor = lerp(extractedColor, Color.Black , 0.5f)
                     
                 }
             }
