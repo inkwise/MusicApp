@@ -608,21 +608,31 @@ fun playerScreen(
             }
         }
     )*/
-    	AsyncImage(
-        model = coverUri,
+    	// 使用 key 确保切歌时组件彻底刷新
+key(coverUri) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(coverUri)
+            .crossfade(true)
+            .crossfade(500) // 500ms 淡入淡出，切歌更顺滑
+            // 核心优化：因为是要做模糊背景，直接加载很小的尺寸（如100px）
+            // 这样图片下载极快，模糊计算压力也极小，完全不会卡顿
+            .size(100) 
+            .build(),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxSize()
-            .blur(radius = 40.dp) // Compose 原生高斯模糊 (Android 12+)
+            // 这里的 blur 只有在 Android 12+ 才会生效
+            .blur(radius = 40.dp) 
             .drawWithContent {
                 drawContent()
-                drawRect(Color.Black.copy(alpha = 0.3f)) // 叠加半透明黑色，提升文字可读性
+                // 叠加半透明遮罩，确保前台文字清晰
+                drawRect(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f))
             },
-        // 切歌时的过渡动画
-        filterQuality = FilterQuality.Low // 降低质量以换取极速加载
+        filterQuality = FilterQuality.Low
     )
-    
+}
     	//毛玻璃
     	Box(
 		    modifier = Modifier
