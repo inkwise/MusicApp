@@ -1352,8 +1352,7 @@ fun BottomDrawerContent(
                             Box(
                                 modifier =
                                     Modifier
-                                        // .size(64.dp)
-                                        .padding(30.dp) // 👈 用内边距控制大小
+                                        .padding(15.dp) // 👈 用内边距控制大小
                                         .aspectRatio(1f)
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -1493,7 +1492,7 @@ Slider(
 
             IconButton(
                 onClick = { playerViewModel.playPause() },
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(52.dp)
             ) {
                 Icon(
                     painter = painterResource(id = if (playbackState.isPlaying) {
@@ -1502,7 +1501,7 @@ Slider(
                         R.drawable.ic_mini_player_play
                     }),
                     null,
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(38.dp),
                     tint = animatedThemeColor
                 )
             }
