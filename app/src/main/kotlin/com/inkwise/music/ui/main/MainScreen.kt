@@ -166,6 +166,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 @Composable
 fun MiniLyricsView(
     viewModel: PlayerViewModel,
+    animatedThemeColor: Color,
     modifier: Modifier = Modifier,
 ) {
     val lyricsState by viewModel.lyricsState.collectAsState()
@@ -195,11 +196,11 @@ fun MiniLyricsView(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 color = if (isHighlighted) {
-                    Color.Black
+                    animatedThemeColor
                 } else {
-                    Color.Black.copy(alpha = 0.5f)
+                    animatedThemeColor.copy(alpha = 0.5f)
                 },
-                fontSize = 20.sp,
+                fontSize = 14.sp,
                 fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
             )
         }
@@ -1389,6 +1390,13 @@ fun BottomDrawerContent(
                 when (page) {
                     0 -> {
                         // 封面页
+                        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ){
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center,
@@ -1432,6 +1440,14 @@ fun BottomDrawerContent(
                                     )
                                 }
                             }
+                        }
+                        
+                        MiniLyricsView(
+						    viewModel: playerViewModel,
+						    animatedThemeColor=animatedThemeColor,
+					
+						)
+                        
                         }
                     }
 
