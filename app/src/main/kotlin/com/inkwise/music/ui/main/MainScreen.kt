@@ -566,13 +566,26 @@ fun MainScreen() {
                     },
                 )
             }
+            
+            // --- 核心：将 BackHandler 放在这里 ---
+        // 使用 currentValue 配合 targetValue 确保在动画过程中也能精准拦截
+        val isExpanded = sheetState.currentValue == SheetValue.Expanded || sheetState.targetValue == SheetValue.Expanded
+        val isAtSecondPage = pagerState.currentPage > 0
+        
+        BackHandler(enabled = isExpanded || isAtSecondPage) {
+            scope.launch {
+                if (pagerState.currentPage > 0) {
+                    // 如果在第二页，先回第一页
+                    pagerState.animateScrollToPage(0)
+                } else {
+                    // 如果在第一页且展开，则收起
+                    sheetState.partialExpand()
+                }
+            }
+        }
         },
     ) {
-        MainScreen2(
-        	sheetState = sheetState,
-            pagerState = pagerState,
-            scope = scope
-        )
+        MainScreen2()
     }
     
     // 1. 精确定义什么时候需要拦截返回键
@@ -918,9 +931,6 @@ fun SongItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen2(
-	sheetState: SheetState,      // 接收状态
-    pagerState: PagerState,
-    scope: CoroutineScope,
     viewModel: MainViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -1008,17 +1018,7 @@ fun MainScreen2(
         }
     }
     
-    val shouldIntercept = sheetState.targetValue == SheetValue.Expanded || pagerState.currentPage > 0
-
-    BackHandler(enabled = shouldIntercept) {
-        scope.launch {
-            if (pagerState.currentPage > 0) {
-                pagerState.animateScrollToPage(0)
-            } else {
-                sheetState.partialExpand()
-            }
-        }
-    }
+    
 }
 
 // 侧边栏内容
