@@ -26,6 +26,13 @@ import androidx.compose.foundation.Image // 必须手动引入，防止和 Icon 
 import androidx.compose.runtime.remember
 import coil.compose.rememberAsyncImagePainter // 核心报错修正
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+
+
 
 import androidx.compose.foundation.Image // 必须手动引入，防止和 Icon 混淆
 import androidx.compose.foundation.background
@@ -667,32 +674,42 @@ key(coverUri) {
     )
 }*/
 	// 2. 在 Box 中通过 Image 渲染，并添加强制重绘逻辑
-	Box(
-    modifier = modifier
-        .fillMaxSize()
-        // 关键修复：通过 graphicsLayer 强制重绘
-        .graphicsLayer {
-            // 这一行非常重要：将变量引入此作用域，强制 Compose 知道此层依赖 coverUri
-            val _unused = coverUri.hashCode()
-            clip = true
-        }
-        .blur(radius = 40.dp)
-) {
-    // 2. 使用 foundation 包下的 Image，避免 Unresolved reference
-    androidx.compose.foundation.Image(
-        painter = painter,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize()
-    )
-
-    // 3. 遮罩层，直接用 background 提高性能
+	// 放在你的 Box 容器内作为背景
+AnimatedContent(
+    targetState = coverUri,
+    transitionSpec = {
+        // 定义切歌时的过渡效果：淡入淡出，时长 600ms
+        fadeIn(animationSpec = tween(600)) togetherWith fadeOut(animationSpec = tween(600))
+    },
+    label = "BackgroundAnimation"
+) { targetUri ->
+    // 这里的 targetUri 就是当前最新的图片地址
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.3f))
-    )
+            .blur(radius = 40.dp) // 在动画容器内部应用模糊
+    ) {
+        androidx.compose.foundation.Image(
+            painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(targetUri)
+                    .size(150) // 强制小图模式，极速加载
+                    .build()
+            ),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        
+        // 遮罩层也放在里面，跟随动画
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f))
+        )
+    }
 }
+
     	//毛玻璃
     /*	Box(
 		    modifier = Modifier
