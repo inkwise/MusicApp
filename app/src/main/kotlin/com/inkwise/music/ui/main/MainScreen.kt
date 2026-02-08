@@ -689,7 +689,7 @@ AsyncImage(
 					
 					// 将提取到的颜色与黑色 (Black) 进行混合
 					// 0.3f 代表混合 30% 的黑色，70% 的原色。数值越大，颜色越深。
-					themeColor = lerp(extractedColor, Color.Black.copy(alpha = 0.3f) , 0.3f)
+					themeColor = lerp(extractedColor, Color.Black.copy(alpha = 0.5f) , 0.5f)
                     
                 }
             }
