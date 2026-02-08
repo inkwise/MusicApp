@@ -1299,8 +1299,9 @@ fun BottomDrawerContent(
             Modifier
                 .fillMaxSize()
                 .statusBarsPadding() // 自动增加顶部 Padding，高度等于状态栏
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
+                //.padding(horizontal = 16.dp)
+                //.padding(bottom = 16.dp)
+                .padding(14.dp) //,
     ) {
         // ---------- 顶部：歌名 / 歌手 ----------
         Column(
@@ -1352,7 +1353,6 @@ fun BottomDrawerContent(
                             Box(
                                 modifier =
                                     Modifier
-                                        .padding(15.dp) // 👈 用内边距控制大小
                                         .aspectRatio(1f)
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(MaterialTheme.colorScheme.surfaceVariant),
