@@ -1231,6 +1231,7 @@ fun BottomDrawerContent(
 }
 
 */
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BottomDrawerContent(
@@ -1252,6 +1253,7 @@ fun BottomDrawerContent(
         modifier =
             Modifier
                 .fillMaxSize()
+                .statusBarsPadding() // 自动增加顶部 Padding，高度等于状态栏
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp),
     ) {
