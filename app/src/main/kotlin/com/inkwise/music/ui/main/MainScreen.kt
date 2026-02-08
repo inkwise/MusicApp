@@ -557,7 +557,7 @@ fun playerScreen(
     val flingBehavior = PagerDefaults.flingBehavior(
         state = pagerState,
         // 关键：只要滑动超过 15% 就视为翻页，防止回弹
-        snapPositionalThreshold = 0.15f, 
+        snapPositionalThreshold = 0.8f, 
         // 这里的 snapAnimationSpec 对应松手后的吸附动画
         snapAnimationSpec = spring(
             dampingRatio = Spring.DampingRatioNoBouncy,
@@ -570,6 +570,7 @@ fun playerScreen(
                 .fillMaxSize(),
     ) {
         // 背景图片 + 高斯模糊
+        /*
 		AndroidView(
         modifier =
             Modifier
@@ -598,6 +599,20 @@ fun playerScreen(
               //  imageView.setImageDrawable(null)
             }
         }
+    )*/
+    	AsyncImage(
+        model = coverUri,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxSize()
+            .blur(radius = 40.dp) // Compose 原生高斯模糊 (Android 12+)
+            .drawWithContent {
+                drawContent()
+                drawRect(Color.Black.copy(alpha = 0.3f)) // 叠加半透明黑色，提升文字可读性
+            },
+        // 切歌时的过渡动画
+        filterQuality = FilterQuality.Low // 降低质量以换取极速加载
     )
     
     	//毛玻璃
