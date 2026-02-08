@@ -1443,7 +1443,7 @@ Slider(
             //取消隐藏滑块后的缺口
             thumbTrackGapSize = 0.dp,
             // 关闭尾部小圆点
-            drawStopIndicator = false   
+            drawStopIndicator = null 
         )
     },
     modifier = Modifier.fillMaxWidth()
