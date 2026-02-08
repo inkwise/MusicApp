@@ -1497,7 +1497,7 @@ fun BottomDrawerContent(
             IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
                 Icon(
 			        painter = painterResource(id = R.drawable.ic_player_circle), 
-			        contentDescription = "播放模式, 
+			        contentDescription = "播放模式", 
 			        tint = animatedThemeColor,
 			        modifier = Modifier.size(24.dp)
 			    )
