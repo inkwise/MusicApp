@@ -512,6 +512,7 @@ fun MainScreen() {
                     .coerceIn(0f, 1f)
         }
     }
+    /*
 	// 是否展开（Expanded / PartiallyExpanded 都算）
     val sheetVisible = sheetState.currentValue != SheetValue.Hidden
     
@@ -529,7 +530,28 @@ fun MainScreen() {
                 }
             }
         }
+    }*/
+    // --- 修改这里的逻辑 ---
+
+// 1. 精确定义什么时候需要拦截返回键
+// 只有当 Sheet 处于完全展开状态，或者 Pager 还在第二页时，才由 MainScreen 处理返回
+val shouldInterceptBack = sheetState.currentValue == SheetValue.Expanded || pagerState.currentPage > 0
+
+BackHandler(enabled = shouldInterceptBack) {
+    scope.launch {
+        when {
+            // ① 如果 Pager 在第二页（播放队列），先回第一页（播放器主页）
+            pagerState.currentPage > 0 -> {
+                pagerState.animateScrollToPage(0)
+            }
+            // ② 如果已经在第一页且是展开状态，则收起（折叠）Sheet
+            sheetState.currentValue == SheetValue.Expanded -> {
+                sheetState.partialExpand()
+            }
+        }
     }
+}
+
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
