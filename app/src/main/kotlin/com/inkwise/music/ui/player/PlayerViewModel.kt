@@ -3,35 +3,34 @@ package com.inkwise.music.ui.player
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inkwise.music.data.lyrics.LyricsSynchronizer
+import com.inkwise.music.data.model.LyricHighlight
+import com.inkwise.music.data.model.LyricLine
+import com.inkwise.music.data.model.Lyrics
+import com.inkwise.music.data.model.LyricsSource
+import com.inkwise.music.data.model.LyricsUiState
 import com.inkwise.music.data.model.PlaybackState
 import com.inkwise.music.data.model.Song
+import com.inkwise.music.data.repository.LyricsRepository
 import com.inkwise.music.data.repository.MusicRepository
 import com.inkwise.music.player.MusicPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import com.inkwise.music.data.lyrics.LyricsSynchronizer
-import com.inkwise.music.data.model.LyricHighlight
-import com.inkwise.music.data.model.Lyrics
-import com.inkwise.music.data.model.LyricLine
-
-import com.inkwise.music.data.model.LyricsSource
-import com.inkwise.music.data.model.LyricsUiState
-import com.inkwise.music.data.repository.LyricsRepository
-import kotlinx.coroutines.flow.SharingStarted
-
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
 @HiltViewModel
 class PlayerViewModel
     @Inject
     constructor(
         private val repository: MusicRepository,
-        private val lyricsRepository: LyricsRepository
+        private val lyricsRepository: LyricsRepository,
     ) : ViewModel() {
         val playbackState: StateFlow<PlaybackState> = MusicPlayerManager.playbackState
         val playQueue: StateFlow<List<Song>> = MusicPlayerManager.playQueue
@@ -40,40 +39,41 @@ class PlayerViewModel
         private val _uiState = MutableStateFlow(PlayerUiState())
         val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
 		
-		//歌词
-		 
-	    private val _lyricsState = MutableStateFlow(LyricsUiState())
-	    val lyricsState: StateFlow<LyricsUiState> = _lyricsState.asStateFlow()
-	    private var synchronizer: LyricsSynchronizer? = null
-	
-	    // 当前歌曲对象
-	    val currentSong: StateFlow<Song?> = combine(playQueue, currentIndex) { queue, index ->
-	        queue.getOrNull(index)
-	    }.stateIn(
-	        scope = viewModelScope,
-	        started = SharingStarted.WhileSubscribed(5_000),
-	        initialValue = null
-	    )
-	    
-	    init {
-        observeCurrentSong()
-        observePlayback()
-    }
+        // 歌词
 
-    private fun observeCurrentSong() {
-        viewModelScope.launch {
-            currentSong.collect { song ->
-                if (song == null) {
-                    _lyricsState.value = LyricsUiState()
-                    synchronizer = null
-                    return@collect
-                }
+        private val _lyricsState = MutableStateFlow(LyricsUiState())
+        val lyricsState: StateFlow<LyricsUiState> = _lyricsState.asStateFlow()
+        private var synchronizer: LyricsSynchronizer? = null
 
-                // 加载歌词
-                val lyrics = lyricsRepository.loadLyrics(song.id)
-                synchronizer = lyrics?.let { LyricsSynchronizer(it) }
-                _lyricsState.value = _lyricsState.value.copy(lyrics = lyrics, highlight = null)
-                
+        // 当前歌曲对象
+        val currentSong: StateFlow<Song?> =
+            combine(playQueue, currentIndex) { queue, index ->
+                queue.getOrNull(index)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = null,
+            )
+
+        init {
+            observeCurrentSong()
+            observePlayback()
+        }
+
+        private fun observeCurrentSong() {
+            viewModelScope.launch {
+                currentSong.collect { song ->
+                    if (song == null) {
+                        _lyricsState.value = LyricsUiState()
+                        synchronizer = null
+                        return@collect
+                    }
+
+                    // 加载歌词
+                    val lyrics = lyricsRepository.loadLyrics(song.id)
+                    synchronizer = lyrics?.let { LyricsSynchronizer(it) }
+                    _lyricsState.value = _lyricsState.value.copy(lyrics = lyrics, highlight = null)
+
               /*  val lyrics = Lyrics(
     songId = song.id,
     language = "zh",
@@ -88,20 +88,20 @@ class PlayerViewModel
 
 synchronizer = LyricsSynchronizer(lyrics)
 _lyricsState.value = LyricsUiState(lyrics = lyrics)*/
+                }
             }
         }
-    }
 
-    private fun observePlayback() {
-        viewModelScope.launch {
-            playbackState.collect { state ->
-                val sync = synchronizer ?: return@collect
-                val highlight = sync.findHighlight(state.currentPosition) // ✅ Long 类型
-                _lyricsState.value = _lyricsState.value.copy(highlight = highlight)
+        private fun observePlayback() {
+            viewModelScope.launch {
+                playbackState.collect { state ->
+                    val sync = synchronizer ?: return@collect
+                    val highlight = sync.findHighlight(state.currentPosition) // ✅ Long 类型
+                    _lyricsState.value = _lyricsState.value.copy(highlight = highlight)
+                }
             }
         }
-    }
-	                
+
         // 加载本地歌曲
         fun loadLocalSongs() {
             viewModelScope.launch {

@@ -32,8 +32,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
 
-
-
 import androidx.compose.foundation.Image // 必须手动引入，防止和 Icon 混淆
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.graphicsLayer
@@ -41,7 +39,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.remember
 import coil.compose.rememberAsyncImagePainter // 核心报错修正
 import coil.request.CachePolicy
-
 
 import androidx.compose.runtime.key
 import coil.compose.AsyncImage
@@ -52,7 +49,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
-// 注意：drawRect 和 drawContent 是在 DrawScope 作用域内的，通常不需要单独 import 
+// 注意：drawRect 和 drawContent 是在 DrawScope 作用域内的，通常不需要单独 import
 // 但确保你引入了下面这个
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 
@@ -154,7 +151,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val lyricsState by viewModel.lyricsState.collectAsState()
     val lyrics = lyricsState.lyrics?.lines.orEmpty()
@@ -166,9 +163,9 @@ fun LyricsView(
     var userScrolling by remember { mutableStateOf(false) }
     var isProgrammaticScroll by remember { mutableStateOf(false) }
 
-    /* ------------------------------------------------ */
-    /* 监听用户手动滚动                                   */
-    /* ------------------------------------------------ */
+    // ------------------------------------------------
+    // 监听用户手动滚动
+    // ------------------------------------------------
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
             .collect { scrolling ->
@@ -178,9 +175,9 @@ fun LyricsView(
             }
     }
 
-    /* ------------------------------------------------ */
-    /* 用户停止滚动 1 秒后，恢复自动回中                    */
-    /* ------------------------------------------------ */
+    // ------------------------------------------------
+    // 用户停止滚动 1 秒后，恢复自动回中
+    // ------------------------------------------------
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
             .collect { scrolling ->
@@ -191,9 +188,9 @@ fun LyricsView(
             }
     }
 
-    /* ------------------------------------------------ */
-    /* 自动回中（只由高亮行变化触发）                        */
-    /* ------------------------------------------------ */
+    // ------------------------------------------------
+    // 自动回中（只由高亮行变化触发）
+    // ------------------------------------------------
     LaunchedEffect(highlight?.lineIndex) {
         if (highlight == null) return@LaunchedEffect
         if (userScrolling) return@LaunchedEffect
@@ -209,88 +206,90 @@ fun LyricsView(
         }
     }
 
-    /* ------------------------------------------------ */
-    /* UI                                               */
-    /* ------------------------------------------------ */
+    // ------------------------------------------------
+    // UI
+    // ------------------------------------------------
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        state = listState
+        state = listState,
     ) {
         itemsIndexed(lyrics) { index, line ->
             val isHighlighted = highlight?.lineIndex == index
 
             val animatedFontSize by animateFloatAsState(
                 targetValue = if (isHighlighted) 30f else 20f,
-                label = "lyrics_font_size"
+                label = "lyrics_font_size",
             )
 
             val animatedAlpha by animateFloatAsState(
                 targetValue = if (isHighlighted) 0.82f else 0.5f,
-                label = "lyrics_alpha"
+                label = "lyrics_alpha",
             )
 
             Text(
                 text = line.text,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable {
-                        viewModel.seekTo(line.timeMs)
-                        scope.launch {
-                            isProgrammaticScroll = true
-                            try {
-                                slowScrollToCenter(listState, index)
-                            } finally {
-                                isProgrammaticScroll = false
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clickable {
+                            viewModel.seekTo(line.timeMs)
+                            scope.launch {
+                                isProgrammaticScroll = true
+                                try {
+                                    slowScrollToCenter(listState, index)
+                                } finally {
+                                    isProgrammaticScroll = false
+                                }
                             }
-                        }
-                    },
+                        },
                 color = Color.Black.copy(alpha = animatedAlpha),
                 fontSize = animatedFontSize.sp,
-                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
             )
         }
     }
 }
 
-/* ------------------------------------------------ */
-/* 慢速滚动到居中（不使用 animationSpec）              */
-/* ------------------------------------------------ */
+// ------------------------------------------------
+// 慢速滚动到居中（不使用 animationSpec）
+// ------------------------------------------------
 private suspend fun slowScrollToCenter(
     listState: LazyListState,
-    index: Int
+    index: Int,
 ) {
     val layoutInfo = listState.layoutInfo
     val viewportCenter = layoutInfo.viewportSize.height / 2
 
-    val itemInfo = layoutInfo.visibleItemsInfo
-        .find { it.index == index }
+    val itemInfo =
+        layoutInfo.visibleItemsInfo
+            .find { it.index == index }
 
-    val targetOffset = if (itemInfo != null) {
-        val itemCenter = itemInfo.offset + itemInfo.size / 2
-        itemCenter - viewportCenter
-    } else {
-        null
-    }
+    val targetOffset =
+        if (itemInfo != null) {
+            val itemCenter = itemInfo.offset + itemInfo.size / 2
+            itemCenter - viewportCenter
+        } else {
+            null
+        }
 
     if (targetOffset == null) {
         listState.scrollToItem(
             index,
-            -viewportCenter
+            -viewportCenter,
         )
         return
     }
 
     // 👇 手动分段慢滚
-    val steps = 30          // 越大越慢
+    val steps = 30 // 越大越慢
     val stepOffset = targetOffset / steps
 
     repeat(steps) {
         listState.scrollBy(stepOffset.toFloat())
-        delay(16L)          // ~60fps
+        delay(16L) // ~60fps
     }
 }
-
 
 @Composable
 fun ReboundHorizontalDrag(
@@ -564,159 +563,125 @@ fun playerScreen(
     pagerState: PagerState,
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
-	val playbackState by playerViewModel.playbackState.collectAsState()
+    val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
-	val coverUri = currentSong?.albumArt
-	 // 1. 必须先定义 scope
+    val coverUri = currentSong?.albumArt
+    // 1. 必须先定义 scope
     val scope = rememberCoroutineScope()
 	
     // 1. 创建一个嵌套滚动连接器，专门处理“卡住”的情况
-    val fixStuckConnection = remember {
-        object : NestedScrollConnection {
-            // 当用户松开手，且所有子组件（LazyColumn）完成惯性滑动后触发
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                // 如果 Pager 停在半路（偏移量不为 0）
-                if (pagerState.currentPageOffsetFraction != 0f) {
-                    // 强制让 Pager 滚动到它“想去”的那一页
-                    scope.launch {
-                        pagerState.animateScrollToPage(pagerState.targetPage)
+    val fixStuckConnection =
+        remember {
+            object : NestedScrollConnection {
+                // 当用户松开手，且所有子组件（LazyColumn）完成惯性滑动后触发
+                override suspend fun onPostFling(
+                    consumed: Velocity,
+                    available: Velocity,
+                ): Velocity {
+                    // 如果 Pager 停在半路（偏移量不为 0）
+                    if (pagerState.currentPageOffsetFraction != 0f) {
+                        // 强制让 Pager 滚动到它“想去”的那一页
+                        scope.launch {
+                            pagerState.animateScrollToPage(pagerState.targetPage)
+                        }
                     }
+                    return super.onPostFling(consumed, available)
                 }
-                return super.onPostFling(consumed, available)
             }
         }
-    }
-	// 自定义 Fling 行为
-     // 使用这种方式定义，参数名更准确
-    val flingBehavior = PagerDefaults.flingBehavior(
-        state = pagerState,
-        // 关键：只要滑动超过 15% 就视为翻页，防止回弹
-        snapPositionalThreshold = 0.8f, 
-        // 这里的 snapAnimationSpec 对应松手后的吸附动画
-        snapAnimationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow
+    // 自定义 Fling 行为
+    // 使用这种方式定义，参数名更准确
+    val flingBehavior =
+        PagerDefaults.flingBehavior(
+            state = pagerState,
+            // 关键：只要滑动超过 15% 就视为翻页，防止回弹
+            snapPositionalThreshold = 0.8f,
+            // 这里的 snapAnimationSpec 对应松手后的吸附动画
+            snapAnimationSpec =
+                spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMediumLow,
+                ),
         )
+    // 默认颜色（如深灰色）
+    val defaultButtonColor = MaterialTheme.colorScheme.primary
+    var themeColor by remember { mutableStateOf(defaultButtonColor) }
+
+// 使用动画过渡，防止切歌时颜色突变，看起来更高级
+    val animatedThemeColor by animateColorAsState(
+        targetValue = themeColor,
+        animationSpec = tween(600),
+        label = "ThemeColorAnimation",
     )
-    
-    // 1. 手动创建 Painter
-	
-	/*val painter = rememberAsyncImagePainter(
-    model = ImageRequest.Builder(LocalContext.current)
-        .data(coverUri)
-        .crossfade(true)
-        .size(150) // 适当调大一点点保证模糊后的质感
-        .memoryCachePolicy(CachePolicy.ENABLED)
-        .build(),
-    filterQuality = FilterQuality.Low
-)*/
-	
-	Box(
+
+    Box(
         modifier =
             modifier
                 .fillMaxSize(),
     ) {
         // 背景图片 + 高斯模糊
-        /*
-		AndroidView(
-        modifier =
-            Modifier
-                .fillMaxSize(),
-        factory = { context ->
-            ImageView(context).apply {
-                scaleType = ImageView.ScaleType.CENTER_CROP
-                rotation = 180f
-            }
-        },
-        update = { imageView ->
-            if (coverUri != null) {
-                Glide.with(imageView)
-                    .load(coverUri)
-                    .transform(
-                        jp.wasabeef.glide.transformations.BlurTransformation(
-                            40,   // radius
-                            20     // sampling（越大越省性能）
-                        )
-                    )
-                    .transform(
-	        BlurTransformation(40, 20) // 最终效果
-	    )
-                    .into(imageView)
-            } else {
-              //  imageView.setImageDrawable(null)
+
+        // 2. 在 Box 中通过 Image 渲染，并添加强制重绘逻辑
+        AnimatedContent(
+            targetState = coverUri,
+            transitionSpec = {
+                // 定义切歌时的过渡效果：淡入淡出，时长 600ms
+                fadeIn(animationSpec = tween(600)) togetherWith fadeOut(animationSpec = tween(600))
+            },
+            label = "BackgroundAnimation",
+        ) { targetUri ->
+            // 这里的 targetUri 就是当前最新的图片地址
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .blur(radius = 80.dp), // 在动画容器内部应用模糊
+            ) {
+                androidx.compose.foundation.Image(
+                    painter =
+                        rememberAsyncImagePainter(
+                            model =
+                                ImageRequest
+                                    .Builder(LocalContext.current)
+                                    .data(targetUri)
+                                    .allowHardware(false) // ⚠️ 关键：提取颜色必须关闭硬件加速，否则拿不到 Bitmap
+                                    .size(150) // 强制小图模式，极速加载
+                                    .build(),
+                        ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    onSuccess = { result ->
+                        // 获取加载成功的 Drawable 并转换为 Bitmap
+                        val bitmap = (result.result.drawable as? BitmapDrawable)?.bitmap
+                        if (bitmap != null) {
+                            // 使用 Palette 异步提取颜色
+                            Palette.from(bitmap).generate { palette ->
+                                // 优先取有活力的颜色 (Vibrant)，备选主色 (Muted)
+                                val swatches =
+                                    listOfNotNull(
+                                        palette?.vibrantSwatch,
+                                        palette?.lightVibrantSwatch,
+                                        palette?.mutedSwatch,
+                                    )
+                                // 取出第一个不为空的颜色，如果没有，保持默认
+                                swatches.firstOrNull()?.let { swatch ->
+                                    themeColor = Color(swatch.rgb)
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
+
+                // 遮罩层也放在里面，跟随动画
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.White.copy(alpha = 0.38f)),
+                )
             }
         }
-    )*/
-    	// 使用 key 确保切歌时组件彻底刷新
-    	/*
-key(coverUri) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(coverUri)
-            .crossfade(true)
-            .crossfade(500) // 500ms 淡入淡出，切歌更顺滑
-            // 核心优化：因为是要做模糊背景，直接加载很小的尺寸（如100px）
-            // 这样图片下载极快，模糊计算压力也极小，完全不会卡顿
-            .size(100) 
-            .build(),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .fillMaxSize()
-            // 这里的 blur 只有在 Android 12+ 才会生效
-            .blur(radius = 40.dp) 
-            .drawWithContent {
-                drawContent()
-                // 叠加半透明遮罩，确保前台文字清晰
-                drawRect(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f))
-            },
-        filterQuality = FilterQuality.Low
-    )
-}*/
-	// 2. 在 Box 中通过 Image 渲染，并添加强制重绘逻辑
-	// 放在你的 Box 容器内作为背景
-AnimatedContent(
-    targetState = coverUri,
-    transitionSpec = {
-        // 定义切歌时的过渡效果：淡入淡出，时长 600ms
-        fadeIn(animationSpec = tween(600)) togetherWith fadeOut(animationSpec = tween(600))
-    },
-    label = "BackgroundAnimation"
-) { targetUri ->
-    // 这里的 targetUri 就是当前最新的图片地址
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .blur(radius = 80.dp) // 在动画容器内部应用模糊
-    ) {
-        androidx.compose.foundation.Image(
-            painter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(targetUri)
-                    .size(150) // 强制小图模式，极速加载
-                    .build()
-            ),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        
-        // 遮罩层也放在里面，跟随动画
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White.copy(alpha = 0.3f))
-        )
-    }
-}
-
-    	//毛玻璃
-    /*	Box(
-		    modifier = Modifier
-		        .fillMaxSize()
-		        .blur(10.dp)
-		        .background(Color.White.copy(alpha = 0.25f))
-		)*/
         // 你原本的播放器内容（盖在上面）
         Box(
             modifier =
@@ -728,13 +693,13 @@ AnimatedContent(
         VerticalPager(
             state = pagerState,
             key = { it },
-            modifier = Modifier
-            	.fillMaxSize()
-            	.nestedScroll(fixStuckConnection), // 拦截并修复状态,
-            beyondViewportPageCount = 1,           // 预加载相邻页，防止卡顿处出现空白
-            flingBehavior = flingBehavior,     // 应用自定义行为
-            // 👇 手势限制可以放松
-            //     userScrollEnabled = expandProgress > 0.3f
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .nestedScroll(fixStuckConnection),
+            // 拦截并修复状态,
+            beyondViewportPageCount = 1, // 预加载相邻页，防止卡顿处出现空白
+            flingBehavior = flingBehavior, // 应用自定义行为
         ) { page ->
             when (page) {
                 0 -> {
@@ -1243,8 +1208,8 @@ fun BottomDrawerContent(
     val currentSong = playbackState.currentSong
     val pageCount = 2
     val coverUri = currentSong?.albumArt
-	val scope = rememberCoroutineScope()
-    
+    val scope = rememberCoroutineScope()
+
     val pagerStateB =
         rememberPagerState(
             pageCount = { pageCount },
@@ -1300,9 +1265,9 @@ fun BottomDrawerContent(
                             Box(
                                 modifier =
                                     Modifier
-                                        //.size(64.dp)
-                                        .padding(30.dp)              // 👈 用内边距控制大小
-           								.aspectRatio(1f)  
+                                        // .size(64.dp)
+                                        .padding(30.dp) // 👈 用内边距控制大小
+                                        .aspectRatio(1f)
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(MaterialTheme.colorScheme.surfaceVariant),
                                 contentAlignment = Alignment.Center,
@@ -1442,8 +1407,8 @@ fun BottomDrawerContent(
                 Icon(Icons.Default.Equalizer, "音效")
             }
             IconButton(onClick = {
-            	scope.launch {
-                	pagerState.animateScrollToPage(1)
+                scope.launch {
+                    pagerState.animateScrollToPage(1)
                 }
             }) {
                 Icon(Icons.Default.QueueMusic, "播放队列")

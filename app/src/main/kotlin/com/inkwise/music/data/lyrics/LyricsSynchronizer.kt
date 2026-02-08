@@ -5,11 +5,13 @@ import com.inkwise.music.data.model.LyricLine
 import com.inkwise.music.data.model.LyricToken
 import com.inkwise.music.data.model.Lyrics
 
-class LyricsSynchronizer(private val lyrics: Lyrics) {
-	private val lines = lyrics.lines
-	
+class LyricsSynchronizer(
+    private val lyrics: Lyrics,
+) {
+    private val lines = lyrics.lines
+
     fun findHighlight(
-        positionMs: Long
+        positionMs: Long,
     ): LyricHighlight? {
         if (lines.isEmpty()) return null
 
@@ -25,20 +27,21 @@ class LyricsSynchronizer(private val lyrics: Lyrics) {
         }
 
         val tokenIndex = findTokenIndex(tokens, positionMs)
-        val progress = tokenIndex?.let {
-            calculateTokenProgress(tokens[it], positionMs)
-        }
+        val progress =
+            tokenIndex?.let {
+                calculateTokenProgress(tokens[it], positionMs)
+            }
 
         return LyricHighlight(
             lineIndex = lineIndex,
             tokenIndex = tokenIndex,
-            tokenProgress = progress
+            tokenProgress = progress,
         )
     }
 
     private fun findLineIndex(
         lines: List<LyricLine>,
-        positionMs: Long
+        positionMs: Long,
     ): Int {
         var low = 0
         var high = lines.lastIndex
@@ -58,7 +61,7 @@ class LyricsSynchronizer(private val lyrics: Lyrics) {
 
     private fun findTokenIndex(
         tokens: List<LyricToken>,
-        positionMs: Long
+        positionMs: Long,
     ): Int? {
         var low = 0
         var high = tokens.lastIndex
@@ -78,7 +81,7 @@ class LyricsSynchronizer(private val lyrics: Lyrics) {
 
     private fun calculateTokenProgress(
         token: LyricToken,
-        positionMs: Long
+        positionMs: Long,
     ): Float {
         val duration = token.endMs - token.startMs
         if (duration <= 0) return 1f

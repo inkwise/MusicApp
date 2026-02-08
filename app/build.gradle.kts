@@ -133,5 +133,6 @@ dependencies {
   	ksp ("androidx.room:room-compiler:2.6.1" )
 	implementation ("androidx.room:room-ktx:2.6.1")
 	implementation ("com.github.AdrienPoupa:jaudiotagger:2.2.3")
-	
+	//主题色
+	implementation("androidx.palette:palette-ktx:1.0.0")
 }

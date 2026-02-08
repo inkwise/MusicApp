@@ -3,26 +3,25 @@ package com.inkwise.music.ui.queue
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.inkwise.music.ui.player.PlayerViewModel
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-
 import androidx.compose.ui.geometry.Offset
-
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.inkwise.music.ui.player.PlayerViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayQueueBottomSheet(
@@ -31,9 +30,9 @@ fun PlayQueueBottomSheet(
     val playQueue by playerViewModel.playQueue.collectAsState()
     val currentIndex by playerViewModel.currentIndex.collectAsState()
     val playbackState by playerViewModel.playbackState.collectAsState()
-	// ✅ 和 LazyColumn 绑定
+    // ✅ 和 LazyColumn 绑定
     val listState = rememberLazyListState()
-    
+
     Column(
         modifier =
             Modifier
@@ -74,12 +73,11 @@ fun PlayQueueBottomSheet(
 
         // 播放队列列表
         LazyColumn(
-        	state = listState,
-        	modifier = Modifier
-            	//.fillMaxSize()
-            	.weight(1f)
-            	
-        
+            state = listState,
+            modifier =
+                Modifier
+                    // .fillMaxSize()
+                    .weight(1f),
         ) {
             itemsIndexed(playQueue) { index, song ->
                 val isCurrentSong = index == currentIndex

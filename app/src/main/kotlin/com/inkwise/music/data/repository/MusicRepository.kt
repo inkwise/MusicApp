@@ -7,10 +7,10 @@ import com.inkwise.music.data.model.PlaylistSongEntity
 import com.inkwise.music.data.model.PlaylistWithSongs
 import com.inkwise.music.data.model.Song
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import kotlinx.coroutines.flow.firstOrNull
-	
+
 class MusicRepository
     @Inject
     constructor(
@@ -26,23 +26,22 @@ class MusicRepository
 
         fun getAllPlaylists(): Flow<List<PlaylistWithSongs>> = playlistDao.getAllPlaylistsWithSongs()
 
+        suspend fun saveScannedSongs(scanned: List<Song>) {
+            // 只插入数据库里不存在的
+            val newSongs = mutableListOf<Song>()
+	
+            for (song in scanned) {
+                val exist = songDao.getSongByPath(song.path)
+                if (exist == null) {
+                    newSongs += song
+                }
+            }
+	
+            if (newSongs.isNotEmpty()) {
+                songDao.insertSongs(newSongs)
+            }
+        }
 
-		suspend fun saveScannedSongs(scanned: List<Song>) {
-	        // 只插入数据库里不存在的
-	        val newSongs = mutableListOf<Song>()
-	
-	        for (song in scanned) {
-	            val exist = songDao.getSongByPath(song.path)
-	            if (exist == null) {
-	                newSongs += song
-	            }
-	        }
-	
-	        if (newSongs.isNotEmpty()) {
-	            songDao.insertSongs(newSongs)
-	        }
-	    }
-	
         suspend fun insertSongs(songs: List<Song>) {
             songDao.insertSongs(songs)
         }
@@ -65,8 +64,6 @@ class MusicRepository
                 }
             playlistDao.insertPlaylistSongs(playlistSongs)
         }
-    
-		suspend fun getSongById(songId: Long): Song? {
-		    return songDao.getSongById(songId)
-		}
+
+        suspend fun getSongById(songId: Long): Song? = songDao.getSongById(songId)
     }

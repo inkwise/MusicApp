@@ -5,5 +5,5 @@ data class Lyrics(
     val lines: List<LyricLine>,
     val language: String,
     val source: LyricsSource,
-    val version: Int
+    val version: Int,
 )

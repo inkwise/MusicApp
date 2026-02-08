@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.hilt.navigation.compose.hiltViewModel
+
 @Composable
 fun LocalSongsScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
@@ -33,8 +34,8 @@ fun LocalSongsScreen(
 
     // 首次加载
     LaunchedEffect(Unit) {
-        //localViewModel.loadLocalSongsFromStore()
-      //  localViewModel.scanSongs(context)
+        // localViewModel.loadLocalSongsFromStore()
+        //  localViewModel.scanSongs(context)
     }
 
     Column(
