@@ -1435,9 +1435,9 @@ Slider(
     },
     // 1. 自定义颜色
     colors = SliderDefaults.colors(
-        activeTrackColor = animatedColor,      // 已播放部分的进度条颜色
-        inactiveTrackColor = animatedColor.copy(alpha = 0.24f), // 未播放部分的背景色
-        thumbColor = animatedColor,            // 滑块颜色
+        activeTrackColor = animatedThemeColor,      // 已播放部分的进度条颜色
+        inactiveTrackColor = animatedThemeColor.copy(alpha = 0.24f), // 未播放部分的背景色
+        thumbColor = animatedThemeColor,            // 滑块颜色
         activeTickColor = Color.Transparent,   // 隐藏刻度线
         inactiveTickColor = Color.Transparent
     ),
@@ -1446,7 +1446,7 @@ Slider(
         SliderDefaults.Thumb(
             interactionSource = remember { MutableInteractionSource() },
             thumbSize = DpSize(12.dp, 12.dp), // 缩小滑块尺寸
-            colors = SliderDefaults.colors(thumbColor = animatedColor)
+            colors = SliderDefaults.colors(thumbColor = animatedThemeColor)
         )
     },
     // 3. 调整轨道高度 (取消默认厚度)
@@ -1455,7 +1455,7 @@ Slider(
             sliderState = sliderState,
             modifier = Modifier.height(4.dp), // 让进度条更纤细
             colors = SliderDefaults.colors(
-                activeTrackColor = animatedColor,
+                activeTrackColor = animatedThemeColor,
                 inactiveTrackColor = animatedColor.copy(alpha = 0.2f)
             )
         )
