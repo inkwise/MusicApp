@@ -736,7 +736,7 @@ AsyncImage(
         ) { page ->
             when (page) {
                 0 -> {
-                    BottomDrawerContent(pagerState = pagerState,iconColor=animatedThemeColor)
+                    BottomDrawerContent(pagerState = pagerState,animatedThemeColor=animatedThemeColor)
                 }
 
                 1 -> {
@@ -1235,7 +1235,7 @@ fun BottomDrawerContent(
 @Composable
 fun BottomDrawerContent(
     pagerState: PagerState,
-    iconColor: Color,
+    animatedThemeColor: Color,
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val playbackState by playerViewModel.playbackState.collectAsState()
@@ -1265,15 +1265,21 @@ fun BottomDrawerContent(
         ) {
             Text(
                 text = currentSong?.title ?: "墨迹",
-                style = MaterialTheme.typography.titleLarge,
+                color = animatedThemeColor,
+                style = MaterialTheme.typography.titleLarge.copy(
+			        // 2. 使用 fontWeight 设置加粗
+			        fontWeight = FontWeight.Bold 
+			    ),
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis // 建议加上，防止长歌名挤压布局
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = currentSong?.artist ?: "@inkwise",
+                color = animatedThemeColor,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 		
