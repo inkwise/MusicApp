@@ -1486,7 +1486,8 @@ fun BottomDrawerContent(
     // 歌词区域（不影响封面）
     // -------------------------------
     MiniLyricsView(
-        viewModel = viewModel,
+        viewModel = playerViewModel,
+        animatedThemeColor=animatedThemeColor
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)   // ✅ 明确高度（推荐）
