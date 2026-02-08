@@ -10,7 +10,7 @@ import coil.compose.rememberAsyncImagePainter
 
 import androidx.compose.ui.platform.LocalContext
 
-
+import androidx.compose.ui.graphics.lerp
 
 import jp.wasabeef.glide.transformations.BlurTransformation
 import androidx.compose.animation.core.animateFloatAsState
@@ -654,18 +654,18 @@ AsyncImage(
             androidx.palette.graphics.Palette.from(bitmap).generate { palette ->
                 palette?.let { p ->
                     // 尝试取几种颜色，按优先级排序
-                    /*val colorInt = p.getVibrantColor(
+                    val colorInt = p.getVibrantColor(
                         p.getMutedColor(
                             p.getDominantColor(defaultColor.toArgb())
                         )
                     )
-                    */
-                    val colorInt = if (p.mutedSwatch != null) {
-					    p.mutedSwatch!!.rgb // 没有就找柔和色
-					} else {
-					    p.getDominantColor(defaultColor.toArgb()) // 再没有就用像素最多的色，实在不行用灰色
-					}
+                    
+                    // ... 在获取颜色后
+					val extractedColor = Color(colorInt)
 					
+					// 将提取到的颜色与黑色 (Black) 进行混合
+					// 0.3f 代表混合 30% 的黑色，70% 的原色。数值越大，颜色越深。
+					themeColor = lerp(extractedColor, Color.Black, 0.4f)
                     themeColor = Color(colorInt)
                 }
             }
