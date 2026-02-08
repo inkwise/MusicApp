@@ -601,7 +601,7 @@ fun playerScreen(
     
     // 1. 手动创建 Painter
 	
-	val painter = rememberAsyncImagePainter(
+	/*val painter = rememberAsyncImagePainter(
     model = ImageRequest.Builder(LocalContext.current)
         .data(coverUri)
         .crossfade(true)
@@ -609,7 +609,7 @@ fun playerScreen(
         .memoryCachePolicy(CachePolicy.ENABLED)
         .build(),
     filterQuality = FilterQuality.Low
-)
+)*/
 	
 	Box(
         modifier =
@@ -687,7 +687,7 @@ AnimatedContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .blur(radius = 40.dp) // 在动画容器内部应用模糊
+            .blur(radius = 80.dp) // 在动画容器内部应用模糊
     ) {
         androidx.compose.foundation.Image(
             painter = rememberAsyncImagePainter(
@@ -705,7 +705,7 @@ AnimatedContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.3f))
+                .background(Color.White.copy(alpha = 0.3f))
         )
     }
 }
