@@ -527,6 +527,23 @@ fun playerScreen(
     val currentSong = playbackState.currentSong
 	val coverUri = currentSong?.albumArt
 	
+	
+    // 1. 创建一个嵌套滚动连接器，专门处理“卡住”的情况
+    val fixStuckConnection = remember {
+        object : NestedScrollConnection {
+            // 当用户松开手，且所有子组件（LazyColumn）完成惯性滑动后触发
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                // 如果 Pager 停在半路（偏移量不为 0）
+                if (pagerState.currentPageOffsetFraction != 0f) {
+                    // 强制让 Pager 滚动到它“想去”的那一页
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.targetPage)
+                    }
+                }
+                return super.onPostFling(consumed, available)
+            }
+        }
+    }
 	// 自定义 Fling 行为
      // 使用这种方式定义，参数名更准确
     val flingBehavior = PagerDefaults.flingBehavior(
@@ -593,7 +610,10 @@ fun playerScreen(
         VerticalPager(
             state = pagerState,
             key = { it },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+            	.fillMaxSize()
+            	.nestedScroll(fixStuckConnection), // 拦截并修复状态,
+            beyondViewportPageCount = 1,           // 预加载相邻页，防止卡顿处出现空白
             flingBehavior = flingBehavior,     // 应用自定义行为
             // 👇 手势限制可以放松
             //     userScrollEnabled = expandProgress > 0.3f
