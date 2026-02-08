@@ -729,7 +729,7 @@ AsyncImage(
         ) { page ->
             when (page) {
                 0 -> {
-                    BottomDrawerContent(pagerState = pagerState)
+                    BottomDrawerContent(pagerState = pagerState,iconColor=animatedThemeColor)
                 }
 
                 1 -> {
@@ -1228,6 +1228,7 @@ fun BottomDrawerContent(
 @Composable
 fun BottomDrawerContent(
     pagerState: PagerState,
+    iconColor: Color,
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val playbackState by playerViewModel.playbackState.collectAsState()
@@ -1424,23 +1425,23 @@ fun BottomDrawerContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
-                Icon(Icons.Default.Repeat, "播放模式")
+                Icon(Icons.Default.Repeat, "播放模式" , tint = iconColor)
             }
             IconButton(onClick = { /* 定时 */ }) {
-                Icon(Icons.Default.Timer, "定时")
+                Icon(Icons.Default.Timer, "定时" , tint = iconColor)
             }
             IconButton(onClick = { /* 音效 */ }) {
-                Icon(Icons.Default.Equalizer, "音效")
+                Icon(Icons.Default.Equalizer, "音效" , tint = iconColor)
             }
             IconButton(onClick = {
                 scope.launch {
                     pagerState.animateScrollToPage(1)
                 }
             }) {
-                Icon(Icons.Default.QueueMusic, "播放队列")
+                Icon(Icons.Default.QueueMusic, "播放队列" , tint = iconColor)
             }
             IconButton(onClick = { /* 菜单 */ }) {
-                Icon(Icons.Default.MoreVert, "菜单")
+                Icon(Icons.Default.MoreVert, "菜单" , tint = iconColor)
             }
         }
     }
