@@ -1390,14 +1390,8 @@ fun BottomDrawerContent(
                 when (page) {
                     0 -> {
                         // 封面页
-                        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(top = 24.dp, bottom = 16.dp)
-        ){
-                        Box(
+         
+                      /*  Box(
                             modifier = Modifier.fillMaxWidth().weight(1f),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -1440,15 +1434,65 @@ fun BottomDrawerContent(
                                     )
                                 }
                             }
-                        }
-                        
-	                        MiniLyricsView(
-							    viewModel= playerViewModel,
-							    animatedThemeColor=animatedThemeColor,
-						
-							)
-                        
-                        }
+                        }*/
+                        Column(
+    modifier = Modifier.fillMaxSize(),
+) {
+    // -------------------------------
+    // 封面区域（固定占剩余空间）
+    // -------------------------------
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),   // ✅ 只有它用 weight
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            AndroidView(
+                modifier = Modifier.matchParentSize(),
+                factory = { context ->
+                    ImageView(context).apply {
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                    }
+                },
+                update = { imageView ->
+                    val uri = coverUri
+                    if (uri != null) {
+                        Glide.with(imageView).load(uri).into(imageView)
+                    } else {
+                        imageView.setImageDrawable(null)
+                    }
+                },
+            )
+
+            if (coverUri == null) {
+                Icon(
+                    imageVector = Icons.Default.MusicNote,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
+    // -------------------------------
+    // 歌词区域（不影响封面）
+    // -------------------------------
+    MiniLyricsView(
+        viewModel = viewModel,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)   // ✅ 明确高度（推荐）
+    )
+}
+	                     
                     }
 
                     1 -> {
