@@ -1488,9 +1488,17 @@ fun BottomDrawerContent(
             IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
                 Icon(Icons.Default.Repeat, "播放模式" , tint = animatedThemeColor)
             }
-            IconButton(onClick = { /* 定时 */ }) {
+          /*  IconButton(onClick = {  }) {
                 Icon(Icons.Default.Timer, "定时" , tint = animatedThemeColor)
-            }
+            }*/
+            IconButton(onClick = { /* 定时逻辑 */ }) {
+			    Icon(
+			        painter = painterResource(id = R.drawable.ic_sleep_timer), 
+			        contentDescription = "定时", 
+			        tint = animatedThemeColor
+			    )
+			}
+			
             IconButton(onClick = { /* 音效 */ }) {
                 Icon(Icons.Default.Equalizer, "音效" , tint = animatedThemeColor)
             }
