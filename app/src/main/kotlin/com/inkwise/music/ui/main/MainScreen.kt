@@ -526,6 +526,16 @@ fun playerScreen(
 	val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
 	val coverUri = currentSong?.albumArt
+	
+	// 自定义 Fling 行为
+    val flingBehavior = PagerDefaults.flingBehavior(
+        state = pagerState,
+        // 关键点 1：降低判定阈值。只要滑动超过 15%，松手就跳转下一页
+        snapPositionalThreshold = 0.15f,
+        // 关键点 2：可以微调低速滚动时的吸附动画
+        lowVelocityAnimationSpec = spring(stiffness = Spring.StiffnessLow)
+    )
+    
 	Box(
         modifier =
             modifier
