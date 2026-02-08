@@ -1443,19 +1443,13 @@ Slider(
         activeTickColor = Color.Transparent,   // 隐藏刻度线
         inactiveTickColor = Color.Transparent
     ),
-    // 2. 自定义滑块 (如果想取消默认的大圆头，可以自定义一个极小的圆或空置)
-    thumb = {
-        SliderDefaults.Thumb(
-            interactionSource = remember { MutableInteractionSource() },
-            thumbSize = DpSize(12.dp, 12.dp), // 缩小滑块尺寸
-            colors = SliderDefaults.colors(thumbColor = animatedThemeColor)
-        )
-    },
+    //隐藏滑块
+    thumb = {},
     // 3. 调整轨道高度 (取消默认厚度)
     track = { sliderState ->
         SliderDefaults.Track(
             sliderState = sliderState,
-            modifier = Modifier.height(4.dp), // 让进度条更纤细
+            modifier = Modifier.height(3.dp), // 让进度条更纤细
             colors = SliderDefaults.colors(
                 activeTrackColor = animatedThemeColor,
                 inactiveTrackColor =animatedThemeColor.copy(alpha = 0.2f)
