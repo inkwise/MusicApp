@@ -616,16 +616,19 @@ fun playerScreen(
                     stiffness = Spring.StiffnessMediumLow,
                 ),
         )
-    // 默认颜色（如深灰色）
-    val defaultButtonColor = MaterialTheme.colorScheme.primary
-    var themeColor by remember { mutableStateOf(defaultButtonColor) }
-
-// 使用动画过渡，防止切歌时颜色突变，看起来更高级
-    val animatedThemeColor by animateColorAsState(
-        targetValue = themeColor,
-        animationSpec = tween(600),
-        label = "ThemeColorAnimation",
-    )
+    // --- 1. 颜色状态定义 ---
+	val defaultColor = Color.DarkGray
+	var themeColor by remember { mutableStateOf(defaultColor) }
+	
+	// 动态颜色过渡动画
+	val animatedThemeColor by animateColorAsState(
+	    targetValue = themeColor,
+	    animationSpec = tween(600),
+	    label = "ColorAnimation"
+	)
+	
+	val context = LocalContext.current
+	
 
     Box(
         modifier =
@@ -663,26 +666,25 @@ fun playerScreen(
                         ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    onSuccess = { result ->
-                        // 获取加载成功的 Drawable 并转换为 Bitmap
-                        val bitmap = (result.result.drawable as? BitmapDrawable)?.bitmap
-                        if (bitmap != null) {
-                            // 使用 Palette 异步提取颜色
-                            Palette.from(bitmap).generate { palette ->
-                                // 优先取有活力的颜色 (Vibrant)，备选主色 (Muted)
-                                val swatches =
-                                    listOfNotNull(
-                                        palette?.vibrantSwatch,
-                                        palette?.lightVibrantSwatch,
-                                        palette?.mutedSwatch,
-                                    )
-                                // 取出第一个不为空的颜色，如果没有，保持默认
-                                swatches.firstOrNull()?.let { swatch ->
-                                    themeColor = Color(swatch.rgb)
-                                }
-                            }
-                        }
-                    },
+                    onSuccess = { success ->
+        // 修正 Unresolved reference 'result' 和 'bitmap'
+        val drawable = success.result.drawable
+        if (drawable is BitmapDrawable) {
+            val bitmap = drawable.bitmap
+            // 修正 Palette 命名冲突：明确使用 androidx.palette.graphics.Palette
+            androidx.palette.graphics.Palette.from(bitmap).generate { palette ->
+                palette?.let { p ->
+                    // 尝试取几种颜色，按优先级排序
+                    val colorInt = p.getVibrantColor(
+                        p.getMutedColor(
+                            p.getDominantColor(defaultColor.toArgb())
+                        )
+                    )
+                    themeColor = Color(colorInt)
+                }
+            }
+        }
+    },
                     modifier = Modifier.fillMaxSize(),
                 )
 
