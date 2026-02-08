@@ -512,25 +512,6 @@ fun MainScreen() {
                     .coerceIn(0f, 1f)
         }
     }
-    /*
-	// 是否展开（Expanded / PartiallyExpanded 都算）
-    val sheetVisible = sheetState.currentValue != SheetValue.Hidden
-    */
-    BackHandler(enabled = true) {
-        scope.launch {
-            when {
-                // ① 在第二页 → 回第一页
-                pagerState.currentPage > 0 -> {
-                    pagerState.animateScrollToPage(0)
-                }
-
-                // ② 在第一页 → 收起 Sheet
-                else -> {
-                    sheetState.partialExpand()
-                }
-            }
-        }
-    }
 
 
 
@@ -649,7 +630,7 @@ fun playerScreen(
         PagerDefaults.flingBehavior(
             state = pagerState,
             // 关键：只要滑动超过 15% 就视为翻页，防止回弹
-            snapPositionalThreshold = 0.8f,
+            snapPositionalThreshold = 0.08f,
             // 这里的 snapAnimationSpec 对应松手后的吸附动画
             snapAnimationSpec =
                 spring(
