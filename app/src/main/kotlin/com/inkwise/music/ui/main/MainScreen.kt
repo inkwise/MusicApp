@@ -1394,10 +1394,11 @@ fun BottomDrawerContent(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .weight(1f)
                     .padding(top = 24.dp, bottom = 16.dp)
         ){
                         Box(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxWidth().weight(1f),
                             contentAlignment = Alignment.Center,
                         ) {
                             Box(
