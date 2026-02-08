@@ -194,13 +194,13 @@ fun MiniLyricsView(
                 text = line.text,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
                 color = if (isHighlighted) {
                     animatedThemeColor
                 } else {
                     animatedThemeColor.copy(alpha = 0.5f)
                 },
-                fontSize = 14.sp,
+                fontSize = 8.sp,
                 fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
             )
         }
@@ -1490,7 +1490,7 @@ fun BottomDrawerContent(
         animatedThemeColor=animatedThemeColor,
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)   // ✅ 明确高度（推荐）
+            .height(60.dp)   // ✅ 明确高度（推荐）
     )
 }
 	                     
