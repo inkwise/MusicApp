@@ -528,14 +528,17 @@ fun playerScreen(
 	val coverUri = currentSong?.albumArt
 	
 	// 自定义 Fling 行为
+     // 使用这种方式定义，参数名更准确
     val flingBehavior = PagerDefaults.flingBehavior(
         state = pagerState,
-        // 关键点 1：降低判定阈值。只要滑动超过 15%，松手就跳转下一页
-        snapPositionalThreshold = 0.15f,
-        // 关键点 2：可以微调低速滚动时的吸附动画
-        lowVelocityAnimationSpec = spring(stiffness = Spring.StiffnessLow)
+        // 关键：只要滑动超过 15% 就视为翻页，防止回弹
+        snapPositionalThreshold = 0.15f, 
+        // 这里的 snapAnimationSpec 对应松手后的吸附动画
+        snapAnimationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        )
     )
-    
 	Box(
         modifier =
             modifier
