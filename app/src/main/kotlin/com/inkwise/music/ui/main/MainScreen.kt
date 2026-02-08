@@ -25,13 +25,12 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.foundation.Image // 必须手动引入，防止和 Icon 混淆
 import androidx.compose.runtime.remember
 import coil.compose.rememberAsyncImagePainter // 核心报错修正
-import coil.request.CachePolicy
 
 
 import androidx.compose.foundation.Image // 必须手动引入，防止和 Icon 混淆
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.Color
+
 import androidx.compose.runtime.remember
 import coil.compose.rememberAsyncImagePainter // 核心报错修正
 import coil.request.CachePolicy
