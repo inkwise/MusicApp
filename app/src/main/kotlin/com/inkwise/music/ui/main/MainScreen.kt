@@ -22,6 +22,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.unit.dp
+// 注意：drawRect 和 drawContent 是在 DrawScope 作用域内的，通常不需要单独 import 
+// 但确保你引入了下面这个
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+
 // 动画核心
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
