@@ -1408,7 +1408,8 @@ fun BottomDrawerContent(
         }
 
         // ---------- 进度条 ----------
-  /*      Column(modifier = Modifier.padding(top = 8.dp)) {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
+        /*
             Slider(
                 value =
                     if (playbackState.duration > 0) {
