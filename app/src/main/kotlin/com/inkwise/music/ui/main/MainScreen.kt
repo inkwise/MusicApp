@@ -1487,7 +1487,7 @@ fun BottomDrawerContent(
     // -------------------------------
     MiniLyricsView(
         viewModel = playerViewModel,
-        animatedThemeColor=animatedThemeColor
+        animatedThemeColor=animatedThemeColor,
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)   // ✅ 明确高度（推荐）
