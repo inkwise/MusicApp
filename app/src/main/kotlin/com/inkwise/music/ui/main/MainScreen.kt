@@ -635,6 +635,36 @@ fun playerScreen(
             modifier
                 .fillMaxSize(),
     ) {
+    	//主题色获取
+    	// 我们用一个 0 尺寸的 AsyncImage 来偷偷提取颜色
+AsyncImage(
+    model = ImageRequest.Builder(context)
+        .data(coverUri)
+        .allowHardware(false) // 必须关闭硬件加速才能拿 Bitmap
+        .size(150)            // 极小尺寸提速
+        .build(),
+    contentDescription = null,
+    modifier = Modifier.size(1.dp).alpha(0f), // 隐藏它
+    onSuccess = { success ->
+        // 修正 Unresolved reference 'result' 和 'bitmap'
+        val drawable = success.result.drawable
+        if (drawable is BitmapDrawable) {
+            val bitmap = drawable.bitmap
+            // 修正 Palette 命名冲突：明确使用 androidx.palette.graphics.Palette
+            androidx.palette.graphics.Palette.from(bitmap).generate { palette ->
+                palette?.let { p ->
+                    // 尝试取几种颜色，按优先级排序
+                    val colorInt = p.getVibrantColor(
+                        p.getMutedColor(
+                            p.getDominantColor(defaultColor.toArgb())
+                        )
+                    )
+                    themeColor = Color(colorInt)
+                }
+            }
+        }
+    }
+)
         // 背景图片 + 高斯模糊
 
         // 2. 在 Box 中通过 Image 渲染，并添加强制重绘逻辑
@@ -666,25 +696,6 @@ fun playerScreen(
                         ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    onSuccess = { success ->
-        // 修正 Unresolved reference 'result' 和 'bitmap'
-        val drawable = success.result.drawable
-        if (drawable is BitmapDrawable) {
-            val bitmap = drawable.bitmap
-            // 修正 Palette 命名冲突：明确使用 androidx.palette.graphics.Palette
-            androidx.palette.graphics.Palette.from(bitmap).generate { palette ->
-                palette?.let { p ->
-                    // 尝试取几种颜色，按优先级排序
-                    val colorInt = p.getVibrantColor(
-                        p.getMutedColor(
-                            p.getDominantColor(defaultColor.toArgb())
-                        )
-                    )
-                    themeColor = Color(colorInt)
-                }
-            }
-        }
-    },
                     modifier = Modifier.fillMaxSize(),
                 )
 
