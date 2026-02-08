@@ -1431,11 +1431,13 @@ fun BottomDrawerContent(
                     com.inkwise.music.ui.local
                         .formatTime(playbackState.currentPosition),
                     style = MaterialTheme.typography.bodySmall,
+                    color = animatedThemeColor
                 )
                 Text(
                     com.inkwise.music.ui.local
                         .formatTime(playbackState.duration),
                     style = MaterialTheme.typography.bodySmall,
+                    color = animatedThemeColor
                 )
             }
         }
@@ -1450,7 +1452,7 @@ fun BottomDrawerContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = { playerViewModel.skipToPrevious() }) {
-                Icon(Icons.Default.SkipPrevious, null, modifier = Modifier.size(36.dp))
+                Icon(Icons.Default.SkipPrevious, null, modifier = Modifier.size(36.dp),tint = animatedThemeColor)
             }
 
             Spacer(Modifier.width(24.dp))
@@ -1467,13 +1469,14 @@ fun BottomDrawerContent(
                     },
                     null,
                     modifier = Modifier.size(36.dp),
+                    tint = animatedThemeColor
                 )
             }
 
             Spacer(Modifier.width(24.dp))
 
             IconButton(onClick = { playerViewModel.skipToNext() }) {
-                Icon(Icons.Default.SkipNext, null, modifier = Modifier.size(36.dp))
+                Icon(Icons.Default.SkipNext, null, modifier = Modifier.size(36.dp),tint = animatedThemeColor)
             }
         }
 
