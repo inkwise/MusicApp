@@ -15,6 +15,14 @@ import androidx.compose.ui.graphics.asComposeRenderEffect
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import kotlinx.coroutines.delay
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
+import androidx.compose.runtime.rememberCoroutineScope
+
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+
 // 动画核心
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
