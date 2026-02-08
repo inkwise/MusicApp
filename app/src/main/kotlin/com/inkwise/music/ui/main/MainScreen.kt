@@ -515,8 +515,8 @@ fun MainScreen() {
     /*
 	// 是否展开（Expanded / PartiallyExpanded 都算）
     val sheetVisible = sheetState.currentValue != SheetValue.Hidden
-    
-    BackHandler(enabled = sheetVisible) {
+    */
+    BackHandler(enabled = true) {
         scope.launch {
             when {
                 // ① 在第二页 → 回第一页
@@ -530,7 +530,7 @@ fun MainScreen() {
                 }
             }
         }
-    }*/
+    }
 
 
 
