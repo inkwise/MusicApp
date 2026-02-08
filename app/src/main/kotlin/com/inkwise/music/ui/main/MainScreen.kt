@@ -577,6 +577,16 @@ fun playerScreen(
             stiffness = Spring.StiffnessMediumLow
         )
     )
+    
+    // 1. 手动创建 Painter
+	val painter = rememberAsyncImagePainter(
+	    model = ImageRequest.Builder(LocalContext.current)
+	        .data(coverUri)
+	        .crossfade(true)
+	        .size(100) // 保持小尺寸优化性能
+	        .build(),
+	    filterQuality = FilterQuality.Low
+	)
 	Box(
         modifier =
             modifier
@@ -614,6 +624,7 @@ fun playerScreen(
         }
     )*/
     	// 使用 key 确保切歌时组件彻底刷新
+    	/*
 key(coverUri) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
@@ -637,14 +648,39 @@ key(coverUri) {
             },
         filterQuality = FilterQuality.Low
     )
+}*/
+	// 2. 在 Box 中通过 Image 渲染，并添加强制重绘逻辑
+Box(
+    modifier = modifier
+        .fillMaxSize()
+        // 关键点：使用 graphicsLayer 强制开启一个新的合成层
+        .graphicsLayer { 
+            // 随便改变一点点 alpha 或 clip，强制图形层在状态改变时重新计算
+            clip = true 
+        }
+        .blur(radius = 40.dp) 
+) {
+    Image(
+        painter = painter,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxSize()
+    )
+    
+    // 叠加半透明遮罩
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.3f))
+    )
 }
     	//毛玻璃
-    	Box(
+    /*	Box(
 		    modifier = Modifier
 		        .fillMaxSize()
 		        .blur(10.dp)
 		        .background(Color.White.copy(alpha = 0.25f))
-		)
+		)*/
         // 你原本的播放器内容（盖在上面）
         Box(
             modifier =
