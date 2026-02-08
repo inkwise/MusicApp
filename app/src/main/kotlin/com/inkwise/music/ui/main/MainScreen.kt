@@ -1453,7 +1453,9 @@ Slider(
             colors = SliderDefaults.colors(
                 activeTrackColor = animatedThemeColor,
                 inactiveTrackColor =animatedThemeColor.copy(alpha = 0.2f)
-            )
+            ),
+            //取消隐藏滑块后的缺口
+            thumbTrackGapSize = 0.dp 
         )
     },
     modifier = Modifier.fillMaxWidth()
