@@ -711,7 +711,7 @@ AsyncImage(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(Color.White.copy(alpha = 0.5f)),
+                            .background(Color.White.copy(alpha = 0.75f)),
                 )
             }
         }
