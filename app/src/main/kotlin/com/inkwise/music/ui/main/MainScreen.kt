@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
