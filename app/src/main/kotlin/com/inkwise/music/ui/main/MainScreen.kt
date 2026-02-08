@@ -1394,8 +1394,7 @@ fun BottomDrawerContent(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(top = 24.dp, bottom = 16.dp)
         ){
                         Box(
                             modifier = Modifier.fillMaxSize(),
@@ -1442,11 +1441,11 @@ fun BottomDrawerContent(
                             }
                         }
                         
-                        MiniLyricsView(
-						    viewModel: playerViewModel,
-						    animatedThemeColor=animatedThemeColor,
-					
-						)
+	                        MiniLyricsView(
+							    viewModel: playerViewModel,
+							    animatedThemeColor=animatedThemeColor,
+						
+							)
                         
                         }
                     }
