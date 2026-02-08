@@ -22,6 +22,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 
+import androidx.compose.foundation.Image // 必须手动引入，防止和 Icon 混淆
+import androidx.compose.runtime.remember
+import coil.compose.rememberAsyncImagePainter // 核心报错修正
+import coil.request.CachePolicy
+
+
+import androidx.compose.foundation.Image // 必须手动引入，防止和 Icon 混淆
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.remember
+import coil.compose.rememberAsyncImagePainter // 核心报错修正
+import coil.request.CachePolicy
+
+
 import androidx.compose.runtime.key
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -579,14 +594,17 @@ fun playerScreen(
     )
     
     // 1. 手动创建 Painter
+	
 	val painter = rememberAsyncImagePainter(
-	    model = ImageRequest.Builder(LocalContext.current)
-	        .data(coverUri)
-	        .crossfade(true)
-	        .size(100) // 保持小尺寸优化性能
-	        .build(),
-	    filterQuality = FilterQuality.Low
-	)
+    model = ImageRequest.Builder(LocalContext.current)
+        .data(coverUri)
+        .crossfade(true)
+        .size(150) // 适当调大一点点保证模糊后的质感
+        .memoryCachePolicy(CachePolicy.ENABLED)
+        .build(),
+    filterQuality = FilterQuality.Low
+)
+	
 	Box(
         modifier =
             modifier
@@ -650,24 +668,26 @@ key(coverUri) {
     )
 }*/
 	// 2. 在 Box 中通过 Image 渲染，并添加强制重绘逻辑
-Box(
+	Box(
     modifier = modifier
         .fillMaxSize()
-        // 关键点：使用 graphicsLayer 强制开启一个新的合成层
-        .graphicsLayer { 
-            // 随便改变一点点 alpha 或 clip，强制图形层在状态改变时重新计算
-            clip = true 
+        // 关键修复：通过 graphicsLayer 强制重绘
+        .graphicsLayer {
+            // 这一行非常重要：将变量引入此作用域，强制 Compose 知道此层依赖 coverUri
+            val _unused = coverUri.hashCode()
+            clip = true
         }
-        .blur(radius = 40.dp) 
+        .blur(radius = 40.dp)
 ) {
-    Image(
+    // 2. 使用 foundation 包下的 Image，避免 Unresolved reference
+    androidx.compose.foundation.Image(
         painter = painter,
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier.fillMaxSize()
     )
-    
-    // 叠加半透明遮罩
+
+    // 3. 遮罩层，直接用 background 提高性能
     Box(
         modifier = Modifier
             .fillMaxSize()
