@@ -533,7 +533,8 @@ fun playerScreen(
 	val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
 	val coverUri = currentSong?.albumArt
-	
+	 // 1. 必须先定义 scope
+    val scope = rememberCoroutineScope()
 	
     // 1. 创建一个嵌套滚动连接器，专门处理“卡住”的情况
     val fixStuckConnection = remember {
