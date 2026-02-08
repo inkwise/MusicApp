@@ -1466,11 +1466,11 @@ fun BottomDrawerContent(
                 onClick = { playerViewModel.playPause() },
             ) {
                 Icon(
-                    painter = if (playbackState.isPlaying) {
+                    painter = painterResource(id = if (playbackState.isPlaying) {
                         R.drawable.ic_mini_player_pause
                     } else {
                         R.drawable.ic_mini_player_play
-                    },
+                    }),
                     null,
                     modifier = Modifier.size(48.dp),
                     tint = animatedThemeColor
