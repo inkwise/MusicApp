@@ -1301,7 +1301,7 @@ fun BottomDrawerContent(
                 .statusBarsPadding() // 自动增加顶部 Padding，高度等于状态栏
                 //.padding(horizontal = 16.dp)
                 //.padding(bottom = 16.dp)
-                .padding(20.dp) //,
+                .padding(28.dp) //,
     ) {
         // ---------- 顶部：歌名 / 歌手 ----------
         Column(
