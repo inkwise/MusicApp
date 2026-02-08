@@ -702,7 +702,10 @@ AsyncImage(
                         ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().rotate(180f),
+                    modifier = Modifier
+                    	.fillMaxSize()
+                    	// Y 轴缩放为 -1 表示垂直翻转
+                    	.graphicsLayer(scaleY = -1f),
                 )
 
                 // 遮罩层也放在里面，跟随动画
