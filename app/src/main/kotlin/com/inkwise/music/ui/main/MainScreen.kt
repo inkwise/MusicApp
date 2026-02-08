@@ -494,8 +494,6 @@ fun MainScreen() {
             pagerState.scrollToPage(savedPage.intValue)
         }
     }
-    // 是否展开（Expanded / PartiallyExpanded 都算）
-    val sheetVisible = sheetState.currentValue != SheetValue.Hidden
     // 监听 BottomSheet 拖拽
     LaunchedEffect(scaffoldState.bottomSheetState) {
         snapshotFlow {
@@ -514,7 +512,9 @@ fun MainScreen() {
                     .coerceIn(0f, 1f)
         }
     }
-
+	// 是否展开（Expanded / PartiallyExpanded 都算）
+    val sheetVisible = sheetState.currentValue != SheetValue.Hidden
+    
     BackHandler(enabled = sheetVisible) {
         scope.launch {
             when {
