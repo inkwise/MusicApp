@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette // 确保 build.gradle 有 implementation("androidx.palette:palette-ktx:1.0.0")
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.ui.graphics.lerp
