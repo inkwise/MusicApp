@@ -1442,7 +1442,7 @@ fun BottomDrawerContent(
                         }
                         
 	                        MiniLyricsView(
-							    viewModel: playerViewModel,
+							    viewModel= playerViewModel,
 							    animatedThemeColor=animatedThemeColor,
 						
 							)
