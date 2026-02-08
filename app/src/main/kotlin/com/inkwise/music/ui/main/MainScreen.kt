@@ -1,4 +1,18 @@
 package com.inkwise.music.ui.main
+import android.graphics.drawable.BitmapDrawable
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.palette.graphics.Palette // 确保 build.gradle 有 implementation("androidx.palette:palette-ktx:1.0.0")
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+
+
+
 import jp.wasabeef.glide.transformations.BlurTransformation
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
