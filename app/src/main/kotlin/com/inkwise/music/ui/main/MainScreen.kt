@@ -1408,7 +1408,7 @@ fun BottomDrawerContent(
         }
 
         // ---------- 进度条 ----------
-        Column(modifier = Modifier.padding(top = 8.dp)) {
+  /*      Column(modifier = Modifier.padding(top = 8.dp)) {
             Slider(
                 value =
                     if (playbackState.duration > 0) {
@@ -1422,6 +1422,46 @@ fun BottomDrawerContent(
                     )
                 },
             )
+      */
+Slider(
+    value = if (playbackState.duration > 0) {
+        playbackState.currentPosition.toFloat() / playbackState.duration
+    } else {
+        0f
+    },
+    onValueChange = { progress ->
+        playerViewModel.seekTo((progress * playbackState.duration).toLong())
+    },
+    // 1. 自定义颜色
+    colors = SliderDefaults.colors(
+        activeTrackColor = animatedColor,      // 已播放部分的进度条颜色
+        inactiveTrackColor = animatedColor.copy(alpha = 0.24f), // 未播放部分的背景色
+        thumbColor = animatedColor,            // 滑块颜色
+        activeTickColor = Color.Transparent,   // 隐藏刻度线
+        inactiveTickColor = Color.Transparent
+    ),
+    // 2. 自定义滑块 (如果想取消默认的大圆头，可以自定义一个极小的圆或空置)
+    thumb = {
+        SliderDefaults.Thumb(
+            interactionSource = remember { MutableInteractionSource() },
+            thumbSize = DpSize(12.dp, 12.dp), // 缩小滑块尺寸
+            colors = SliderDefaults.colors(thumbColor = animatedColor)
+        )
+    },
+    // 3. 调整轨道高度 (取消默认厚度)
+    track = { sliderState ->
+        SliderDefaults.Track(
+            sliderState = sliderState,
+            modifier = Modifier.height(4.dp), // 让进度条更纤细
+            colors = SliderDefaults.colors(
+                activeTrackColor = animatedColor,
+                inactiveTrackColor = animatedColor.copy(alpha = 0.2f)
+            )
+        )
+    },
+    modifier = Modifier.fillMaxWidth()
+)
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
