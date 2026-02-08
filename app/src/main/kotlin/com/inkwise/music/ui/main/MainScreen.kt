@@ -2,7 +2,7 @@ package com.inkwise.music.ui.main
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette // 确保 build.gradle 有 implementation("androidx.palette:palette-ktx:1.0.0")
 import coil.compose.AsyncImage
@@ -1438,23 +1438,23 @@ fun BottomDrawerContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
-                Icon(Icons.Default.Repeat, "播放模式" , tint = iconColor)
+                Icon(Icons.Default.Repeat, "播放模式" , tint = animatedThemeColor)
             }
             IconButton(onClick = { /* 定时 */ }) {
-                Icon(Icons.Default.Timer, "定时" , tint = iconColor)
+                Icon(Icons.Default.Timer, "定时" , tint = animatedThemeColor)
             }
             IconButton(onClick = { /* 音效 */ }) {
-                Icon(Icons.Default.Equalizer, "音效" , tint = iconColor)
+                Icon(Icons.Default.Equalizer, "音效" , tint = animatedThemeColor)
             }
             IconButton(onClick = {
                 scope.launch {
                     pagerState.animateScrollToPage(1)
                 }
             }) {
-                Icon(Icons.Default.QueueMusic, "播放队列" , tint = iconColor)
+                Icon(Icons.Default.QueueMusic, "播放队列" , tint = animatedThemeColor)
             }
             IconButton(onClick = { /* 菜单 */ }) {
-                Icon(Icons.Default.MoreVert, "菜单" , tint = iconColor)
+                Icon(Icons.Default.MoreVert, "菜单" , tint = animatedThemeColor)
             }
         }
     }
