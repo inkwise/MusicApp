@@ -1,4 +1,4 @@
-package com.inkwise.music.ui.local
+package com.inkwise.music.ui.main.navigationPage.local
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 // clickable
 import androidx.compose.foundation.clickable
@@ -19,7 +18,6 @@ import androidx.compose.foundation.clickable
 import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun LocalSongsScreen(

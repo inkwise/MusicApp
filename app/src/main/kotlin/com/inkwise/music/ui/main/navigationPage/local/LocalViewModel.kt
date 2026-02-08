@@ -1,4 +1,4 @@
-package com.inkwise.music.ui.local
+package com.inkwise.music.ui.main.navigationPage.local
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri

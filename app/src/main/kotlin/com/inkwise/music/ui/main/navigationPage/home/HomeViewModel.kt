@@ -1,4 +1,4 @@
-package com.inkwise.music.ui.home
+package com.inkwise.music.ui.main.navigationPage.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,4 +1,4 @@
-package com.inkwise.music.ui.cloud
+package com.inkwise.music.ui.main.navigationPage.cloud
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

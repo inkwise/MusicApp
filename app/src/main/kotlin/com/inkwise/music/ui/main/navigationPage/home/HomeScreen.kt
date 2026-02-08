@@ -1,6 +1,6 @@
 
 // ui/home/HomeScreen.kt
-package com.inkwise.music.ui.home
+package com.inkwise.music.ui.main.navigationPage.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 // 放在檔案最上面，其他 import 旁邊
 
