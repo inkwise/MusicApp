@@ -594,6 +594,7 @@ fun playerScreen(
             state = pagerState,
             key = { it },
             modifier = Modifier.fillMaxSize(),
+            flingBehavior = flingBehavior,     // 应用自定义行为
             // 👇 手势限制可以放松
             //     userScrollEnabled = expandProgress > 0.3f
         ) { page ->
