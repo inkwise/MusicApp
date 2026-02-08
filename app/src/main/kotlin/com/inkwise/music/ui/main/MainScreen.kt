@@ -1441,7 +1441,7 @@ Slider(
                 inactiveTrackColor =animatedThemeColor.copy(alpha = 0.2f)
             ),
             //取消隐藏滑块后的缺口
-            thumbTrackGapSize = 0.d,
+            thumbTrackGapSize = 0.dp,
             // 关闭尾部小圆点
             drawStopIndicator = false   
         )
