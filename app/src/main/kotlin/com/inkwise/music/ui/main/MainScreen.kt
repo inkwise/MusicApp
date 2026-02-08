@@ -568,12 +568,16 @@ fun MainScreen() {
             }
         },
     ) {
-        MainScreen2()
+        MainScreen2(
+        	sheetState = sheetState,
+            pagerState = pagerState,
+            scope = scope
+        )
     }
     
     // 1. 精确定义什么时候需要拦截返回键
 	// 只有当 Sheet 处于完全展开状态，或者 Pager 还在第二页时，才由 MainScreen 处理返回
-	val shouldInterceptBack = sheetState.currentValue == SheetValue.Expanded || pagerState.currentPage > 0
+	/*val shouldInterceptBack = sheetState.currentValue == SheetValue.Expanded || pagerState.currentPage > 0
 	
 	BackHandler(enabled = shouldInterceptBack) {
 	    scope.launch {
@@ -588,7 +592,7 @@ fun MainScreen() {
 	            }
 	        }
 	    }
-	}
+	}*/
 }
 
 // 播放器页面
@@ -914,6 +918,9 @@ fun SongItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen2(
+	sheetState: SheetState,      // 接收状态
+    pagerState: PagerState,
+    scope: CoroutineScope,
     viewModel: MainViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -997,6 +1004,18 @@ fun MainScreen2(
                         CloudSongsScreen()
                     }
                 }
+            }
+        }
+    }
+    
+    val shouldIntercept = sheetState.targetValue == SheetValue.Expanded || pagerState.currentPage > 0
+
+    BackHandler(enabled = shouldIntercept) {
+        scope.launch {
+            if (pagerState.currentPage > 0) {
+                pagerState.animateScrollToPage(0)
+            } else {
+                sheetState.partialExpand()
             }
         }
     }
