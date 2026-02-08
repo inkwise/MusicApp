@@ -1466,7 +1466,7 @@ fun BottomDrawerContent(
 
             IconButton(
                 onClick = { playerViewModel.playPause() },
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier.size(56.dp)
             ) {
                 Icon(
                     painter = painterResource(id = if (playbackState.isPlaying) {
@@ -1475,7 +1475,7 @@ fun BottomDrawerContent(
                         R.drawable.ic_mini_player_play
                     }),
                     null,
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(40.dp),
                     tint = animatedThemeColor
                 )
             }
@@ -1484,7 +1484,7 @@ fun BottomDrawerContent(
 
             IconButton(
             onClick = { playerViewModel.skipToNext() },
-            modifier = Modifier.size(52.dp)) {
+            modifier = Modifier.size(48.dp)) {
                 Icon(
 			        painter = painterResource(id = R.drawable.ic_round_skip_next_24), 
 			        contentDescription = "下一首", 
