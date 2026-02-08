@@ -1410,22 +1410,8 @@ fun BottomDrawerContent(
         }
 
         // ---------- 进度条 ----------
-        Column(modifier = Modifier.padding(top = 8.dp)) {
-        /*
-            Slider(
-                value =
-                    if (playbackState.duration > 0) {
-                        playbackState.currentPosition.toFloat() / playbackState.duration
-                    } else {
-                        0f
-                    },
-                onValueChange = { progress ->
-                    playerViewModel.seekTo(
-                        (progress * playbackState.duration).toLong(),
-                    )
-                },
-            )
-      */
+        Column(modifier = Modifier.padding(top = 4.dp)) {
+        
 Slider(
     value = if (playbackState.duration > 0) {
         playbackState.currentPosition.toFloat() / playbackState.duration
@@ -1449,13 +1435,15 @@ Slider(
     track = { sliderState ->
         SliderDefaults.Track(
             sliderState = sliderState,
-            modifier = Modifier.height(3.dp), // 让进度条更纤细
+            modifier = Modifier.height(2.dp), // 让进度条更纤细
             colors = SliderDefaults.colors(
                 activeTrackColor = animatedThemeColor,
                 inactiveTrackColor =animatedThemeColor.copy(alpha = 0.2f)
             ),
             //取消隐藏滑块后的缺口
-            thumbTrackGapSize = 0.dp 
+            thumbTrackGapSize = 0.d,
+            // 关闭尾部小圆点
+            drawStopIndicator = false   
         )
     },
     modifier = Modifier.fillMaxWidth()
