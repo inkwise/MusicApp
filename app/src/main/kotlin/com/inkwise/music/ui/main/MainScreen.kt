@@ -1452,23 +1452,27 @@ fun BottomDrawerContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = { playerViewModel.skipToPrevious() }) {
-                Icon(Icons.Default.SkipPrevious, null, modifier = Modifier.size(36.dp),tint = animatedThemeColor)
+                Icon(
+			        painter = painterResource(id = R.drawable.ic_round_skip_previous_24), 
+			        contentDescription = "上一首", 
+			        tint = animatedThemeColor,
+			        modifier = Modifier.size(36.dp)
+			    )
             }
 
             Spacer(Modifier.width(24.dp))
 
-            FilledIconButton(
+            IconButton(
                 onClick = { playerViewModel.playPause() },
-                modifier = Modifier.size(64.dp),
             ) {
                 Icon(
-                    if (playbackState.isPlaying) {
-                        Icons.Default.Pause
+                    painter = if (playbackState.isPlaying) {
+                        R.drawable.ic_mini_player_pause
                     } else {
-                        Icons.Default.PlayArrow
+                        R.drawable.ic_mini_player_play
                     },
                     null,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(48.dp),
                     tint = animatedThemeColor
                 )
             }
@@ -1476,7 +1480,12 @@ fun BottomDrawerContent(
             Spacer(Modifier.width(24.dp))
 
             IconButton(onClick = { playerViewModel.skipToNext() }) {
-                Icon(Icons.Default.SkipNext, null, modifier = Modifier.size(36.dp),tint = animatedThemeColor)
+                Icon(
+			        painter = painterResource(id = R.drawable.ic_round_skip_next_24), 
+			        contentDescription = "下一首", 
+			        tint = animatedThemeColor,
+			        modifier = Modifier.size(36.dp)
+			    )
             }
         }
 
@@ -1486,31 +1495,49 @@ fun BottomDrawerContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
-                Icon(Icons.Default.Repeat, "播放模式" , tint = animatedThemeColor)
+                Icon(
+			        painter = painterResource(id = R.drawable.ic_player_circle), 
+			        contentDescription = "播放模式, 
+			        tint = animatedThemeColor,
+			        modifier = Modifier.size(24.dp)
+			    )
             }
-          /*  IconButton(onClick = {  }) {
-                Icon(Icons.Default.Timer, "定时" , tint = animatedThemeColor)
-            }*/
             IconButton(onClick = { /* 定时逻辑 */ }) {
 			    Icon(
 			        painter = painterResource(id = R.drawable.ic_sleep_timer), 
 			        contentDescription = "定时", 
-			        tint = animatedThemeColor
+			        tint = animatedThemeColor,
+			        modifier = Modifier.size(24.dp)
 			    )
 			}
 			
             IconButton(onClick = { /* 音效 */ }) {
-                Icon(Icons.Default.Equalizer, "音效" , tint = animatedThemeColor)
+                Icon(
+			        painter = painterResource(id = R.drawable.ic_audio_effect), 
+			        contentDescription = "音效", 
+			        tint = animatedThemeColor,
+			        modifier = Modifier.size(24.dp)
+			    )
             }
             IconButton(onClick = {
                 scope.launch {
                     pagerState.animateScrollToPage(1)
                 }
             }) {
-                Icon(Icons.Default.QueueMusic, "播放队列" , tint = animatedThemeColor)
+                Icon(
+			        painter = painterResource(id = R.drawable.ic_play_queue), 
+			        contentDescription = "播放队列", 
+			        tint = animatedThemeColor,
+			        modifier = Modifier.size(24.dp)
+			    )
             }
             IconButton(onClick = { /* 菜单 */ }) {
-                Icon(Icons.Default.MoreVert, "菜单" , tint = animatedThemeColor)
+                Icon(
+			        painter = painterResource(id = R.drawable.ic_player_more), 
+			        contentDescription = "菜单", 
+			        tint = animatedThemeColor,
+			        modifier = Modifier.size(24.dp)
+			    )
             }
         }
     }
