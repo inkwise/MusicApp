@@ -654,11 +654,18 @@ AsyncImage(
             androidx.palette.graphics.Palette.from(bitmap).generate { palette ->
                 palette?.let { p ->
                     // 尝试取几种颜色，按优先级排序
-                    val colorInt = p.getVibrantColor(
+                    /*val colorInt = p.getVibrantColor(
                         p.getMutedColor(
                             p.getDominantColor(defaultColor.toArgb())
                         )
                     )
+                    */
+                    val colorInt = if (p.mutedSwatch != null) {
+					    p.mutedSwatch!!.rgb // 没有就找柔和色
+					} else {
+					    p.getDominantColor(defaultColor.toArgb()) // 再没有就用像素最多的色，实在不行用灰色
+					}
+					
                     themeColor = Color(colorInt)
                 }
             }
@@ -690,7 +697,7 @@ AsyncImage(
                                 ImageRequest
                                     .Builder(LocalContext.current)
                                     .data(targetUri)
-                                    .allowHardware(false) // ⚠️ 关键：提取颜色必须关闭硬件加速，否则拿不到 Bitmap
+                                  //  .allowHardware(false) // ⚠️ 关键：提取颜色必须关闭硬件加速，否则拿不到 Bitmap
                                     .size(150) // 强制小图模式，极速加载
                                     .build(),
                         ),
