@@ -697,13 +697,12 @@ AsyncImage(
                                 ImageRequest
                                     .Builder(LocalContext.current)
                                     .data(targetUri)
-                                  //  .allowHardware(false) // ⚠️ 关键：提取颜色必须关闭硬件加速，否则拿不到 Bitmap
                                     .size(150) // 强制小图模式，极速加载
                                     .build(),
                         ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().rotate(180f),
                 )
 
                 // 遮罩层也放在里面，跟随动画
