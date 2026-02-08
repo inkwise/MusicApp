@@ -6,6 +6,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette // 确保 build.gradle 有 implementation("androidx.palette:palette-ktx:1.0.0")
 import coil.compose.AsyncImage
+import androidx.compose.ui.unit.DpSize
+
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
@@ -1275,7 +1277,7 @@ fun BottomDrawerContent(
 
 */
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class,ExperimentalMaterial3Api::class)
 @Composable
 fun BottomDrawerContent(
     pagerState: PagerState,
@@ -1456,7 +1458,7 @@ Slider(
             modifier = Modifier.height(4.dp), // 让进度条更纤细
             colors = SliderDefaults.colors(
                 activeTrackColor = animatedThemeColor,
-                inactiveTrackColor = animatedColor.copy(alpha = 0.2f)
+                inactiveTrackColor =animatedThemeColor.copy(alpha = 0.2f)
             )
         )
     },
