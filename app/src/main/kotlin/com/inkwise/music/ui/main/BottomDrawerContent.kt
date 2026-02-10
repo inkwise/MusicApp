@@ -186,7 +186,7 @@ fun BottomDrawerContent(
 
                     1 -> {
                         // 歌词页（占位）
-                        
+                        /*
                         Box(
                             modifier =
                                 Modifier
@@ -194,18 +194,13 @@ fun BottomDrawerContent(
                                     .padding(16.dp),
                             contentAlignment = Alignment.Center,
                         ) {
-                        	    val lyricsState by playerViewModel.lyricsState.collectAsState()
-
-						    val hasTranslation =
-						        lyricsState.lyrics
-						            ?.lines
-						            ?.any { it.translation != null }
-						            == true
-						
-						    var showTranslation by remember { mutableStateOf(true) }
-						
+                     
                             LyricsView(playerViewModel)
-                        }
+                        }*/
+                        LyricsPage(
+					        playerViewModel = playerViewModel,
+					        modifier = Modifier.fillMaxSize(),
+					    )
                     }
                     
                     
@@ -379,3 +374,26 @@ fun BottomDrawerContent(
     }
 }
 
+@Composable
+fun LyricsPage(
+    playerViewModel: PlayerViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val lyricsState by playerViewModel.lyricsState.collectAsState()
+
+    val hasTranslation =
+        lyricsState.lyrics
+            ?.lines
+            ?.any { it.translation != null }
+            == true
+
+    var showTranslation by remember { mutableStateOf(true) }
+
+    Column(modifier = modifier) {
+        LyricsView(
+            viewModel = playerViewModel,
+            showTranslation = showTranslation && hasTranslation,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
