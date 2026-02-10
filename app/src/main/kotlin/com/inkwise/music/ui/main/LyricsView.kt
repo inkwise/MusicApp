@@ -447,7 +447,11 @@ fun LyricsView(
                             translationX = offsetX
                             translationY = offsetY
                         }
-                        .animateItemPlacement()      // 项目位置变化平滑
+                        .animateItem(
+				            fadeInSpec = null,     // 如果不需要淡入动画可设为 null
+				            fadeOutSpec = null,    // 如果不需要淡出动画可设为 null
+				            placementSpec = spring() // 控制位置变化的动画参数
+				        )
                         .animateContentSize()        // 项目自身尺寸变化平滑（展开/收缩译文）
                         .clickable {
                             viewModel.seekTo(line.timeMs)
