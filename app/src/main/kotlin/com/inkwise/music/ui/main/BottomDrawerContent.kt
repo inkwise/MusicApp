@@ -381,12 +381,10 @@ fun LyricsPage(
 ) {
     val lyricsState by playerViewModel.lyricsState.collectAsState()
 
-    val hasTranslation =
-        lyricsState.lyrics
-            ?.lines
-            ?.any { it.translation != null }
-            == true
-
+	val hasTranslation = lyricsState.lyrics?.lines
+	    ?.any { line -> line.translation != null }
+	    ?: false
+	    
     var showTranslation by remember { mutableStateOf(true) }
 
     Column(modifier = modifier) {
