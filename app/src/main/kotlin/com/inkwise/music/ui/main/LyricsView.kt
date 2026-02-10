@@ -1,4 +1,10 @@
 package com.inkwise.music.ui.main
+
+// animateItemPlacement
+import androidx.compose.foundation.lazy.animateItemPlacement
+
+// ExperimentalAnimationApi 注解
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
