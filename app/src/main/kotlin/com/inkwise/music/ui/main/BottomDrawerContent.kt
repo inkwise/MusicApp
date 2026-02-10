@@ -245,6 +245,8 @@ fun BottomDrawerContent(
                             LyricsSource.EMBEDDED -> "内嵌歌词"
                             LyricsSource.NETWORK -> "网络歌词"
                             LyricsSource.USER_PROVIDED -> "用户歌词"
+                            
+                             else -> ""
                         }
                     } ?: "",
                 fontSize = 12.sp,
@@ -276,7 +278,7 @@ fun BottomDrawerContent(
     }
 }
                     ///////
-                
+                }
             }
         }
 
