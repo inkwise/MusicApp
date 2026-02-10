@@ -186,6 +186,16 @@ fun BottomDrawerContent(
 
                     1 -> {
                         // 歌词页（占位）
+                            val lyricsState by playerViewModel.lyricsState.collectAsState()
+
+						    val hasTranslation =
+						        lyricsState.lyrics
+						            ?.lines
+						            ?.any { it.translation != null }
+						            == true
+						
+						    var showTranslation by remember { mutableStateOf(true) }
+						
                         Box(
                             modifier =
                                 Modifier

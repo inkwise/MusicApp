@@ -28,7 +28,12 @@ import androidx.compose.ui.unit.sp
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 @Composable
 fun MiniLyricsView(
     viewModel: PlayerViewModel,
@@ -177,7 +182,7 @@ fun LyricsView(
     }
 }
 
-
+*/
 // ------------------------------------------------
 // 慢速滚动到居中（不使用 animationSpec）
 // ------------------------------------------------
@@ -217,7 +222,7 @@ private suspend fun slowScrollToCenter(
         delay(16L) // ~60fps
     }
 }
-*/
+
 
 @Composable
 fun LyricsView(
