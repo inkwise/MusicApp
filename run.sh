@@ -37,8 +37,8 @@ echo "▶ 新版本: $NEW_VERSION"
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
 # 构建 / 安装 / 启动
-if ./gradlew assembleRelease; then
-#if ./gradlew assembleDebug; then
+#if ./gradlew assembleRelease; then
+if ./gradlew assembleDebug; then
 
 
   echo "✅ 构建成功"
