@@ -1,7 +1,8 @@
 package com.inkwise.music.ui.main
 
 // animateItemPlacement
-
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.BlendMode
 // ExperimentalAnimationApi 注解
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.graphics.graphicsLayer
