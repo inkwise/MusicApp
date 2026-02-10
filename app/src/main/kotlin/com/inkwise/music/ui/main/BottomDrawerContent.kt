@@ -1,5 +1,8 @@
 package com.inkwise.music.ui.main
 
+import androidx.compose.material3.Switch
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import android.widget.ImageView
