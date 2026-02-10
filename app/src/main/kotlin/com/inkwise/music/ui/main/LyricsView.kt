@@ -1,5 +1,6 @@
 package com.inkwise.music.ui.main
-
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
