@@ -56,7 +56,8 @@ import com.inkwise.music.R
 import com.inkwise.music.ui.main.navigationPage.local.formatTime
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalFoundationApi::class,ExperimentalMaterial3Api::class)
 @Composable
