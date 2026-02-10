@@ -186,7 +186,15 @@ fun BottomDrawerContent(
 
                     1 -> {
                         // 歌词页（占位）
-                            val lyricsState by playerViewModel.lyricsState.collectAsState()
+                        
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                        	    val lyricsState by playerViewModel.lyricsState.collectAsState()
 
 						    val hasTranslation =
 						        lyricsState.lyrics
@@ -196,13 +204,6 @@ fun BottomDrawerContent(
 						
 						    var showTranslation by remember { mutableStateOf(true) }
 						
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
                             LyricsView(playerViewModel)
                         }
                     }
