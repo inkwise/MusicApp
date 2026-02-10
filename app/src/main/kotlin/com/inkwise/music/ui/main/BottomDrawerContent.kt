@@ -1,5 +1,7 @@
 package com.inkwise.music.ui.main
 
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import android.widget.ImageView
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
@@ -387,11 +389,71 @@ fun LyricsPage(
 	    
     var showTranslation by remember { mutableStateOf(true) }
 
-    Column(modifier = modifier) {
-        LyricsView(
-            viewModel = playerViewModel,
-            showTranslation = showTranslation && hasTranslation,
+    
+    Column(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        // ----------------------------
+        // 歌词主体
+        // ----------------------------
+        Box(
             modifier = Modifier.weight(1f),
-        )
+        ) {
+            LyricsView(
+                viewModel = playerViewModel,
+                showTranslation = showTranslation && hasTranslation,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        // ----------------------------
+        // 底部工具栏
+        // ----------------------------
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // ⬅️ 左侧：歌词来源
+            Text(
+                text =
+                    lyricsState.lyrics?.source?.let {
+                        when (it) {
+                            LyricsSource.LOCAL_LRC -> "本地 LRC"
+                            LyricsSource.LOCAL_KRC -> "本地 KRC"
+                            LyricsSource.EMBEDDED -> "内嵌歌词"
+                            LyricsSource.NETWORK -> "网络歌词"
+                            LyricsSource.USER_PROVIDED -> "用户歌词"
+                        }
+                    } ?: "",
+                fontSize = 12.sp,
+                color = Color.Gray,
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // ➡️ 右侧：翻译开关（仅在有翻译时显示）
+            if (hasTranslation) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "翻译",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Switch(
+                        checked = showTranslation,
+                        onCheckedChange = { showTranslation = it },
+                    )
+                }
+            }
+        }
     }
+
 }
