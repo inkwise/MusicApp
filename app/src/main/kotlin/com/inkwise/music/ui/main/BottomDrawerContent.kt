@@ -1,5 +1,6 @@
 package com.inkwise.music.ui.main
 
+import com.inkwise.music.data.model.LyricsSource
 import androidx.compose.material3.Switch
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
