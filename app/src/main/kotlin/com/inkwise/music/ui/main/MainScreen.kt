@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalDensity
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.saveable.rememberSaveable
-
+import androidx.compose.ui.graphics.RectangleShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +72,7 @@ fun MainScreen() {
         sheetPeekHeight = dimens.sheetPeekHeightDp,
         sheetDragHandle = null,
         // sheetContainerColor = Color.Transparent,
+        sheetShape = RectangleShape, 
         sheetContent = {
             Box {
                 // 背景播放器：展开时显示
