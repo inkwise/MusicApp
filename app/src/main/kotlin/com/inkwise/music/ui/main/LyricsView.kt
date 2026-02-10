@@ -1,7 +1,6 @@
 package com.inkwise.music.ui.main
 
 // animateItemPlacement
-import androidx.compose.foundation.lazy.animateItemPlacement
 
 // ExperimentalAnimationApi 注解
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -38,7 +37,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.animateItemPlacement
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
