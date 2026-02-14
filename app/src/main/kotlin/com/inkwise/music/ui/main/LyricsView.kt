@@ -687,6 +687,7 @@ fun LyricsView(
    // val viewportHeight = layoutInfo.viewportEndOffset
     val viewportHeight =
     layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+    
     val targetPosition = (viewportHeight * bias).toInt()
 
     // 尝试找到当前正在显示的 item
@@ -695,9 +696,14 @@ fun LyricsView(
     if (visibleItem != null) {
         // 2. 计算像素位移差
         // 目标是让 item 的中心点（item.offset + size/2）移动到 targetPosition
-        val itemCenter = visibleItem.offset + (visibleItem.size / 2)
+      /*  val itemCenter = visibleItem.offset + (visibleItem.size / 2)
         val scrollDelta = itemCenter - targetPosition
+    */    
+        val itemCenter = visibleItem.offset + visibleItem.size / 2
+        val targetCenter = viewportHeight / 2
+        val scrollDelta = itemCenter - targetCenter
         
+    
         listState.animateScrollBy(
             value = scrollDelta.toFloat(),
             animationSpec = tween(
