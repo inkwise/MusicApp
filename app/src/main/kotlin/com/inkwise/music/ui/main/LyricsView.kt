@@ -692,6 +692,13 @@ fun LyricsView(
         }
     }
 
+    
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val boxHeight = maxHeight  // LyricsView 的高度
+
+        // 估算每行高度，如果你的 LyricLineItem 高度固定，可以直接写固定值
+        val estimatedLineHeightDp = 56.dp
+        val verticalPadding = (boxHeight / 2) - (estimatedLineHeightDp / 2)
     Box(
         modifier =
             Modifier
@@ -744,5 +751,6 @@ fun LyricsView(
                 )
             }
         }
+    }
     }
 }
