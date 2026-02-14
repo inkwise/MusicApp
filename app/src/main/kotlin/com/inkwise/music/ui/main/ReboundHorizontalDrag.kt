@@ -231,6 +231,7 @@ fun SongPage(
 @Composable
 fun CurrentSongPage(
     song: Song?,
+    playerViewModel: PlayerViewModel,
     modifier: Modifier,
 ) {
     Column(
@@ -250,6 +251,9 @@ fun CurrentSongPage(
                         iterations = Int.MAX_VALUE,
                         repeatDelayMillis = 1000
                     )
+            )
+            MiniLyricsView2(
+                viewModel= playerViewModel
             )
         }
     }

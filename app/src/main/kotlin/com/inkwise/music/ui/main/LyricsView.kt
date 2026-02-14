@@ -82,6 +82,45 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun MiniLyricsView2(
+    viewModel: PlayerViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
+    val currentIndex = lyricsState.highlight?.lineIndex ?: 0
+
+    val currentLine = lyrics.getOrNull(currentIndex)?.text.orEmpty()
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(20.dp), // 👈 控制 mini 高度
+        contentAlignment = Alignment.Center
+    ) {
+
+        AnimatedContent(
+            targetState = currentLine,
+            transitionSpec = {
+                slideInVertically { height -> height } + fadeIn() togetherWith
+                        slideOutVertically { height -> -height } + fadeOut()
+            },
+            label = "mini_lyrics"
+        ) { text ->
+
+            Text(
+                text = text,
+                maxLines = 1,
+                //color = animatedThemeColor,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
 
 @Composable
 fun MiniLyricsView(
