@@ -114,7 +114,7 @@ fun MiniLyricsView2(
 val currentTime = lyrics.getOrNull(currentIndex)?.timeMs
 
 val duration = if (nextTime != null && currentTime != null) {
-    (nextTime - currentTime).coerceAtMost(400).toInt()
+    (nextTime - currentTime).coerceAtMost(1500).toInt()
 } else {
     300
 }
