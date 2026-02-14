@@ -32,6 +32,8 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.MarqueeAnimationMode
+
 @Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,
