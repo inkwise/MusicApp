@@ -385,7 +385,7 @@ private suspend fun slowScrollToCenter(
         delay(16L) // ~60fps
     }
 }
-
+/*
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun LyricsView(
@@ -587,5 +587,94 @@ fun LyricsView(
                 }
             }
         }
+    }
+}
+*/
+@Composable
+fun LyricsView(
+    viewModel: PlayerViewModel,
+    showTranslation: Boolean,
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
+    val highlight = lyricsState.highlight
+    
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    // 核心优化：手动控制滚动速度
+    LaunchedEffect(highlight?.lineIndex) {
+        val index = highlight?.lineIndex ?: return@LaunchedEffect
+        val layoutInfo = listState.layoutInfo
+        
+        // 查找当前高亮行在屏幕上的位置
+        val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
+        
+        if (visibleItem != null) {
+            // 计算让该行居中需要的像素位移
+            val viewportHeight = layoutInfo.viewportEndOffset
+            val itemCenter = visibleItem.offset + (visibleItem.size / 2)
+            val targetCenter = viewportHeight / 2
+            val scrollDelta = itemCenter - targetCenter
+            
+            // 使用 animateScrollBy + tween 配合任意插值器实现线性感
+            listState.animateScrollBy(
+                value = scrollDelta.toFloat(),
+                animationSpec = tween(
+                    durationMillis = 600, // 这里完全控制速度
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        } else {
+            // 如果不在屏幕内，先快速跳转到附近
+            listState.scrollToItem(index)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        LazyColumn(
+            state = listState,
+            // 使用一半屏幕高度作为 Padding，确保第一行和最后一行都能居中
+            contentPadding = PaddingValues(vertical = 300.dp), 
+            modifier = Modifier.fillMaxSize()
+        ) {
+            itemsIndexed(lyrics, key = { _, item -> item.id }) { index, line ->
+                val isHighlighted = highlight?.lineIndex == index
+                
+                // 性能优化：只在高亮变化时触发最小范围重组
+                LyricLineItem(
+                    line = line,
+                    isHighlighted = isHighlighted,
+                    showTranslation = showTranslation
+                )
+            }
+        }
+
+        // --- 更好的渐隐方案：覆盖层 ---
+        // 顶部渐隐
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .align(Alignment.TopCenter)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.White, Color.White.copy(alpha = 0f))
+                    )
+                )
+        )
+
+        // 底部渐隐
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.White.copy(alpha = 0f), Color.White)
+                    )
+                )
+        )
     }
 }
