@@ -96,6 +96,44 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 
+@Composable
+fun MiniLyricsView2(
+    viewModel: PlayerViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
+    val currentIndex = lyricsState.highlight?.lineIndex ?: 0
+
+    val currentLine = lyrics.getOrNull(currentIndex)?.text.orEmpty()
+
+    val offsetY = remember { Animatable(0f) }
+
+    LaunchedEffect(currentLine) {
+        offsetY.snapTo(30f)        // 从下方开始
+        offsetY.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(220) // 固定一个短时间
+        )
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(30.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = currentLine,
+            modifier = Modifier.offset(y = offsetY.value.dp),
+            maxLines = 1,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+/*
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MiniLyricsView2(
@@ -159,7 +197,7 @@ fun MiniLyricsView2(
             )
         }
     }
-}
+}*/
 
 @Composable
 fun MiniLyricsView(
