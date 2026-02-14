@@ -650,7 +650,7 @@ fun LyricsView(
     val listState = rememberLazyListState()
 
     // 自动滚动逻辑：改用 animateScrollBy 配合像素计算
-    LaunchedEffect(highlight?.lineIndex) {
+    /*LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
         val layoutInfo = listState.layoutInfo
         
@@ -676,7 +676,39 @@ fun LyricsView(
             // 如果目标不在屏幕内，先直接跳转
             listState.scrollToItem(index)
         }
+    }*/
+    
+    LaunchedEffect(highlight?.lineIndex) {
+    val index = highlight?.lineIndex ?: return@LaunchedEffect
+    val layoutInfo = listState.layoutInfo
+    
+    // 1. 定义你想要的“居中线”比例（0.4f 代表屏幕从上往下 40% 的位置）
+    val bias = 0.4f 
+    val viewportHeight = layoutInfo.viewportEndOffset
+    val targetPosition = (viewportHeight * bias).toInt()
+
+    // 尝试找到当前正在显示的 item
+    val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
+    
+    if (visibleItem != null) {
+        // 2. 计算像素位移差
+        // 目标是让 item 的中心点（item.offset + size/2）移动到 targetPosition
+        val itemCenter = visibleItem.offset + (visibleItem.size / 2)
+        val scrollDelta = itemCenter - targetPosition
+        
+        listState.animateScrollBy(
+            value = scrollDelta.toFloat(),
+            animationSpec = tween(
+                durationMillis = 600, 
+                easing = LinearOutSlowInEasing
+            )
+        )
+    } else {
+        // 3. 修复跳转逻辑：即使目标在屏幕外，跳转后也要位于 bias 位置
+        // scrollOffset 为负数表示将 item 向下推，避开顶部
+        listState.scrollToItem(index, scrollOffset = -targetPosition + 100) 
     }
+}
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
