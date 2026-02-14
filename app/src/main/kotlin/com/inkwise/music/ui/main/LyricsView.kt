@@ -121,7 +121,7 @@ fun MiniLyricsView2(
         offsetY.snapTo(30f)        // 从下方开始
         offsetY.animateTo(
             targetValue = 0f,
-            animationSpec = tween(220) // 固定一个短时间
+            animationSpec = tween(1300) // 固定一个短时间
         )
     }
 
