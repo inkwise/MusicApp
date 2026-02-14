@@ -254,8 +254,9 @@ fun CurrentSongPage(
                             repeatDelayMillis = 1000,
                         ),
             )
-            MiniLyricsView2(
+            MiniLyricsView(
                 viewModel = playerViewModel,
+                animatedThemeColor: Color.Red
             )
         }
     }
