@@ -664,12 +664,7 @@ fun LyricsView(
             centerToIndex(index)
         }
     }
-    LaunchedEffect(lyricsState.isSeeking) {
-        if (!lyricsState.isSeeking) {
-            val index = highlight?.lineIndex ?: return@LaunchedEffect
-            centerToIndex(index)
-        }
-    }
+    
     /*
     LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
