@@ -252,29 +252,32 @@ fun LyricsView(
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
       
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-.drawWithContent {
+            .drawWithContent {
     drawContent()
 
-    val fadeHeight = 18.dp.toPx() // 👈 改小一点
+    // 使用已经在外面计算好的 fadeHeightPx（像素）
+    val fh = fadeHeightPx.coerceAtMost(size.height / 2f) // 防守：不要超过一半高度
 
-    // 顶部渐隐
+    // 顶部渐隐：从透明 -> 不透明（DstIn 会把 alpha 应用到内容）
     drawRect(
         brush = Brush.verticalGradient(
-            0f to Color.Transparent,
-            fadeHeight to Color.Black
+            colors = listOf(Color.Transparent, Color.Black),
+            startY = 0f,
+            endY = fh
         ),
         blendMode = BlendMode.DstIn
     )
 
-    // 底部渐隐
+    // 底部渐隐：从不透明 -> 透明
     drawRect(
         brush = Brush.verticalGradient(
-            (size.height - fadeHeight) to Color.Black,
-            size.height to Color.Transparent
+            colors = listOf(Color.Black, Color.Transparent),
+            startY = size.height - fh,
+            endY = size.height
         ),
         blendMode = BlendMode.DstIn
     )
-},
+},    
             state = listState,
             // contentPadding = PaddingValues(vertical = 8.dp),
             contentPadding = PaddingValues(vertical = 40.dp), // 增加 padding 让第一行也能被“擦除”
