@@ -110,6 +110,15 @@ fun MiniLyricsView2(
 
     val currentLine = lyrics.getOrNull(currentIndex)?.text.orEmpty()
 
+        val nextTime = lyrics.getOrNull(currentIndex + 1)?.timeMs
+val currentTime = lyrics.getOrNull(currentIndex)?.timeMs
+
+val duration = if (nextTime != null && currentTime != null) {
+    (nextTime - currentTime).coerceAtMost(400).toInt()
+} else {
+    300
+}
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -123,11 +132,11 @@ fun MiniLyricsView2(
     transitionSpec = {
         slideInVertically(
             initialOffsetY = { height -> height },
-            animationSpec = tween(1600)
+            animationSpec = tween(duration)
         ) togetherWith
         slideOutVertically(
             targetOffsetY = { height -> -height },
-            animationSpec = tween(1600)
+            animationSpec = tween(duration)
         )
     },
     label = "mini_lyrics"
