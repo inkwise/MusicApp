@@ -474,7 +474,7 @@ fun LyricsView(
             isProgrammaticScroll = false
         }
     }*/
-    LaunchedEffect(highlight?.lineIndex) {
+LaunchedEffect(highlight?.lineIndex) {
     val index = highlight?.lineIndex ?: return@LaunchedEffect
     if (userScrolling) return@LaunchedEffect
     if (index !in lyrics.indices) return@LaunchedEffect
@@ -490,31 +490,28 @@ fun LyricsView(
             val viewportCenter = viewportHeight / 2
             val distance = (itemCenter - viewportCenter).toFloat()
 
-            // Animatable 平滑滚动
+            // 使用 Animatable + coroutine，不带 lambda
             val anim = Animatable(0f)
-            var lastValue = 0f
-
             anim.animateTo(
                 targetValue = distance,
                 animationSpec = tween(
                     durationMillis = 350, // 控制速度
                     easing = FastOutSlowInEasing
                 )
-            ) { value: Float ->
-                // 每一帧滚动增量
-                val delta = value - lastValue
-                lastValue = value
+            )
 
-                // 在 coroutine 内调用 suspend scrollBy
-                launch {
-                    listState.scrollBy(delta)
-                }
+            // 每帧滚动
+            val steps = 30
+            repeat(steps) {
+                val delta = distance / steps
+                listState.scrollBy(delta)
             }
 
         } else {
             // item 不可见，直接跳转
             listState.animateScrollToItem(index)
         }
+
     } finally {
         isProgrammaticScroll = false
     }
