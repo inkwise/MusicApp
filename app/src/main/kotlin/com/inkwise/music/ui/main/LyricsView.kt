@@ -193,7 +193,7 @@ fun MiniLyricsView(
                     } else {
                         animatedThemeColor.copy(alpha = 0.5f)
                     },
-                fontSize = 8.sp,
+                fontSize = 12.sp,
                 fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
             )
         }
