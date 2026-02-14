@@ -267,7 +267,36 @@ fun MiniLyricsView(
         }
     }
 }
+private suspend fun slowScrollToCenter(
+    listState: LazyListState,
+    index: Int,
+) {
+    // 先等一帧，确保 layout 完成
+    snapshotFlow { listState.layoutInfo.viewportSize.height }
+        .first { it > 0 }
 
+    val layoutInfo = listState.layoutInfo
+    val viewportHeight = layoutInfo.viewportSize.height
+
+    val itemInfo =
+        layoutInfo.visibleItemsInfo
+            .find { it.index == index }
+
+    val offset =
+        if (itemInfo != null) {
+            val itemCenter = itemInfo.offset + itemInfo.size / 2
+            val viewportCenter = viewportHeight / 2
+            itemCenter - viewportCenter
+        } else {
+            0
+        }
+
+    listState.animateScrollToItem(
+        index,
+        -offset,
+    )
+}
+/*
 // ------------------------------------------------
 // 慢速滚动到居中（不使用 animationSpec）
 // ------------------------------------------------
@@ -308,6 +337,7 @@ private suspend fun slowScrollToCenter(
     }
 }
 
+*/
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun LyricsView(
