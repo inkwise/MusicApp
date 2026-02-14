@@ -661,6 +661,16 @@ fun LyricsView(
 
     LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
+        // 1. 动态计算动画时长
+        val currentLineTime = lyrics[index].timeMs
+        val nextLineTime = lyrics.getOrNull(index + 1)?.timeMs
+        
+        val dynamicDuration = if (nextLineTime != null) {
+            // 计算与下一行的间隔，并设定一个阈值（比如最快 200ms，最慢 800ms）
+            (nextLineTime - currentLineTime).toInt().coerceIn(200, 800)
+        } else {
+            500 // 最后一行默认值
+        }
 
         val layoutInfo = listState.layoutInfo
         val visibleItem =
