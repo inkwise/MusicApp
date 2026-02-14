@@ -86,6 +86,13 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy // 关键：处理像素级滚动
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
 
 // 对齐
 import androidx.compose.ui.Alignment
