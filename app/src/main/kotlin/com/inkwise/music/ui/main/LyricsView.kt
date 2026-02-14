@@ -606,6 +606,7 @@ fun LyricsView(
 fun LyricLineItem(
     line: LyricLine, // 请确保这里的类名和你 ViewModel 里的歌词行类名一致
     isHighlighted: Boolean,
+    animatedThemeColor :Color,
     showTranslation: Boolean,
     alpha: Float,
 ) {
@@ -619,7 +620,7 @@ fun LyricLineItem(
             text = line.text,
             color =
                 if (isHighlighted) {
-                    MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+                    animatedThemeColor.copy(alpha = alpha)
                 } else {
                     Color.Black.copy(alpha = alpha)
                 },
@@ -757,6 +758,7 @@ fun LyricsView(
 
                     LyricLineItem(
                         line = line,
+                        animatedThemeColor = animatedThemeColor,
                         isHighlighted = isHighlighted,
                         showTranslation = showTranslation,
                         alpha = alpha,
