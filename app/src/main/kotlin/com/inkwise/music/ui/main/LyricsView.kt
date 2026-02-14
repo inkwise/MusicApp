@@ -123,7 +123,7 @@ fun MiniLyricsView2(
         offsetY.snapTo(0f)
         offsetY.animateTo(
             targetValue = -30f, // 向上滚动一行高度
-            animationSpec = tween(200)
+            animationSpec = tween(1200)
         )
         offsetY.snapTo(0f)
     }
