@@ -47,7 +47,8 @@ fun controlContent(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(100.dp)
+              //  .height(100.dp)
+                .fillMaxHeight()
                 .clickable(
                     indication = null, // 🚫 去掉波纹
                     interactionSource = remember { MutableInteractionSource() },
