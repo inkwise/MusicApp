@@ -256,7 +256,7 @@ fun CurrentSongPage(
             )
             MiniLyricsView(
                 viewModel = playerViewModel,
-                animatedThemeColor: Color.Red
+                animatedThemeColor= Color.Red
             )
         }
     }
