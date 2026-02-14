@@ -73,8 +73,6 @@ class PlayerViewModel
                     val lyrics = lyricsRepository.loadLyrics(song.id)
                     synchronizer = lyrics?.let { LyricsSynchronizer(it) }
                     _lyricsState.value = _lyricsState.value.copy(lyrics = lyrics, highlight = null)
-
-              
                 }
             }
         }

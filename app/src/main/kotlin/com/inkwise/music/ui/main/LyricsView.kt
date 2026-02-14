@@ -653,13 +653,10 @@ fun LyricsView(
     val lyrics = lyricsState.lyrics?.lines.orEmpty()
     val highlight = lyricsState.highlight
     val listState = rememberLazyListState()
-    
-    val fadeHeightDp = 33.dp      // 👈 在这里改高度
+
+    val fadeHeightDp = 33.dp // 👈 在这里改高度
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
-    
-    
-    
-    
+
     LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
 
@@ -696,36 +693,37 @@ fun LyricsView(
     }
 
     Box(
-    modifier = Modifier
-        .fillMaxSize()
-        .graphicsLayer {
-            compositingStrategy = CompositingStrategy.Offscreen
-        }
-        .drawWithContent {
-            drawContent()
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    compositingStrategy = CompositingStrategy.Offscreen
+                }.drawWithContent {
+                    drawContent()
 
-            val height = size.height
+                    val height = size.height
 
-            val gradient = Brush.verticalGradient(
-                colorStops = arrayOf(
-                    0f to Color.Transparent,
-                    fadeHeightPx / height to Color.Black,
+                    val gradient =
+                        Brush.verticalGradient(
+                            colorStops =
+                                arrayOf(
+                                    0f to Color.Transparent,
+                                    fadeHeightPx / height to Color.Black,
+                                    1f - (fadeHeightPx / height) to Color.Black,
+                                    1f to Color.Transparent,
+                                ),
+                        )
 
-                    1f - (fadeHeightPx / height) to Color.Black,
-                    1f to Color.Transparent
-                )
-            )
-
-            drawRect(
-                brush = gradient,
-                blendMode = BlendMode.DstIn
-            )
-        }
-) {
+                    drawRect(
+                        brush = gradient,
+                        blendMode = BlendMode.DstIn,
+                    ) 
+                },
+    ) {
         LazyColumn(
             state = listState,
             // 使用 contentPadding 代替复杂的居中逻辑
-            contentPadding = PaddingValues(vertical = 300.dp),
+            contentPadding = PaddingValues(vertical = 100.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
             itemsIndexed(

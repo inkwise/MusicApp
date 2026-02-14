@@ -119,7 +119,6 @@ fun BottomDrawerContent(
             HorizontalPager(
                 state = pagerStateB,
                 beyondViewportPageCount = 2,
-                
                 modifier =
                     Modifier
                         .fillMaxWidth()
