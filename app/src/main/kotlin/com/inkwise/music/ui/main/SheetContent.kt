@@ -1,5 +1,4 @@
 package com.inkwise.music.ui.main
-import androidx.compose.foundation.layout.fillMaxHeight
 import android.widget.ImageView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,9 +33,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.Glide
 import com.inkwise.music.ui.player.PlayerViewModel
-
 import com.inkwise.music.ui.theme.LocalAppDimens
-
 
 // 手柄区域
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +50,7 @@ fun controlContent(
             modifier
                 .fillMaxWidth()
                 .height(dimens.sheetPeekHeightDp)
-               // .fillMaxHeight()
+                // .fillMaxHeight()
                 .clickable(
                     indication = null, // 🚫 去掉波纹
                     interactionSource = remember { MutableInteractionSource() },
@@ -86,7 +84,7 @@ fun controlContent2(
         modifier =
             modifier
                 .fillMaxWidth()
-                //.height(56.dp)
+                // .height(56.dp)
                 .fillMaxHeight()
                 .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

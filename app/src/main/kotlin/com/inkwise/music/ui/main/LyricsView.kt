@@ -96,8 +96,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 
-
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MiniLyricsView2(
@@ -110,49 +108,58 @@ fun MiniLyricsView2(
 
     val currentLine = lyrics.getOrNull(currentIndex)?.text.orEmpty()
 
-        val nextTime = lyrics.getOrNull(currentIndex + 1)?.timeMs
-val currentTime = lyrics.getOrNull(currentIndex)?.timeMs
+    val nextTime = lyrics.getOrNull(currentIndex + 1)?.timeMs
+    val currentTime = lyrics.getOrNull(currentIndex)?.timeMs
 
-val duration = if (nextTime != null && currentTime != null) {
-    (nextTime - currentTime).coerceAtMost(1500).toInt()
-} else {
-    300
-}
+    val duration =
+        if (nextTime != null && currentTime != null) {
+            (nextTime - currentTime).coerceAtMost(1500).toInt()
+        } else {
+            300
+        }
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(30.dp), // 👈 控制 mini 高度
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(30.dp),
+        // 👈 控制 mini 高度
+        contentAlignment = Alignment.Center,
     ) {
-    
         AnimatedContent(
-    modifier = Modifier.fillMaxWidth(),
-    targetState = currentLine,
-    transitionSpec = {
-        slideInVertically(
-            initialOffsetY = { height -> height },
-            animationSpec = tween(duration)
-        ) togetherWith
-        slideOutVertically(
-            targetOffsetY = { height -> -height },
-            animationSpec = tween(duration)
-        )
-    },
-    label = "mini_lyrics"
-) { text ->
+            modifier = Modifier.fillMaxWidth(),
+            targetState = currentLine,
+            transitionSpec = {
+                /*
+                slideInVertically(
+                    initialOffsetY = { height -> height },
+                    animationSpec = tween(duration),
+                ) togetherWith
+                    slideOutVertically(
+                        targetOffsetY = { height -> -height },
+                        animationSpec = tween(duration),
+                    )*/
+                slideInVertically(
+                    initialOffsetY = { height -> (height * 0.6f).toInt() },
+                    animationSpec = tween(duration),
+                ) togetherWith
+                    slideOutVertically(
+                        targetOffsetY = { height -> -(height * 0.6f).toInt() },
+                        animationSpec = tween(duration),
+                    )
+            },
+            label = "mini_lyrics",
+        ) { text ->
 
-    Text(
-        text = text,
-        maxLines = 1,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium
-    )
-}
-
+            Text(
+                text = text,
+                maxLines = 1,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
     }
 }
-
 
 @Composable
 fun MiniLyricsView(
@@ -186,7 +193,7 @@ fun MiniLyricsView(
                 modifier =
                     Modifier
                         .fillMaxWidth(),
-                      //  .padding(horizontal = 6.dp, vertical = 4.dp),
+                //  .padding(horizontal = 6.dp, vertical = 4.dp),
                 color =
                     if (isHighlighted) {
                         animatedThemeColor
@@ -321,34 +328,35 @@ fun LyricsView(
                     // drawWithContent 绘制内容后再画顶部/底部渐变遮罩，不会阻塞触摸
                     // 1. 必须开启渲染层合成策略，否则 BlendMode 不会作用于整个图层
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-      
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-            .drawWithContent {
-    drawContent()
+                    .drawWithContent {
+                        drawContent()
 
-    // 使用已经在外面计算好的 fadeHeightPx（像素）
-    val fh = fadeHeightPx.coerceAtMost(size.height / 2f) // 防守：不要超过一半高度
+                        // 使用已经在外面计算好的 fadeHeightPx（像素）
+                        val fh = fadeHeightPx.coerceAtMost(size.height / 2f) // 防守：不要超过一半高度
 
-    // 顶部渐隐：从透明 -> 不透明（DstIn 会把 alpha 应用到内容）
-    drawRect(
-        brush = Brush.verticalGradient(
-            colors = listOf(Color.Transparent, Color.Black),
-            startY = 0f,
-            endY = fh
-        ),
-        blendMode = BlendMode.DstIn
-    )
+                        // 顶部渐隐：从透明 -> 不透明（DstIn 会把 alpha 应用到内容）
+                        drawRect(
+                            brush =
+                                Brush.verticalGradient(
+                                    colors = listOf(Color.Transparent, Color.Black),
+                                    startY = 0f,
+                                    endY = fh,
+                                ),
+                            blendMode = BlendMode.DstIn,
+                        )
 
-    // 底部渐隐：从不透明 -> 透明
-    drawRect(
-        brush = Brush.verticalGradient(
-            colors = listOf(Color.Black, Color.Transparent),
-            startY = size.height - fh,
-            endY = size.height
-        ),
-        blendMode = BlendMode.DstIn
-    )
-},    
+                        // 底部渐隐：从不透明 -> 透明
+                        drawRect(
+                            brush =
+                                Brush.verticalGradient(
+                                    colors = listOf(Color.Black, Color.Transparent),
+                                    startY = size.height - fh,
+                                    endY = size.height,
+                                ),
+                            blendMode = BlendMode.DstIn,
+                        )
+                    },
             state = listState,
             // contentPadding = PaddingValues(vertical = 8.dp),
             contentPadding = PaddingValues(vertical = 40.dp), // 增加 padding 让第一行也能被“擦除”

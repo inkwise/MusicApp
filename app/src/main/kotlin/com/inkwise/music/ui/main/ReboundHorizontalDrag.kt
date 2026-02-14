@@ -3,6 +3,8 @@ package com.inkwise.music.ui.main
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.MarqueeAnimationMode
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -24,15 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import androidx.compose.foundation.basicMarquee
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.MarqueeAnimationMode
 
 @Composable
 fun ReboundHorizontalDrag(
@@ -159,32 +159,33 @@ fun ReboundHorizontalDrag(
                 isVisible = isVisible2,
             )*/
             // ⬅ 上一首
-AdjacentSongPage(
-    label = "上一首",
-    song = playQueue.getOrNull(currentIndex - 1),
-    modifier = itemModifier,
-    alignRight = true,
-    isVisible = isVisible,
-)
+            AdjacentSongPage(
+                label = "上一首",
+                song = playQueue.getOrNull(currentIndex - 1),
+                modifier = itemModifier,
+                alignRight = true,
+                isVisible = isVisible,
+            )
 
 // 🎵 当前
-CurrentSongPage(
-    song = playQueue.getOrNull(currentIndex),
-    playerViewModel= playerViewModel,
-    modifier = itemModifier,
-)
+            CurrentSongPage(
+                song = playQueue.getOrNull(currentIndex),
+                playerViewModel = playerViewModel,
+                modifier = itemModifier,
+            )
 
 // ➡ 下一首
-AdjacentSongPage(
-    label = "下一首",
-    song = playQueue.getOrNull(currentIndex + 1),
-    modifier = itemModifier,
-    alignRight = false,
-    isVisible = isVisible2,
-)
+            AdjacentSongPage(
+                label = "下一首",
+                song = playQueue.getOrNull(currentIndex + 1),
+                modifier = itemModifier,
+                alignRight = false,
+                isVisible = isVisible2,
+            )
         }
     }
 }
+
 /*
 @Composable
 fun SongPage(
@@ -241,20 +242,20 @@ fun CurrentSongPage(
         verticalArrangement = Arrangement.Center,
     ) {
         if (song != null) {
-
             Text(
                 text = song.title,
                 maxLines = 1,
                 overflow = TextOverflow.Clip,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .basicMarquee(
-                        iterations = Int.MAX_VALUE,
-                        repeatDelayMillis = 1000
-                    )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            repeatDelayMillis = 1000,
+                        ),
             )
             MiniLyricsView2(
-                viewModel= playerViewModel
+                viewModel = playerViewModel,
             )
         }
     }
@@ -275,17 +276,17 @@ fun AdjacentSongPage(
         verticalArrangement = Arrangement.Center,
     ) {
         if (song != null && isVisible) {
-
             Text(
                 text = song.title,
                 maxLines = 1,
                 overflow = TextOverflow.Clip,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .basicMarquee(
-                        iterations = Int.MAX_VALUE,
-                        repeatDelayMillis = 1000
-                    )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            repeatDelayMillis = 1000,
+                        ),
             )
 
             Text(
