@@ -392,7 +392,7 @@ fun BottomDrawerContent(
 @Composable
 fun LyricsPage(
     playerViewModel: PlayerViewModel,
-    animatedThemeColor = Color,
+    animatedThemeColor : Color,
     modifier: Modifier = Modifier,
 ) {
     val lyricsState by playerViewModel.lyricsState.collectAsState()
