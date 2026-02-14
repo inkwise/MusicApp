@@ -128,6 +128,7 @@ fun ReboundHorizontalDrag(
         ) {
             val itemModifier = Modifier.width(halfWidth).fillMaxHeight()
 
+/*
             // ⬅ 上一首
             SongPage(
                 text = "上一首",
@@ -156,11 +157,34 @@ fun ReboundHorizontalDrag(
                 modifier = itemModifier,
                 alignRight = false,
                 isVisible = isVisible2,
-            )
+            )*/
+            // ⬅ 上一首
+AdjacentSongPage(
+    label = "上一首",
+    song = playQueue.getOrNull(currentIndex - 1),
+    modifier = itemModifier,
+    alignRight = true,
+    isVisible = isVisible,
+)
+
+// 🎵 当前
+CurrentSongPage(
+    song = playQueue.getOrNull(currentIndex),
+    modifier = itemModifier,
+)
+
+// ➡ 下一首
+AdjacentSongPage(
+    label = "下一首",
+    song = playQueue.getOrNull(currentIndex + 1),
+    modifier = itemModifier,
+    alignRight = false,
+    isVisible = isVisible2,
+)
         }
     }
 }
-
+/*
 @Composable
 fun SongPage(
     text: String,
@@ -198,6 +222,69 @@ fun SongPage(
 )
             Text(
                 text = text,
+                maxLines = 1,
+            )
+        }
+    }
+}
+*/
+@Composable
+fun CurrentSongPage(
+    song: Song?,
+    modifier: Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxHeight(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        if (song != null) {
+
+            Text(
+                text = song.title,
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .basicMarquee(
+                        iterations = Int.MAX_VALUE,
+                        repeatDelayMillis = 1000
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+fun AdjacentSongPage(
+    label: String,
+    song: Song?,
+    modifier: Modifier,
+    alignRight: Boolean = false,
+    isVisible: Boolean,
+) {
+    Column(
+        modifier = modifier.fillMaxHeight(),
+        horizontalAlignment =
+            if (alignRight) Alignment.End else Alignment.Start,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        if (song != null && isVisible) {
+
+            Text(
+                text = song.title,
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .basicMarquee(
+                        iterations = Int.MAX_VALUE,
+                        repeatDelayMillis = 1000
+                    )
+            )
+
+            Text(
+                text = label,
                 maxLines = 1,
             )
         }
