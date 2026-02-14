@@ -668,7 +668,7 @@ fun LyricsView(
                 .firstOrNull { it.index == index }
         // 获取当前高亮行和下一行的时间，用于计算滚动速度
     val currentLineTime = lyrics.getOrNull(index)?.timeMs ?: 0L
-    val nextLineTime = lyrics.getOrNull(index + 1)?.timeMs ?: (currentLineTime + 1000L) // 默认 1 秒
+    val nextLineTime = lyrics.getOrNull(index + 1)?.timeMs ?: (currentLineTime + 100L) // 默认 1 秒
     val durationMs = ((nextLineTime - currentLineTime) / 1.5).toInt() // 可调整比例
         .coerceIn(100, 1500) // 限制最小 100ms，最大 1500ms
 
