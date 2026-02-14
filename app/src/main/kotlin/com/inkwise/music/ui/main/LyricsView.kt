@@ -597,89 +597,136 @@ fun LyricsView(
     }
 }
 */
+// 定义缺失的子组件（放在 LyricsView 函数外面）
+@Composable
+fun LyricLineItem(
+    line: LyricLine, // 请确保这里的类名和你 ViewModel 里的歌词行类名一致
+    isHighlighted: Boolean,
+    showTranslation: Boolean,
+    alpha: Float
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = line.text,
+            color = if (isHighlighted) {
+                MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+            } else {
+                Color.Black.copy(alpha = alpha)
+            },
+            fontSize = 20.sp,
+            fontWeight = if (isHighlighted) FontWeight.SemiBold else FontWeight.Normal,
+        )
+
+        if (showTranslation && line.translation != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = line.translation!!,
+                color = if (isHighlighted) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = alpha * 0.7f)
+                } else {
+                    Color.Black.copy(alpha = alpha * 0.75f)
+                },
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
+// ----------------------------------------------------------------
+
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
     showTranslation: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val lyricsState by viewModel.lyricsState.collectAsState()
     val lyrics = lyricsState.lyrics?.lines.orEmpty()
     val highlight = lyricsState.highlight
-    
     val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
 
-    // 核心优化：手动控制滚动速度
+    // 自动滚动逻辑：改用 animateScrollBy 配合像素计算
     LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
         val layoutInfo = listState.layoutInfo
         
-        // 查找当前高亮行在屏幕上的位置
+        // 尝试找到当前正在显示的 item
         val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
         
         if (visibleItem != null) {
-            // 计算让该行居中需要的像素位移
+            // 计算居中偏移量：(视口高度 / 2) - (Item顶部偏移 + Item高度 / 2)
             val viewportHeight = layoutInfo.viewportEndOffset
             val itemCenter = visibleItem.offset + (visibleItem.size / 2)
             val targetCenter = viewportHeight / 2
             val scrollDelta = itemCenter - targetCenter
             
-            // 使用 animateScrollBy + tween 配合任意插值器实现线性感
+            // 使用 animateScrollBy 实现线性平滑滚动
             listState.animateScrollBy(
                 value = scrollDelta.toFloat(),
                 animationSpec = tween(
-                    durationMillis = 600, // 这里完全控制速度
+                    durationMillis = 600, 
                     easing = LinearOutSlowInEasing
                 )
             )
         } else {
-            // 如果不在屏幕内，先快速跳转到附近
+            // 如果目标不在屏幕内，先直接跳转
             listState.scrollToItem(index)
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             state = listState,
-            // 使用一半屏幕高度作为 Padding，确保第一行和最后一行都能居中
-            contentPadding = PaddingValues(vertical = 300.dp), 
+            // 使用 contentPadding 代替复杂的居中逻辑
+            contentPadding = PaddingValues(vertical = 300.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            itemsIndexed(lyrics, key = { _, item -> item.id }) { index, line ->
+            itemsIndexed(
+                items = lyrics,
+                key = { index, _ -> index } // 修复 'id' 未定义问题
+            ) { index, line ->
                 val isHighlighted = highlight?.lineIndex == index
-                
-                // 性能优化：只在高亮变化时触发最小范围重组
+                val alpha by animateFloatAsState(
+                    targetValue = if (isHighlighted) 1f else 0.5f,
+                    label = "lyrics_alpha"
+                )
+
                 LyricLineItem(
                     line = line,
                     isHighlighted = isHighlighted,
-                    showTranslation = showTranslation
+                    showTranslation = showTranslation,
+                    alpha = alpha
                 )
             }
         }
 
-        // --- 更好的渐隐方案：覆盖层 ---
-        // 顶部渐隐
+        // --- 纯覆盖式渐隐遮罩 (无 BlendMode，不掉帧) ---
+        // 顶部遮罩
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(100.dp)
                 .align(Alignment.TopCenter)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.White, Color.White.copy(alpha = 0f))
+                        listOf(MaterialTheme.colorScheme.surface, Color.Transparent)
                     )
                 )
         )
 
-        // 底部渐隐
+        // 底部遮罩
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(100.dp)
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.White.copy(alpha = 0f), Color.White)
+                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface)
                     )
                 )
         )
