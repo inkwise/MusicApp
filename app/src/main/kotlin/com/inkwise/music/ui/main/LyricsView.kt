@@ -819,27 +819,55 @@ fun LyricsView(
 
     // 当高亮索引变更时：等待 layout 就绪，再滚动到中间
     LaunchedEffect(highlight?.lineIndex, containerHeightPx) {
-        val index = highlight?.lineIndex ?: return@LaunchedEffect
+    val index = highlight?.lineIndex ?: return@LaunchedEffect
+    if (containerHeightPx <= 0) return@LaunchedEffect
+    if (index !in lyrics.indices) return@LaunchedEffect
 
-        // 必须等容器高度已知（onSizeChanged 填充）并且 LazyColumn 已 layout（viewport size > 0）
-        if (containerHeightPx <= 0) return@LaunchedEffect
+    // 等待 layout 完成
+    snapshotFlow { listState.layoutInfo.viewportSize.height }
+        .first { it > 0 }
 
-        // 等 listState 的 layoutInfo 有意义（viewport size > 0）
-        snapshotFlow { listState.layoutInfo.viewportSize.height }
-            .first { it > 0 }
+    val layoutInfo = listState.layoutInfo
+    val visibleItem = layoutInfo.visibleItemsInfo
+        .firstOrNull { it.index == index }
 
-        // 现在 layout 已就绪，可以安全调用 animateScrollToItem
-        if (index in lyrics.indices) {
-            isProgrammaticScroll = true
-            try {
-                // 直接让 LazyColumn 把该 item 滚到可见区域的 offset=0（由于我们用了纵向 contentPadding = centerPadding，item 会落在中间）
-                listState.animateScrollToItem(index)
-            } finally {
-                // 小的防护：在结束后短延迟再把标志置回 false（避免 race）
-                isProgrammaticScroll = false
-            }
+    if (visibleItem != null) {
+
+        val viewportCenter = layoutInfo.viewportSize.height / 2
+        val itemCenter = visibleItem.offset + visibleItem.size / 2
+        val delta = itemCenter - viewportCenter
+
+        listState.animateScrollBy(
+            value = delta.toFloat(),
+            animationSpec = tween(
+                durationMillis = 350,   // 👈 在这里改速度
+                easing = FastOutSlowInEasing
+            )
+        )
+
+    } else {
+        // 如果不在屏幕内，先瞬移再平滑修正
+        listState.scrollToItem(index)
+
+        // 再做一次平滑居中
+        val info = listState.layoutInfo.visibleItemsInfo
+            .firstOrNull { it.index == index }
+
+        info?.let {
+            val viewportCenter = listState.layoutInfo.viewportSize.height / 2
+            val itemCenter = it.offset + it.size / 2
+            val delta = itemCenter - viewportCenter
+
+            listState.animateScrollBy(
+                delta.toFloat(),
+                animationSpec = tween(
+                    durationMillis = 350,
+                    easing = FastOutSlowInEasing
+                )
+            )
         }
     }
+}
 
     Box(
         modifier = modifier
