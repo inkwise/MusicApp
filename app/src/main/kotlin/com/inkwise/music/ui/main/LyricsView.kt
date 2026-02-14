@@ -104,6 +104,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.offset
+
 @Composable
 fun MiniLyricsView2(
     viewModel: PlayerViewModel,
@@ -114,30 +115,44 @@ fun MiniLyricsView2(
     val currentIndex = lyricsState.highlight?.lineIndex ?: 0
 
     val currentLine = lyrics.getOrNull(currentIndex)?.text.orEmpty()
+    val nextLine = lyrics.getOrNull(currentIndex + 1)?.text.orEmpty()
 
     val offsetY = remember { Animatable(0f) }
 
-    LaunchedEffect(currentLine) {
-        offsetY.snapTo(30f)        // 从下方开始
+    LaunchedEffect(currentIndex) {
+        offsetY.snapTo(0f)
         offsetY.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(1300) // 固定一个短时间
+            targetValue = -30f, // 向上滚动一行高度
+            animationSpec = tween(200)
         )
+        offsetY.snapTo(0f)
     }
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(30.dp),
+            .height(30.dp)
+            .clipToBounds(),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = currentLine,
+        Column(
             modifier = Modifier.offset(y = offsetY.value.dp),
-            maxLines = 1,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium
-        )
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = currentLine,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
+            )
+
+            Text(
+                text = nextLine,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
+            )
+        }
     }
 }
 
