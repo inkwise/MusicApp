@@ -598,7 +598,7 @@ fun LyricsView(
     }
 }
 */
-
+/*
 // 定义缺失的子组件（放在 LyricsView 函数外面）
 @Composable
 fun LyricLineItem(
@@ -741,6 +741,179 @@ fun LyricsView(
                     showTranslation = showTranslation,
                     alpha = alpha,
                 )
+            }
+        }
+    }
+}
+*/
+// ----------------------------------------------------------------
+// 子组件：单行歌词项（与你之前一致）
+@Composable
+fun LyricLineItem(
+    line: LyricLine,
+    isHighlighted: Boolean,
+    showTranslation: Boolean,
+    alpha: Float,
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = line.text,
+            color =
+                if (isHighlighted) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+                } else {
+                    Color.Black.copy(alpha = alpha)
+                },
+            fontSize = 20.sp,
+            fontWeight = if (isHighlighted) FontWeight.SemiBold else FontWeight.Normal,
+        )
+
+        if (showTranslation && line.translation != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = line.translation!!,
+                color =
+                    if (isHighlighted) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = alpha * 0.7f)
+                    } else {
+                        Color.Black.copy(alpha = alpha * 0.75f)
+                    },
+                fontSize = 14.sp,
+            )
+        }
+    }
+}
+
+// ----------------------------------------------------------------
+// 主组件：LyricsView（动态 padding + 等待 layout + alpha mask 渐隐）
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
+@Composable
+fun LyricsView(
+    viewModel: PlayerViewModel,
+    showTranslation: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val lyricsState by viewModel.lyricsState.collectAsState()
+    val lyrics = lyricsState.lyrics?.lines.orEmpty()
+    val highlight = lyricsState.highlight
+    val listState = rememberLazyListState()
+
+    // 渐隐高度（可调）
+    val fadeHeightDp = 110.dp
+    val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
+
+    // 记录容器高度（px）
+    var containerHeightPx by remember { mutableStateOf(0) }
+    val containerHeightDp = with(LocalDensity.current) { containerHeightPx.toDp() }
+
+    // 一个标记，避免在程序化滚动时把用户滚动误判为用户操作（如果你后面加入 userScrolling 逻辑会用到）
+    var isProgrammaticScroll by remember { mutableStateOf(false) }
+
+    // 当高亮索引变更时：等待 layout 就绪，再滚动到中间
+    LaunchedEffect(highlight?.lineIndex, containerHeightPx) {
+        val index = highlight?.lineIndex ?: return@LaunchedEffect
+
+        // 必须等容器高度已知（onSizeChanged 填充）并且 LazyColumn 已 layout（viewport size > 0）
+        if (containerHeightPx <= 0) return@LaunchedEffect
+
+        // 等 listState 的 layoutInfo 有意义（viewport size > 0）
+        snapshotFlow { listState.layoutInfo.viewportSize.height }
+            .first { it > 0 }
+
+        // 现在 layout 已就绪，可以安全调用 animateScrollToItem
+        if (index in lyrics.indices) {
+            isProgrammaticScroll = true
+            try {
+                // 直接让 LazyColumn 把该 item 滚到可见区域的 offset=0（由于我们用了纵向 contentPadding = centerPadding，item 会落在中间）
+                listState.animateScrollToItem(index)
+            } finally {
+                // 小的防护：在结束后短延迟再把标志置回 false（避免 race）
+                isProgrammaticScroll = false
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .onSizeChanged { containerHeightPx = it.height } // 保存 container 高度 px
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen } // 为 DstIn 做准备
+            .drawWithContent {
+                // 先绘制内容（歌词）
+                drawContent()
+
+                // 再绘制 alpha mask（DstIn）：透明 -> 黑 -> 黑 -> 透明（黑色代表保留）
+                val h = size.height
+                val fh = fadeHeightPx.coerceAtMost(h / 2f)
+
+                val gradient = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to Color.Transparent,
+                        fh / h to Color.Black,
+                        1f - fh / h to Color.Black,
+                        1f to Color.Transparent
+                    ),
+                    startY = 0f,
+                    endY = h
+                )
+
+                drawRect(brush = gradient, blendMode = BlendMode.DstIn)
+            }
+    ) {
+        // 计算中心 padding（将歌词“天然”居中）
+        val centerPaddingDp = remember(containerHeightDp) {
+            // guard：容器高度可能为 0（首次），但 LazyColumn contentPadding 需要 Dp；如果为 0 则给 0.dp
+            if (containerHeightDp > 0.dp) containerHeightDp / 2f else 0.dp
+        }
+
+        LazyColumn(
+            state = listState,
+            contentPadding = PaddingValues(vertical = centerPaddingDp),
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            itemsIndexed(
+                items = lyrics,
+                key = { index, _ -> index }
+            ) { index, line ->
+                val isHighlighted = highlight?.lineIndex == index
+
+                val alpha by animateFloatAsState(
+                    targetValue = if (isHighlighted) 1f else 0.5f,
+                    label = "lyrics_alpha"
+                )
+
+                // 点击时 seek 并平滑滚动到该行（程序化滚动标记）
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clickable {
+                            viewModel.seekTo(line.timeMs)
+                            // 使用协程滑动，可以依赖 listState.animateScrollToItem
+                            // 也可在这里设置 isProgrammaticScroll = true 如果你后续添加用户滚动逻辑
+                            CoroutineScope(Dispatchers.Main).launch {
+                                isProgrammaticScroll = true
+                                try {
+                                    listState.animateScrollToItem(index)
+                                } finally {
+                                    isProgrammaticScroll = false
+                                }
+                            }
+                        }
+                ) {
+                    LyricLineItem(
+                        line = line,
+                        isHighlighted = isHighlighted,
+                        showTranslation = showTranslation,
+                        alpha = alpha,
+                    )
+                }
             }
         }
     }
