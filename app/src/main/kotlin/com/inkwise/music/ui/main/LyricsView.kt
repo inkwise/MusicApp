@@ -115,6 +115,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+
 @Composable
 fun MiniLyricsView2(
     viewModel: PlayerViewModel,
@@ -658,7 +659,7 @@ fun LyricsView(
     val fadeHeightDp = 33.dp // 👈 在这里改高度
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
 
-    LaunchedEffect(highlight?.lineIndex) {
+   /* LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
 
         val layoutInfo = listState.layoutInfo
@@ -691,67 +692,113 @@ fun LyricsView(
         } else {
             listState.scrollToItem(index)
         }
-    }
+    }*/
+    LaunchedEffect(highlight?.lineIndex) {
+    val index = highlight?.lineIndex ?: return@LaunchedEffect
+    val layoutInfo = listState.layoutInfo
+    val visibleItems = layoutInfo.visibleItemsInfo
 
-    
+    if (visibleItems.isEmpty()) return@LaunchedEffect
+
+    val totalItems = lyrics.size
+    val firstVisibleIndex = visibleItems.first().index
+    val lastVisibleIndex = visibleItems.last().index
+
+    val visibleCount = visibleItems.size
+    val padding = visibleCount / 2  // 中间滚动区的半屏行数
+
+    when {
+        // 高亮行在开头部分 → 不滚动
+        index <= padding -> {
+            listState.scrollToItem(0)
+        }
+
+        // 高亮行在结尾部分 → 不滚动
+        index >= totalItems - padding -> {
+            val scrollIndex = (totalItems - visibleCount).coerceAtLeast(0)
+            listState.scrollToItem(scrollIndex)
+        }
+
+        // 高亮行在中间 → 居中滚动
+        else -> {
+            val visibleItem = visibleItems.firstOrNull { it.index == index }
+            if (visibleItem != null) {
+                val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+                val itemCenter = visibleItem.offset + visibleItem.size / 2
+                val viewportCenter = viewportHeight / 2
+                val scrollDelta = itemCenter - viewportCenter
+
+                listState.animateScrollBy(
+                    scrollDelta.toFloat(),
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearOutSlowInEasing
+                    )
+                )
+            } else {
+                listState.scrollToItem(index)
+            }
+        }
+    }
+}
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val boxHeight = maxHeight  // LyricsView 的高度
+        val boxHeight = maxHeight // LyricsView 的高度
 
         // 估算每行高度，如果你的 LyricLineItem 高度固定，可以直接写固定值
         val estimatedLineHeightDp = 56.dp
         val verticalPadding = (boxHeight / 2) - (estimatedLineHeightDp / 2)
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }.drawWithContent {
-                    drawContent()
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }.drawWithContent {
+                        drawContent()
 
-                    val height = size.height
+                        val height = size.height
 
-                    val gradient =
-                        Brush.verticalGradient(
-                            colorStops =
-                                arrayOf(
-                                    0f to Color.Transparent,
-                                    fadeHeightPx / height to Color.Black,
-                                    1f - (fadeHeightPx / height) to Color.Black,
-                                    1f to Color.Transparent,
-                                ),
+                        val gradient =
+                            Brush.verticalGradient(
+                                colorStops =
+                                    arrayOf(
+                                        0f to Color.Transparent,
+                                        fadeHeightPx / height to Color.Black,
+                                        1f - (fadeHeightPx / height) to Color.Black,
+                                        1f to Color.Transparent,
+                                    ),
+                            )
+
+                        drawRect(
+                            brush = gradient,
+                            blendMode = BlendMode.DstIn,
                         )
-
-                    drawRect(
-                        brush = gradient,
-                        blendMode = BlendMode.DstIn,
-                    ) 
-                },
-    ) {
-        LazyColumn(
-            state = listState,
-            // 使用 contentPadding 代替复杂的居中逻辑
-            contentPadding = PaddingValues(vertical = verticalPadding),
-            modifier = Modifier.fillMaxSize(),
+                    },
         ) {
-            itemsIndexed(
-                items = lyrics,
-                key = { index, _ -> index }, // 修复 'id' 未定义问题
-            ) { index, line ->
-                val isHighlighted = highlight?.lineIndex == index
-                val alpha by animateFloatAsState(
-                    targetValue = if (isHighlighted) 1f else 0.5f,
-                    label = "lyrics_alpha",
-                )
+            LazyColumn(
+                state = listState,
+                // 使用 contentPadding 代替复杂的居中逻辑
+                contentPadding = PaddingValues(vertical = verticalPadding),
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                itemsIndexed(
+                    items = lyrics,
+                    key = { index, _ -> index }, // 修复 'id' 未定义问题
+                ) { index, line ->
+                    val isHighlighted = highlight?.lineIndex == index
+                    val alpha by animateFloatAsState(
+                        targetValue = if (isHighlighted) 1f else 0.5f,
+                        label = "lyrics_alpha",
+                    )
 
-                LyricLineItem(
-                    line = line,
-                    isHighlighted = isHighlighted,
-                    showTranslation = showTranslation,
-                    alpha = alpha,
-                )
+                    LyricLineItem(
+                        line = line,
+                        isHighlighted = isHighlighted,
+                        showTranslation = showTranslation,
+                        alpha = alpha,
+                    )
+                }
             }
         }
-    }
     }
 }
