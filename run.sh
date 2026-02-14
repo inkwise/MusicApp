@@ -48,6 +48,8 @@ if ./gradlew assembleDebug; then
 
 else
   echo "❌ 构建失败"
+  
+  termux-toast  "❌ 构建失败"
   COMMIT_MSG="e$NEW_VERSION"
 fi
 
