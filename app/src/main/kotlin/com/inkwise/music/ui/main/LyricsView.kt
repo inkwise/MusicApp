@@ -694,6 +694,7 @@ fun LyricsView(
             contentPadding = PaddingValues(vertical = 300.dp),
             modifier = Modifier.fillMaxSize()
         ) {
+            val bgColor = MaterialTheme.colorScheme.background
             itemsIndexed(
                 items = lyrics,
                 key = { index, _ -> index } // 修复 'id' 未定义问题
