@@ -694,7 +694,7 @@ fun LyricsView(
             contentPadding = PaddingValues(vertical = 300.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            val bgColor = MaterialTheme.colorScheme.background
+            
             itemsIndexed(
                 items = lyrics,
                 key = { index, _ -> index } // 修复 'id' 未定义问题
@@ -713,7 +713,7 @@ fun LyricsView(
                 )
             }
         }
-
+        val bgColor = MaterialTheme.colorScheme.background
         // --- 纯覆盖式渐隐遮罩 (无 BlendMode，不掉帧) ---
         // 顶部遮罩
         Box(
