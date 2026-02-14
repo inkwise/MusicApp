@@ -117,6 +117,7 @@ fun MiniLyricsView2(
     ) {
 
         AnimatedContent(
+            modifier = Modifier.fillMaxWidth(),
             targetState = currentLine,
             transitionSpec = {
                 slideInVertically { height -> height } + fadeIn() togetherWith
@@ -128,7 +129,6 @@ fun MiniLyricsView2(
             Text(
                 text = text,
                 maxLines = 1,
-                //color = animatedThemeColor,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium
             )
