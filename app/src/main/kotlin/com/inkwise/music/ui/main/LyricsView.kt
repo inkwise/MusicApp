@@ -788,7 +788,7 @@ fun LyricLineItem(
         }
     }
 }
-
+/*
 // ----------------------------------------------------------------
 // 主组件：LyricsView（动态 padding + 等待 layout + alpha mask 渐隐）
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
@@ -918,4 +918,4 @@ fun LyricsView(
             }
         }
     }
-}
+}*/
