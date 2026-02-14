@@ -481,7 +481,6 @@ fun LyricsView(
 
     isProgrammaticScroll = true
     try {
-        // 获取当前 item 的 offset 信息
         val itemInfo = listState.layoutInfo.visibleItemsInfo
             .firstOrNull { it.index == index }
 
@@ -493,22 +492,24 @@ fun LyricsView(
 
             // Animatable 平滑滚动
             val anim = Animatable(0f)
+
+            // ✅ 这里用 launch 每帧调用 scrollBy
             anim.animateTo(
                 targetValue = distance,
                 animationSpec = tween(
-                    durationMillis = 350, // 这里改速度，ms 越小越快
+                    durationMillis = 350,
                     easing = FastOutSlowInEasing
                 )
-            ) {
-                // 每一帧滚动的增量
-                listState.scrollBy(value - anim.value)
+            ) { value, _ ->
+                // value - previousValue 不是 suspend 函数
+                val delta = value - anim.value
+                launch { listState.scrollBy(delta) }
             }
 
         } else {
             // item 不可见，直接跳转
             listState.animateScrollToItem(index)
         }
-
     } finally {
         isProgrammaticScroll = false
     }
