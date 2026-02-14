@@ -170,6 +170,7 @@ AdjacentSongPage(
 // 🎵 当前
 CurrentSongPage(
     song = playQueue.getOrNull(currentIndex),
+    playerViewModel= playerViewModel,
     modifier = itemModifier,
 )
 

@@ -88,8 +88,6 @@ import androidx.compose.ui.Alignment
 
 // AnimatedContent
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-
 // 进出动画
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
