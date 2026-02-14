@@ -113,7 +113,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.offset
-
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 @Composable
 fun MiniLyricsView2(
     viewModel: PlayerViewModel,
@@ -730,7 +731,7 @@ fun LyricsView(
         LazyColumn(
             state = listState,
             // 使用 contentPadding 代替复杂的居中逻辑
-            contentPadding = PaddingValues(vertical = 100.dp),
+            contentPadding = PaddingValues(vertical = verticalPadding),
             modifier = Modifier.fillMaxSize(),
         ) {
             itemsIndexed(
