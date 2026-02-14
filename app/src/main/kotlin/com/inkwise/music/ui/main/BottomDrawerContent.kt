@@ -87,8 +87,8 @@ fun BottomDrawerContent(
         Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 16.dp),
+                    .fillMaxWidth(),
+                    //.padding(top = 24.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
