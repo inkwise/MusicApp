@@ -460,7 +460,7 @@ fun LyricsView(
     // ----------------------------
     // 自动滚动到高亮行（不算 offset）
     // ----------------------------
-    LaunchedEffect(highlight?.lineIndex) {
+  /*  LaunchedEffect(highlight?.lineIndex) {
         if (highlight == null) return@LaunchedEffect
         if (userScrolling) return@LaunchedEffect
 
@@ -473,7 +473,7 @@ fun LyricsView(
         } finally {
             isProgrammaticScroll = false
         }
-    }
+    }*/
 
     // ----------------------------
     // 容器高度用于居中 padding
