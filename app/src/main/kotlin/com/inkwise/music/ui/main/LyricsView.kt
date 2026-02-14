@@ -694,33 +694,32 @@ fun LyricsView(
     }
 
     Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }.drawWithContent {
-                    drawContent()
+    modifier = Modifier
+        .fillMaxSize()
+        .graphicsLayer {
+            compositingStrategy = CompositingStrategy.Offscreen
+        }
+        .drawWithContent {
+            drawContent()
 
-                    val gradient =
-                        Brush.verticalGradient(
-                            colors =
-                                listOf(
-                                    Color.Transparent,
-                                    Color.Black,
-                                    Color.Black,
-                                    Color.Transparent,
-                                ),
-                            startY = 0f,
-                            endY = size.height,
-                        )
+            val height = size.height
 
-                    drawRect(
-                        brush = gradient,
-                        blendMode = BlendMode.DstIn,
-                    )
-                },
-    ) {
+            val gradient = Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    fadeHeightPx / height to Color.Black,
+
+                    1f - (fadeHeightPx / height) to Color.Black,
+                    1f to Color.Transparent
+                )
+            )
+
+            drawRect(
+                brush = gradient,
+                blendMode = BlendMode.DstIn
+            )
+        }
+) {
         LazyColumn(
             state = listState,
             // 使用 contentPadding 代替复杂的居中逻辑
