@@ -898,14 +898,14 @@ fun LyricsView(
                             viewModel.seekTo(line.timeMs)
                             // 使用协程滑动，可以依赖 listState.animateScrollToItem
                             // 也可在这里设置 isProgrammaticScroll = true 如果你后续添加用户滚动逻辑
-                            CoroutineScope(Dispatchers.Main).launch {
-                                isProgrammaticScroll = true
-                                try {
-                                    listState.animateScrollToItem(index)
-                                } finally {
-                                    isProgrammaticScroll = false
-                                }
-                            }
+                            scope.launch {
+    isProgrammaticScroll = true
+    try {
+        listState.animateScrollToItem(index)
+    } finally {
+        isProgrammaticScroll = false
+    }
+}
                         }
                 ) {
                     LyricLineItem(
