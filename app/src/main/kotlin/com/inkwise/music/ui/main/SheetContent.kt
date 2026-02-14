@@ -34,6 +34,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.Glide
 import com.inkwise.music.ui.player.PlayerViewModel
 
+import com.inkwise.music.ui.theme.LocalAppDimens
+
+
 // 手柄区域
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,11 +46,12 @@ fun controlContent(
     showPlayQueue: () -> Unit,
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
+    val dimens = LocalAppDimens.current
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(60.dp)
+                .height(dimens.sheetPeekHeightDp)
                // .fillMaxHeight()
                 .clickable(
                     indication = null, // 🚫 去掉波纹

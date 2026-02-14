@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen() {
     val dimens = LocalAppDimens.current
+
     val scaffoldState = rememberBottomSheetScaffoldState()
     val scope = rememberCoroutineScope()
 
