@@ -657,15 +657,9 @@ fun LyricsView(
     val fadeHeightDp = 33.dp      // 👈 在这里改高度
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
     
-    LaunchedEffect(highlight?.lineIndex) {
-        val index = highlight?.lineIndex ?: return@LaunchedEffect
     
-        if (!lyricsState.isSeeking) {
-            centerToIndex(index)
-        }
-    }
     
-    /*
+    
     LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
 
@@ -699,7 +693,7 @@ fun LyricsView(
         } else {
             listState.scrollToItem(index)
         }
-    }*/
+    }
 
     Box(
     modifier = Modifier
@@ -752,36 +746,5 @@ fun LyricsView(
                 )
             }
         }
-    }
-}
-suspend fun centerToIndex(index: Int) {
-    val layoutInfo = listState.layoutInfo
-    val visibleItem =
-        layoutInfo.visibleItemsInfo
-            .firstOrNull { it.index == index }
-
-    if (visibleItem != null) {
-        val viewportStart = layoutInfo.viewportStartOffset
-        val viewportEnd = layoutInfo.viewportEndOffset
-        val viewportHeight = viewportEnd - viewportStart
-
-        val itemCenter =
-            visibleItem.offset + visibleItem.size / 2
-
-        val viewportCenter =
-            viewportStart + viewportHeight / 2
-
-        val scrollDelta =
-            itemCenter - viewportCenter
-
-        listState.animateScrollBy(
-            scrollDelta.toFloat(),
-            animationSpec = tween(
-                durationMillis = 500,
-                easing = LinearOutSlowInEasing,
-            ),
-        )
-    } else {
-        listState.scrollToItem(index)
     }
 }
