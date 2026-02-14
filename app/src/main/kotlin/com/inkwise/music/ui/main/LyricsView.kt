@@ -251,27 +251,45 @@ fun LyricsView(
                     // 1. 必须开启渲染层合成策略，否则 BlendMode 不会作用于整个图层
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                     .drawWithContent {
-                        drawContent()
+    drawContent()
 
-                        // 2. 创建一个由透明到黑色的渐变 Brush
-                        // 顶部：从透明(0)到不透明(1)
-                        val topBrush =
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                fadeHeightPx to Color.Black,
-                            )
-                        // 底部：从不透明(1)到透明(0)
-                        val bottomBrush =
-                            Brush.verticalGradient(
-                                (size.height - fadeHeightPx) to Color.Black,
-                                size.height to Color.Transparent,
-                            )
+    val fadeHeightPx = fadeHeightDp.toPx()
 
-                        // 3. 使用 BlendMode.DstIn (只保留内容与遮罩重合的部分，透明度取遮罩)
-                        drawRect(brush = topBrush, blendMode = BlendMode.DstIn)
-                        drawRect(brush = bottomBrush, blendMode = BlendMode.DstIn)
-                        canvas.restore()
-                    },
+    // 顶部：透明 -> 黑
+    val topBrush = Brush.verticalGradient(
+        colors = listOf(Color.Transparent, Color.Black),
+        startY = 0f,
+        endY = fadeHeightPx,
+    )
+
+    // 底部：黑 -> 透明
+    val bottomBrush = Brush.verticalGradient(
+        colors = listOf(Color.Black, Color.Transparent),
+        startY = size.height - fadeHeightPx,
+        endY = size.height,
+    )
+
+    // ⚠️ 关键：用 saveLayer，把两次 DstIn 放在同一个图层里
+    drawIntoCanvas { canvas ->
+        val paint = Paint()
+        canvas.saveLayer(size.toRect(), paint)
+
+        // 上遮罩
+        drawRect(
+            brush = topBrush,
+            blendMode = BlendMode.DstIn,
+        )
+
+        // 下遮罩
+        drawRect(
+            brush = bottomBrush,
+            blendMode = BlendMode.DstIn,
+        )
+
+        canvas.restore()
+    }
+}
+                    ,
             state = listState,
             // contentPadding = PaddingValues(vertical = 8.dp),
             contentPadding = PaddingValues(vertical = 40.dp), // 增加 padding 让第一行也能被“擦除”
