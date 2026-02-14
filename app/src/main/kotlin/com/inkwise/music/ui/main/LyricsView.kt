@@ -802,7 +802,8 @@ fun LyricsView(
     val lyrics = lyricsState.lyrics?.lines.orEmpty()
     val highlight = lyricsState.highlight
     val listState = rememberLazyListState()
-
+    
+    val scope = rememberCoroutineScope()
     // 渐隐高度（可调）
     val fadeHeightDp = 110.dp
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
