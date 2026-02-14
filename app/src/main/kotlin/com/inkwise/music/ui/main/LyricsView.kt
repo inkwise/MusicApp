@@ -659,7 +659,7 @@ fun LyricsView(
     val fadeHeightDp = 33.dp // 👈 在这里改高度
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
 
-   /* LaunchedEffect(highlight?.lineIndex) {
+    LaunchedEffect(highlight?.lineIndex) {
         val index = highlight?.lineIndex ?: return@LaunchedEffect
 
         val layoutInfo = listState.layoutInfo
@@ -692,55 +692,8 @@ fun LyricsView(
         } else {
             listState.scrollToItem(index)
         }
-    }*/
-    LaunchedEffect(highlight?.lineIndex) {
-    val index = highlight?.lineIndex ?: return@LaunchedEffect
-    val layoutInfo = listState.layoutInfo
-    val visibleItems = layoutInfo.visibleItemsInfo
-
-    if (visibleItems.isEmpty()) return@LaunchedEffect
-
-    val totalItems = lyrics.size
-    val firstVisibleIndex = visibleItems.first().index
-    val lastVisibleIndex = visibleItems.last().index
-
-    val visibleCount = visibleItems.size
-    val padding = visibleCount / 2  // 中间滚动区的半屏行数
-
-    when {
-        // 高亮行在开头部分 → 不滚动
-        index <= padding -> {
-            listState.scrollToItem(0)
-        }
-
-        // 高亮行在结尾部分 → 不滚动
-        index >= totalItems - padding -> {
-            val scrollIndex = (totalItems - visibleCount).coerceAtLeast(0)
-            listState.scrollToItem(scrollIndex)
-        }
-
-        // 高亮行在中间 → 居中滚动
-        else -> {
-            val visibleItem = visibleItems.firstOrNull { it.index == index }
-            if (visibleItem != null) {
-                val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
-                val itemCenter = visibleItem.offset + visibleItem.size / 2
-                val viewportCenter = viewportHeight / 2
-                val scrollDelta = itemCenter - viewportCenter
-
-                listState.animateScrollBy(
-                    scrollDelta.toFloat(),
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = LinearOutSlowInEasing
-                    )
-                )
-            } else {
-                listState.scrollToItem(index)
-            }
-        }
     }
-}
+    
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val boxHeight = maxHeight // LyricsView 的高度
 
