@@ -492,18 +492,23 @@ fun LyricsView(
 
             // Animatable 平滑滚动
             val anim = Animatable(0f)
+            var lastValue = 0f
 
-            // ✅ 这里用 launch 每帧调用 scrollBy
             anim.animateTo(
                 targetValue = distance,
                 animationSpec = tween(
-                    durationMillis = 350,
+                    durationMillis = 350, // 控制速度
                     easing = FastOutSlowInEasing
                 )
-            ) { value, _ ->
-                // value - previousValue 不是 suspend 函数
-                val delta = value - anim.value
-                launch { listState.scrollBy(delta) }
+            ) { value: Float ->
+                // 每一帧滚动增量
+                val delta = value - lastValue
+                lastValue = value
+
+                // 在 coroutine 内调用 suspend scrollBy
+                launch {
+                    listState.scrollBy(delta)
+                }
             }
 
         } else {
