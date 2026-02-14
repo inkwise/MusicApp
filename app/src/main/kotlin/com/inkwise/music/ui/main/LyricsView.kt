@@ -6,6 +6,7 @@ import androidx.compose.ui.draw.clipToBounds
 // animateItemPlacement
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.BlendMode
+import com.inkwise.music.data.model.LyricLine
 // ExperimentalAnimationApi 注解
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.graphics.graphicsLayer
