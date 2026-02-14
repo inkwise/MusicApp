@@ -690,7 +690,7 @@ fun LyricsView(
                 scrollDelta.toFloat(),
                 animationSpec =
                     tween(
-                        durationMillis = 500,
+                        durationMillis = durationMs,
                         easing = LinearOutSlowInEasing,
                     ),
             )
