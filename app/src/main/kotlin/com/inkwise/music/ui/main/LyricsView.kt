@@ -670,7 +670,6 @@ fun LyricsView(
             val viewportEnd = layoutInfo.viewportEndOffset
             val viewportHeight = viewportEnd - viewportStart
 
-            // 🔥 注意这里
             val itemCenter =
                 visibleItem.offset + visibleItem.size / 2
 
