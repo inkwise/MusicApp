@@ -713,31 +713,6 @@ fun LyricsView(
                 )
             }
         }
-        // --- 纯覆盖式渐隐遮罩 (无 BlendMode，不掉帧) ---
-        // 顶部遮罩
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .align(Alignment.TopCenter)
-                .background(
-                    Brush.verticalGradient(
-        colors = listOf(Color.Black, Color.Transparent)
-    )
-                )
-        )
-
-        // 底部遮罩
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-        colors = listOf(Color.Black, Color.Transparent)
-    )
-                )
-        )
+        
     }
 }
