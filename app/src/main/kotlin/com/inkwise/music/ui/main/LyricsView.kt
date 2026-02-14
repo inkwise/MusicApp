@@ -82,6 +82,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 @Composable
 fun MiniLyricsView(
     viewModel: PlayerViewModel,
@@ -111,14 +112,16 @@ fun MiniLyricsView(
 
             Text(
                 text = line.text,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-                color = if (isHighlighted) {
-                    animatedThemeColor
-                } else {
-                    animatedThemeColor.copy(alpha = 0.5f)
-                },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                color =
+                    if (isHighlighted) {
+                        animatedThemeColor
+                    } else {
+                        animatedThemeColor.copy(alpha = 0.5f)
+                    },
                 fontSize = 8.sp,
                 fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
             )
@@ -165,151 +168,6 @@ private suspend fun slowScrollToCenter(
         delay(16L) // ~60fps
     }
 }
-/*
-@Composable
-fun LyricsView(
-    viewModel: PlayerViewModel,
-    showTranslation: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val lyricsState by viewModel.lyricsState.collectAsState()
-    val lyrics = lyricsState.lyrics?.lines.orEmpty()
-    val highlight = lyricsState.highlight
-
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-
-    var userScrolling by remember { mutableStateOf(false) }
-    var isProgrammaticScroll by remember { mutableStateOf(false) }
-
-    // ------------------------------------------------
-    // 监听用户手动滚动
-    // ------------------------------------------------
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { scrolling ->
-                if (scrolling && !isProgrammaticScroll) {
-                    userScrolling = true
-                }
-            }
-    }
-
-    // ------------------------------------------------
-    // 用户停止滚动 1 秒后恢复自动回中
-    // ------------------------------------------------
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { scrolling ->
-                if (!scrolling && userScrolling && !isProgrammaticScroll) {
-                    delay(1_000)
-                    userScrolling = false
-                }
-            }
-    }
-
-    // ------------------------------------------------
-    // 自动回中（仅由高亮行变化触发）
-    // ------------------------------------------------
-    LaunchedEffect(highlight?.lineIndex) {
-        if (highlight == null) return@LaunchedEffect
-        if (userScrolling) return@LaunchedEffect
-
-        val index = highlight.lineIndex
-        if (index !in lyrics.indices) return@LaunchedEffect
-
-        isProgrammaticScroll = true
-        try {
-            slowScrollToCenter(listState, index)
-        } finally {
-            isProgrammaticScroll = false
-        }
-    }
-
-    // ------------------------------------------------
-    // UI
-    // ------------------------------------------------
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        state = listState,
-    ) {
-        itemsIndexed(lyrics) { index, line ->
-            val isHighlighted = highlight?.lineIndex == index
-
-            // 透明度动画
-            val animatedAlpha by animateFloatAsState(
-                targetValue = if (isHighlighted) 0.95f else 0.5f,
-                label = "lyrics_alpha",
-            )
-
-            // 偏移动画（px）
-            val offsetX by animateFloatAsState(
-                targetValue = if (isHighlighted) 12f else 0f,
-                label = "lyrics_offset_x",
-            )
-
-            val offsetY by animateFloatAsState(
-                targetValue = if (isHighlighted) -6f else 0f,
-                label = "lyrics_offset_y",
-            )
-
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .graphicsLayer {
-                            translationX = offsetX
-                            translationY = offsetY
-                        }
-                        .clickable {
-                            viewModel.seekTo(line.timeMs)
-                            scope.launch {
-                                isProgrammaticScroll = true
-                                try {
-                                    slowScrollToCenter(listState, index)
-                                } finally {
-                                    isProgrammaticScroll = false
-                                }
-                            }
-                        }
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-            ) {
-                // ----------------------------
-                // 原文歌词
-                // ----------------------------
-                Text(
-                    text = line.text,
-                    color =
-                        if (isHighlighted)
-                            MaterialTheme.colorScheme.primary.copy(alpha = animatedAlpha)
-                        else
-                            Color.Black.copy(alpha = animatedAlpha),
-                    fontSize = 20.sp,
-                    fontWeight =
-                        if (isHighlighted) FontWeight.SemiBold else FontWeight.Normal,
-                )
-
-                // ----------------------------
-                // 翻译歌词
-                // ----------------------------
-                if (showTranslation && line.translation != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = line.translation,
-                        color =
-                            if (isHighlighted)
-                                MaterialTheme.colorScheme.primary.copy(alpha = animatedAlpha * 0.7f)
-                            else
-                                Color.Black.copy(alpha = animatedAlpha * 0.75f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                    )
-                }
-            }
-        }
-    }
-}*/
-
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
@@ -383,39 +241,40 @@ fun LyricsView(
     // UI（LazyColumn + drawWithContent 做顶部/底部渐变遮罩）
     // ------------------------------------------------
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                // drawWithContent 绘制内容后再画顶部/底部渐变遮罩，不会阻塞触摸
-                // 1. 必须开启渲染层合成策略，否则 BlendMode 不会作用于整个图层
-        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-        .drawWithContent {
-            drawContent()
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    // drawWithContent 绘制内容后再画顶部/底部渐变遮罩，不会阻塞触摸
+                    // 1. 必须开启渲染层合成策略，否则 BlendMode 不会作用于整个图层
+                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                    .drawWithContent {
+                        drawContent()
 
-            // 定义消失的高度
-            val fadeHeightPx = 60.dp.toPx() 
+                        // 2. 创建一个由透明到黑色的渐变 Brush
+                        // 顶部：从透明(0)到不透明(1)
+                        val topBrush =
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                fadeHeightPx to Color.Black,
+                            )
+                        // 底部：从不透明(1)到透明(0)
+                        val bottomBrush =
+                            Brush.verticalGradient(
+                                (size.height - fadeHeightPx) to Color.Black,
+                                size.height to Color.Transparent,
+                            )
 
-            // 2. 创建一个由透明到黑色的渐变 Brush
-            // 顶部：从透明(0)到不透明(1)
-            val topBrush = Brush.verticalGradient(
-                0f to Color.Transparent,
-                fadeHeightPx to Color.Black
-            )
-            // 底部：从不透明(1)到透明(0)
-            val bottomBrush = Brush.verticalGradient(
-                (size.height - fadeHeightPx) to Color.Black,
-                size.height to Color.Transparent
-            )
-
-            // 3. 使用 BlendMode.DstIn (只保留内容与遮罩重合的部分，透明度取遮罩)
-            drawRect(brush = topBrush, blendMode = BlendMode.DstIn)
-            drawRect(brush = bottomBrush, blendMode = BlendMode.DstIn)
-        },
+                        // 3. 使用 BlendMode.DstIn (只保留内容与遮罩重合的部分，透明度取遮罩)
+                        drawRect(brush = topBrush, blendMode = BlendMode.DstIn)
+                        drawRect(brush = bottomBrush, blendMode = BlendMode.DstIn)
+                        canvas.restore()
+                    },
             state = listState,
-           //contentPadding = PaddingValues(vertical = 8.dp),
-                contentPadding = PaddingValues(vertical = 40.dp) // 增加 padding 让第一行也能被“擦除”
+            // contentPadding = PaddingValues(vertical = 8.dp),
+            contentPadding = PaddingValues(vertical = 40.dp), // 增加 padding 让第一行也能被“擦除”
         ) {
             itemsIndexed(lyrics, key = { index, _ -> index }) { index, line ->
                 val isHighlighted = highlight?.lineIndex == index
@@ -439,30 +298,29 @@ fun LyricsView(
 
                 // 每一项支持位置动画与自身尺寸动画
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .graphicsLayer {
-                            translationX = offsetX
-                            translationY = offsetY
-                        }
-                        .animateItem(
-				            fadeInSpec = null,     // 如果不需要淡入动画可设为 null
-				            fadeOutSpec = null,    // 如果不需要淡出动画可设为 null
-				            placementSpec = spring() // 控制位置变化的动画参数
-				        )
-                        .animateContentSize()        // 项目自身尺寸变化平滑（展开/收缩译文）
-                        .clickable {
-                            viewModel.seekTo(line.timeMs)
-                            scope.launch {
-                                isProgrammaticScroll = true
-                                try {
-                                    slowScrollToCenter(listState, index)
-                                } finally {
-                                    isProgrammaticScroll = false
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .graphicsLayer {
+                                translationX = offsetX
+                                translationY = offsetY
+                            }.animateItem(
+                                fadeInSpec = null, // 如果不需要淡入动画可设为 null
+                                fadeOutSpec = null, // 如果不需要淡出动画可设为 null
+                                placementSpec = spring(), // 控制位置变化的动画参数
+                            ).animateContentSize() // 项目自身尺寸变化平滑（展开/收缩译文）
+                            .clickable {
+                                viewModel.seekTo(line.timeMs)
+                                scope.launch {
+                                    isProgrammaticScroll = true
+                                    try {
+                                        slowScrollToCenter(listState, index)
+                                    } finally {
+                                        isProgrammaticScroll = false
+                                    }
                                 }
-                            }
-                        }
+                            },
                 ) {
                     // ----------------------------
                     // 原文歌词
@@ -470,13 +328,14 @@ fun LyricsView(
                     Text(
                         text = line.text,
                         color =
-                        if (isHighlighted)
-                            MaterialTheme.colorScheme.primary.copy(alpha = animatedAlpha)
-                        else
-                            Color.Black.copy(alpha = animatedAlpha),
+                            if (isHighlighted) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = animatedAlpha)
+                            } else {
+                                Color.Black.copy(alpha = animatedAlpha)
+                            },
                         fontSize = 20.sp,
                         fontWeight =
-                        if (isHighlighted) FontWeight.SemiBold else FontWeight.Normal,
+                            if (isHighlighted) FontWeight.SemiBold else FontWeight.Normal,
                     )
 
                     // ----------------------------
@@ -485,17 +344,18 @@ fun LyricsView(
                     AnimatedVisibility(
                         visible = showTranslation && line.translation != null,
                         enter = expandVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = 500f)) + fadeIn(),
-                        exit = shrinkVertically(animationSpec = spring(dampingRatio = 1f, stiffness = 800f)) + fadeOut()
+                        exit = shrinkVertically(animationSpec = spring(dampingRatio = 1f, stiffness = 800f)) + fadeOut(),
                     ) {
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
                             text = line.translation ?: "",
                             color =
-                            if (isHighlighted)
-                                MaterialTheme.colorScheme.primary.copy(alpha = animatedAlpha * 0.7f)
-                            else
-                                Color.Black.copy(alpha = animatedAlpha * 0.75f),
+                                if (isHighlighted) {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = animatedAlpha * 0.7f)
+                                } else {
+                                    Color.Black.copy(alpha = animatedAlpha * 0.75f)
+                                },
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Normal,
                         )

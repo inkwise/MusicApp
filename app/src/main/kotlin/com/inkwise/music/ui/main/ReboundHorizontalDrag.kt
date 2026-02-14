@@ -31,7 +31,6 @@ import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-
 @Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,

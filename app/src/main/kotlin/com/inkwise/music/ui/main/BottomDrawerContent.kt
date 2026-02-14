@@ -1,11 +1,5 @@
 package com.inkwise.music.ui.main
 
-import com.inkwise.music.data.model.LyricsSource
-import androidx.compose.material3.Switch
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
 import android.widget.ImageView
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
@@ -35,12 +29,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,17 +47,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.Glide
 import com.inkwise.music.R
+import com.inkwise.music.data.model.LyricsSource
 import com.inkwise.music.ui.main.navigationPage.local.formatTime
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
-@OptIn(ExperimentalFoundationApi::class,ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BottomDrawerContent(
     pagerState: PagerState,
@@ -81,9 +79,9 @@ fun BottomDrawerContent(
             Modifier
                 .fillMaxSize()
                 .statusBarsPadding() // 自动增加顶部 Padding，高度等于状态栏
-                //.padding(horizontal = 16.dp)
-                //.padding(bottom = 16.dp)
-                .padding(28.dp) //,
+                // .padding(horizontal = 16.dp)
+                // .padding(bottom = 16.dp)
+                .padding(28.dp), // ,
     ) {
         // ---------- 顶部：歌名 / 歌手 ----------
         Column(
@@ -96,12 +94,13 @@ fun BottomDrawerContent(
             Text(
                 text = currentSong?.title ?: "墨迹",
                 color = animatedThemeColor,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    // 2. 使用 fontWeight 设置加粗
-                    fontWeight = FontWeight.Bold
-                ),
+                style =
+                    MaterialTheme.typography.titleLarge.copy(
+                        // 2. 使用 fontWeight 设置加粗
+                        fontWeight = FontWeight.Bold,
+                    ),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis // 建议加上，防止长歌名挤压布局
+                overflow = TextOverflow.Ellipsis, // 建议加上，防止长歌名挤压布局
             )
             Spacer(Modifier.height(4.dp))
             Text(
@@ -109,7 +108,7 @@ fun BottomDrawerContent(
                 color = animatedThemeColor,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
 
@@ -129,7 +128,6 @@ fun BottomDrawerContent(
                     0 -> {
                         // 封面页
 
-
                         Column(
                             modifier = Modifier.fillMaxSize(),
                         ) {
@@ -137,16 +135,19 @@ fun BottomDrawerContent(
                             // 封面区域（固定占剩余空间）
                             // -------------------------------
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),   // ✅ 只有它用 weight
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                // ✅ 只有它用 weight
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Box(
-                                    modifier = Modifier
-                                        .aspectRatio(1f)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    modifier =
+                                        Modifier
+                                            .aspectRatio(1f)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     AndroidView(
@@ -182,13 +183,13 @@ fun BottomDrawerContent(
                             // -------------------------------
                             MiniLyricsView(
                                 viewModel = playerViewModel,
-                                animatedThemeColor=animatedThemeColor,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(60.dp)   // ✅ 明确高度（推荐）
+                                animatedThemeColor = animatedThemeColor,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(60.dp), // ✅ 明确高度（推荐）
                             )
                         }
-
                     }
 
                     1 -> {
@@ -201,62 +202,61 @@ fun BottomDrawerContent(
                                     .padding(16.dp),
                             contentAlignment = Alignment.Center,
                         ) {
-                     
+
                             LyricsView(playerViewModel)
                         }*/
                         LyricsPage(
-					        playerViewModel = playerViewModel,
-					        modifier = Modifier.fillMaxSize(),
-					    )
+                            playerViewModel = playerViewModel,
+                            modifier = Modifier.fillMaxSize(),
+                        )
                     }
-                    
-                    
- 
-                    ///////
+
+                    // /////
                 }
             }
         }
 
         // ---------- 进度条 ----------
         Column(modifier = Modifier.padding(top = 4.dp)) {
-
             Slider(
-                value = if (playbackState.duration > 0) {
-                    playbackState.currentPosition.toFloat() / playbackState.duration
-                } else {
-                    0f
-                },
+                value =
+                    if (playbackState.duration > 0) {
+                        playbackState.currentPosition.toFloat() / playbackState.duration
+                    } else {
+                        0f
+                    },
                 onValueChange = { progress ->
                     playerViewModel.seekTo((progress * playbackState.duration).toLong())
                 },
                 // 1. 自定义颜色
-                colors = SliderDefaults.colors(
-                    activeTrackColor = animatedThemeColor,      // 已播放部分的进度条颜色
-                    inactiveTrackColor = animatedThemeColor.copy(alpha = 0.24f), // 未播放部分的背景色
-                    thumbColor = animatedThemeColor,            // 滑块颜色
-                    activeTickColor = Color.Transparent,   // 隐藏刻度线
-                    inactiveTickColor = Color.Transparent
-                ),
-                //隐藏滑块
+                colors =
+                    SliderDefaults.colors(
+                        activeTrackColor = animatedThemeColor, // 已播放部分的进度条颜色
+                        inactiveTrackColor = animatedThemeColor.copy(alpha = 0.24f), // 未播放部分的背景色
+                        thumbColor = animatedThemeColor, // 滑块颜色
+                        activeTickColor = Color.Transparent, // 隐藏刻度线
+                        inactiveTickColor = Color.Transparent,
+                    ),
+                // 隐藏滑块
                 thumb = {},
                 // 3. 调整轨道高度 (取消默认厚度)
                 track = { sliderState ->
                     SliderDefaults.Track(
                         sliderState = sliderState,
                         modifier = Modifier.height(2.dp), // 让进度条更纤细
-                        colors = SliderDefaults.colors(
-                            activeTrackColor = animatedThemeColor,
-                            inactiveTrackColor =animatedThemeColor.copy(alpha = 0.2f)
-                        ),
-                        //取消隐藏滑块后的缺口
+                        colors =
+                            SliderDefaults.colors(
+                                activeTrackColor = animatedThemeColor,
+                                inactiveTrackColor = animatedThemeColor.copy(alpha = 0.2f),
+                            ),
+                        // 取消隐藏滑块后的缺口
                         thumbTrackGapSize = 0.dp,
                         // 关闭尾部小圆点
-                        drawStopIndicator = null
+                        drawStopIndicator = null,
                     )
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
-
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -265,12 +265,12 @@ fun BottomDrawerContent(
                 Text(
                     formatTime(playbackState.currentPosition),
                     style = MaterialTheme.typography.bodySmall,
-                    color = animatedThemeColor
+                    color = animatedThemeColor,
                 )
                 Text(
                     formatTime(playbackState.duration),
                     style = MaterialTheme.typography.bodySmall,
-                    color = animatedThemeColor
+                    color = animatedThemeColor,
                 )
             }
         }
@@ -286,12 +286,13 @@ fun BottomDrawerContent(
         ) {
             IconButton(
                 onClick = { playerViewModel.skipToPrevious() },
-                modifier = Modifier.size(48.dp)) {
+                modifier = Modifier.size(48.dp),
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_round_skip_previous_24),
                     contentDescription = "上一首",
                     tint = animatedThemeColor,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(38.dp),
                 )
             }
 
@@ -299,17 +300,21 @@ fun BottomDrawerContent(
 
             IconButton(
                 onClick = { playerViewModel.playPause() },
-                modifier = Modifier.size(52.dp)
+                modifier = Modifier.size(52.dp),
             ) {
                 Icon(
-                    painter = painterResource(id = if (playbackState.isPlaying) {
-                        R.drawable.ic_mini_player_pause
-                    } else {
-                        R.drawable.ic_mini_player_play
-                    }),
+                    painter =
+                        painterResource(
+                            id =
+                                if (playbackState.isPlaying) {
+                                    R.drawable.ic_mini_player_pause
+                                } else {
+                                    R.drawable.ic_mini_player_play
+                                },
+                        ),
                     null,
                     modifier = Modifier.size(38.dp),
-                    tint = animatedThemeColor
+                    tint = animatedThemeColor,
                 )
             }
 
@@ -317,12 +322,13 @@ fun BottomDrawerContent(
 
             IconButton(
                 onClick = { playerViewModel.skipToNext() },
-                modifier = Modifier.size(48.dp)) {
+                modifier = Modifier.size(48.dp),
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_round_skip_next_24),
                     contentDescription = "下一首",
                     tint = animatedThemeColor,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(38.dp),
                 )
             }
         }
@@ -337,7 +343,7 @@ fun BottomDrawerContent(
                     painter = painterResource(id = R.drawable.ic_player_circle),
                     contentDescription = "播放模式",
                     tint = animatedThemeColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             IconButton(onClick = { /* 定时逻辑 */ }) {
@@ -345,7 +351,7 @@ fun BottomDrawerContent(
                     painter = painterResource(id = R.drawable.ic_sleep_timer),
                     contentDescription = "定时",
                     tint = animatedThemeColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
 
@@ -354,7 +360,7 @@ fun BottomDrawerContent(
                     painter = painterResource(id = R.drawable.ic_audio_effect),
                     contentDescription = "音效",
                     tint = animatedThemeColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             IconButton(onClick = {
@@ -366,7 +372,7 @@ fun BottomDrawerContent(
                     painter = painterResource(id = R.drawable.ic_play_queue),
                     contentDescription = "播放队列",
                     tint = animatedThemeColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             IconButton(onClick = { /* 菜单 */ }) {
@@ -374,7 +380,7 @@ fun BottomDrawerContent(
                     painter = painterResource(id = R.drawable.ic_player_more),
                     contentDescription = "菜单",
                     tint = animatedThemeColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
         }
@@ -388,13 +394,14 @@ fun LyricsPage(
 ) {
     val lyricsState by playerViewModel.lyricsState.collectAsState()
 
-	val hasTranslation = lyricsState.lyrics?.lines
-	    ?.any { line -> line.translation != null }
-	    ?: false
-	    
+    val hasTranslation =
+        lyricsState.lyrics
+            ?.lines
+            ?.any { line -> line.translation != null }
+            ?: false
+
     var showTranslation by remember { mutableStateOf(true) }
 
-    
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -460,5 +467,4 @@ fun LyricsPage(
             }
         }
     }
-
 }

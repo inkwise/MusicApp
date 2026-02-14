@@ -1,21 +1,19 @@
 package com.inkwise.music.ui.main
 import androidx.activity.compose.BackHandler
-
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import com.inkwise.music.ui.theme.LocalAppDimens
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalDensity
-
-import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalDensity
+import com.inkwise.music.ui.theme.LocalAppDimens
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,15 +62,12 @@ fun MainScreen() {
         }
     }
 
-
-
-
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = dimens.sheetPeekHeightDp,
         sheetDragHandle = null,
         // sheetContainerColor = Color.Transparent,
-        sheetShape = RectangleShape, 
+        sheetShape = RectangleShape,
         sheetContent = {
             Box {
                 // 背景播放器：展开时显示
@@ -99,28 +94,28 @@ fun MainScreen() {
                     },
                 )
             }
-        // --- 核心：将 BackHandler 放在这里 ---
-        // 使用 currentValue 配合 targetValue 确保在动画过程中也能精准拦截
-        val isExpanded = sheetState.currentValue == SheetValue.Expanded || sheetState.targetValue == SheetValue.Expanded
-        val isAtSecondPage = pagerState.currentPage > 0
+            // --- 核心：将 BackHandler 放在这里 ---
+            // 使用 currentValue 配合 targetValue 确保在动画过程中也能精准拦截
+            val isExpanded = sheetState.currentValue == SheetValue.Expanded || sheetState.targetValue == SheetValue.Expanded
+            val isAtSecondPage = pagerState.currentPage > 0
 
-        BackHandler(enabled = isExpanded || isAtSecondPage) {
-            scope.launch {
-                if (pagerState.currentPage > 0) {
-                    // 如果在第二页，先回第一页
-                    pagerState.animateScrollToPage(0)
-                } else {
-                    // 如果在第一页且展开，则收起
-                    sheetState.partialExpand()
+            BackHandler(enabled = isExpanded || isAtSecondPage) {
+                scope.launch {
+                    if (pagerState.currentPage > 0) {
+                        // 如果在第二页，先回第一页
+                        pagerState.animateScrollToPage(0)
+                    } else {
+                        // 如果在第一页且展开，则收起
+                        sheetState.partialExpand()
+                    }
                 }
             }
-        }
         },
     ) {
-        NavigationContent(            sheetState = sheetState,
+        NavigationContent(
+            sheetState = sheetState,
             pagerState = pagerState,
-            scope = scope)
+            scope = scope,
+        )
     }
 }
-
-

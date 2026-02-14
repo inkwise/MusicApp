@@ -8,7 +8,6 @@ data class Lyrics(
     val version: Int,
 )
 
-
 data class LyricLine(
     val timeMs: Long,
     val text: String,
@@ -24,7 +23,6 @@ data class LyricHighlight(
     val tokenProgress: Float? = null, // 0f ~ 1f
 )
 
-
 enum class LyricsSource {
     LOCAL_LRC, // 本地 .lrc
     LOCAL_KRC, // 本地 .krc / .qrc
@@ -33,13 +31,11 @@ enum class LyricsSource {
     USER_PROVIDED, // 用户导入
 }
 
-
 data class LyricsUiState(
     val lyrics: Lyrics? = null,
     val highlight: LyricHighlight? = null,
     val error: String? = null,
 )
-
 
 data class LyricToken(
     val startMs: Long,

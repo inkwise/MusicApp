@@ -44,7 +44,6 @@ import coil.request.ImageRequest
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun playerScreen(
@@ -100,25 +99,26 @@ fun playerScreen(
     val animatedThemeColor by animateColorAsState(
         targetValue = themeColor,
         animationSpec = tween(600),
-        label = "ColorAnimation"
+        label = "ColorAnimation",
     )
 
     val context = LocalContext.current
-
 
     Box(
         modifier =
             modifier
                 .fillMaxSize(),
     ) {
-        //主题色获取
+        // 主题色获取
         // 我们用一个 0 尺寸的 AsyncImage 来偷偷提取颜色
         AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(coverUri)
-                .allowHardware(false) // 必须关闭硬件加速才能拿 Bitmap
-                .size(150)            // 极小尺寸提速
-                .build(),
+            model =
+                ImageRequest
+                    .Builder(context)
+                    .data(coverUri)
+                    .allowHardware(false) // 必须关闭硬件加速才能拿 Bitmap
+                    .size(150) // 极小尺寸提速
+                    .build(),
             contentDescription = null,
             modifier = Modifier.size(1.dp).alpha(0f), // 隐藏它
             onSuccess = { success ->
@@ -130,23 +130,23 @@ fun playerScreen(
                     androidx.palette.graphics.Palette.from(bitmap).generate { palette ->
                         palette?.let { p ->
                             // 尝试取几种颜色，按优先级排序
-                            val colorInt = p.getVibrantColor(
-                                p.getMutedColor(
-                                    p.getDominantColor(defaultColor.toArgb())
+                            val colorInt =
+                                p.getVibrantColor(
+                                    p.getMutedColor(
+                                        p.getDominantColor(defaultColor.toArgb()),
+                                    ),
                                 )
-                            )
 
                             // ... 在获取颜色后
                             val extractedColor = Color(colorInt)
 
                             // 将提取到的颜色与黑色 (Black) 进行混合
                             // 0.3f 代表混合 30% 的黑色，70% 的原色。数值越大，颜色越深。
-                            themeColor = lerp(extractedColor, Color.Black , 0.5f)
-
+                            themeColor = lerp(extractedColor, Color.Black, 0.5f)
                         }
                     }
                 }
-            }
+            },
         )
         // 背景图片 + 高斯模糊
 
@@ -178,10 +178,11 @@ fun playerScreen(
                         ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        // Y 轴缩放为 -1 表示垂直翻转
-                        .graphicsLayer(scaleY = -1f),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            // Y 轴缩放为 -1 表示垂直翻转
+                            .graphicsLayer(scaleY = -1f),
                 )
 
                 // 遮罩层也放在里面，跟随动画
@@ -214,7 +215,7 @@ fun playerScreen(
         ) { page ->
             when (page) {
                 0 -> {
-                    BottomDrawerContent(pagerState = pagerState,animatedThemeColor=animatedThemeColor)
+                    BottomDrawerContent(pagerState = pagerState, animatedThemeColor = animatedThemeColor)
                 }
 
                 1 -> {

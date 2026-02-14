@@ -34,7 +34,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.Glide
 import com.inkwise.music.ui.player.PlayerViewModel
 
-
 // 手柄区域
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

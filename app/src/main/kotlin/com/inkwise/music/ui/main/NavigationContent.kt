@@ -37,11 +37,10 @@ import com.inkwise.music.ui.main.navigationPage.local.LocalSongsScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationContent(
-    sheetState: SheetState,      // 接收状态
+    sheetState: SheetState, // 接收状态
     pagerState: PagerState,
     scope: CoroutineScope,
     viewModel: MainViewModel = hiltViewModel(),
@@ -144,7 +143,4 @@ fun NavigationContent(
             }
         }
     }
-
-
 }
-
