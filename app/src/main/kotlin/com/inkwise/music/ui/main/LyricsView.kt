@@ -649,34 +649,7 @@ fun LyricsView(
     val highlight = lyricsState.highlight
     val listState = rememberLazyListState()
 
-    // 自动滚动逻辑：改用 animateScrollBy 配合像素计算
-    /*LaunchedEffect(highlight?.lineIndex) {
-        val index = highlight?.lineIndex ?: return@LaunchedEffect
-        val layoutInfo = listState.layoutInfo
-        
-        // 尝试找到当前正在显示的 item
-        val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
-        
-        if (visibleItem != null) {
-            // 计算居中偏移量：(视口高度 / 2) - (Item顶部偏移 + Item高度 / 2)
-            val viewportHeight = layoutInfo.viewportEndOffset
-            val itemCenter = visibleItem.offset + (visibleItem.size / 2)
-            val targetCenter = viewportHeight / 2
-            val scrollDelta = itemCenter - targetCenter
-            
-            // 使用 animateScrollBy 实现线性平滑滚动
-            listState.animateScrollBy(
-                value = scrollDelta.toFloat(),
-                animationSpec = tween(
-                    durationMillis = 600, 
-                    easing = LinearOutSlowInEasing
-                )
-            )
-        } else {
-            // 如果目标不在屏幕内，先直接跳转
-            listState.scrollToItem(index)
-        }
-    }*/
+    
     
     LaunchedEffect(highlight?.lineIndex) {
     val index = highlight?.lineIndex ?: return@LaunchedEffect
