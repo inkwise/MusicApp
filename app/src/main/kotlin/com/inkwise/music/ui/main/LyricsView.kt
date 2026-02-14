@@ -82,6 +82,23 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+// 对齐
+import androidx.compose.ui.Alignment
+
+// AnimatedContent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+
+// 进出动画
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+
+
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MiniLyricsView2(
