@@ -49,9 +49,11 @@ else
   COMMIT_MSG="e$NEW_VERSION"
 fi
 
+adb install -r ./app/build/outputs/apk/debug/app-debug.apk && adb shell monkey -p com.inkwise.music -c android.intent.category.LAUNCHER 1
+
 # Git 提交 & 推送
 git add .
 git commit -m "$COMMIT_MSG"
-git push
+#git push
 
 echo "🚀 已提交并推送：$COMMIT_MSG"
