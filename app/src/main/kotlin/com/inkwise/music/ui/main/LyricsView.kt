@@ -114,8 +114,8 @@ fun MiniLyricsView(
                 text = line.text,
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                        .fillMaxWidth(),
+                      //  .padding(horizontal = 6.dp, vertical = 4.dp),
                 color =
                     if (isHighlighted) {
                         animatedThemeColor
