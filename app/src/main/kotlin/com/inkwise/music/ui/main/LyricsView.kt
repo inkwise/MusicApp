@@ -649,7 +649,7 @@ fun LyricLineItem(
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
-    animatedThemeColor = Color,
+    animatedThemeColor : Color,
     showTranslation: Boolean,
     modifier: Modifier = Modifier,
 ) {
