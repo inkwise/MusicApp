@@ -121,7 +121,7 @@ fun MiniLyricsView2(
             modifier = Modifier.fillMaxWidth(),
             targetState = currentLine,
             transitionSpec = {
-                val duration = 600  // 👈 改这里控制速度（单位 ms）
+                val duration = 1300  // 👈 改这里控制速度（单位 ms）
                 
                /* slideInVertically { height -> height } + fadeIn() togetherWith
                         slideOutVertically { height -> -height } + fadeOut()
