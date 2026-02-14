@@ -1,5 +1,5 @@
 package com.inkwise.music.ui.main
-
+import androidx.compose.ui.draw.clipToBounds
 // animateItemPlacement
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.BlendMode
