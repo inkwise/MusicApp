@@ -33,6 +33,7 @@ import com.inkwise.music.data.model.Song
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ReboundHorizontalDrag(
