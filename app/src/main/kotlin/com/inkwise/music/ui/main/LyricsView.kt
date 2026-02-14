@@ -598,7 +598,7 @@ fun LyricsView(
     }
 }
 */
-/*
+
 // 定义缺失的子组件（放在 LyricsView 函数外面）
 @Composable
 fun LyricLineItem(
@@ -639,10 +639,10 @@ fun LyricLineItem(
             )
         }
     }
-}*/
+}
 
 // ----------------------------------------------------------------
-/*
+
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
@@ -744,8 +744,8 @@ fun LyricsView(
             }
         }
     }
-}*/
-
+}
+/*
 
 // ----------------------------------------------------------------
 // 子组件：单行歌词项（与你之前一致）
@@ -948,4 +948,4 @@ fun LyricsView(
             }
         }
     }
-}
+}*/
