@@ -654,7 +654,7 @@ fun LyricsView(
     val highlight = lyricsState.highlight
     val listState = rememberLazyListState()
     
-    val fadeHeightDp = 120.dp      // 👈 在这里改高度
+    val fadeHeightDp = 20.dp      // 👈 在这里改高度
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
     
     LaunchedEffect(highlight?.lineIndex) {
