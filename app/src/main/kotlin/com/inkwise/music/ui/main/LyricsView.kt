@@ -474,7 +474,45 @@ fun LyricsView(
             isProgrammaticScroll = false
         }
     }*/
+    LaunchedEffect(highlight?.lineIndex) {
+    val index = highlight?.lineIndex ?: return@LaunchedEffect
+    if (userScrolling) return@LaunchedEffect
+    if (index !in lyrics.indices) return@LaunchedEffect
 
+    isProgrammaticScroll = true
+    try {
+        // 获取当前 item 的 offset 信息
+        val itemInfo = listState.layoutInfo.visibleItemsInfo
+            .firstOrNull { it.index == index }
+
+        if (itemInfo != null) {
+            val viewportHeight = listState.layoutInfo.viewportSize.height
+            val itemCenter = itemInfo.offset + itemInfo.size / 2
+            val viewportCenter = viewportHeight / 2
+            val distance = (itemCenter - viewportCenter).toFloat()
+
+            // Animatable 平滑滚动
+            val anim = Animatable(0f)
+            anim.animateTo(
+                targetValue = distance,
+                animationSpec = tween(
+                    durationMillis = 350, // 这里改速度，ms 越小越快
+                    easing = FastOutSlowInEasing
+                )
+            ) {
+                // 每一帧滚动的增量
+                listState.scrollBy(value - anim.value)
+            }
+
+        } else {
+            // item 不可见，直接跳转
+            listState.animateScrollToItem(index)
+        }
+
+    } finally {
+        isProgrammaticScroll = false
+    }
+}
     // ----------------------------
     // 容器高度用于居中 padding
     // ----------------------------
