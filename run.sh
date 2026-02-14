@@ -42,7 +42,7 @@ if ./gradlew assembleDebug; then
 
 
   echo "✅ 构建成功"
-  adb install -r ./app/build/outputs/apk/debug/app-debug.apk && adb shell monkey -p com.inkwise.music -c android.intent.category.LAUNCHER 1
+  adb install -r ./app/build/outputs/apk/debug/app-debug.apk #&& adb shell monkey -p com.inkwise.music -c android.intent.category.LAUNCHER 1
 
   COMMIT_MSG="$NEW_VERSION"
 
