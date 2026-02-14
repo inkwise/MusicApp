@@ -256,7 +256,8 @@ fun MiniLyricsView(
                 text = line.text,
                 modifier =
                     Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .height(24.dp),
                 //  .padding(horizontal = 6.dp, vertical = 4.dp),
                 color =
                     if (isHighlighted) {
