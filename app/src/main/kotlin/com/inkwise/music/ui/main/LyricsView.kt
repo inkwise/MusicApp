@@ -113,7 +113,7 @@ fun MiniLyricsView2(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(20.dp), // 👈 控制 mini 高度
+            .height(30.dp), // 👈 控制 mini 高度
         contentAlignment = Alignment.Center
     ) {
     
@@ -136,7 +136,7 @@ fun MiniLyricsView2(
     Text(
         text = text,
         maxLines = 1,
-        fontSize = 10.sp,
+        fontSize = 13.sp,
         fontWeight = FontWeight.Medium
     )
 }
