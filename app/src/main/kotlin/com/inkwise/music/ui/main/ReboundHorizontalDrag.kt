@@ -287,7 +287,7 @@ fun AdjacentSongPage(
                         .fillMaxWidth()
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            repeatDelayMillis = 1000,
+                            repeatDelayMillis = 1100,
                         ),
             )
 
