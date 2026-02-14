@@ -74,20 +74,7 @@ class PlayerViewModel
                     synchronizer = lyrics?.let { LyricsSynchronizer(it) }
                     _lyricsState.value = _lyricsState.value.copy(lyrics = lyrics, highlight = null)
 
-              /*  val lyrics = Lyrics(
-    songId = song.id,
-    language = "zh",
-    source = LyricsSource.EMBEDDED,   // 按你的枚举来
-    version = 1,
-    lines = listOf(
-        LyricLine(timeMs = 0, text = "第一行歌词"),
-        LyricLine(timeMs = 2000, text = "第二行歌词"),
-        LyricLine(timeMs = 4000, text = "第三行歌词"),
-    )
-)
-
-synchronizer = LyricsSynchronizer(lyrics)
-_lyricsState.value = LyricsUiState(lyrics = lyrics)*/
+              
                 }
             }
         }
