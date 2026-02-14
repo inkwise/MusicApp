@@ -713,7 +713,6 @@ fun LyricsView(
                 )
             }
         }
-        val bgColor = MaterialTheme.colorScheme.background
         // --- 纯覆盖式渐隐遮罩 (无 BlendMode，不掉帧) ---
         // 顶部遮罩
         Box(
@@ -723,7 +722,7 @@ fun LyricsView(
                 .align(Alignment.TopCenter)
                 .background(
                     Brush.verticalGradient(
-        colors = listOf(bgColor, Color.Transparent)
+        colors = listOf(Color.Black, Color.Transparent)
     )
                 )
         )
@@ -736,7 +735,7 @@ fun LyricsView(
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
-        colors = listOf(bgColor, Color.Transparent)
+        colors = listOf(Color.Black, Color.Transparent)
     )
                 )
         )
