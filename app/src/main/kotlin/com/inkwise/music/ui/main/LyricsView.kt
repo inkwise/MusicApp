@@ -116,39 +116,31 @@ fun MiniLyricsView2(
             .height(20.dp), // 👈 控制 mini 高度
         contentAlignment = Alignment.Center
     ) {
-
+    
         AnimatedContent(
-            modifier = Modifier.fillMaxWidth(),
-            targetState = currentLine,
-            transitionSpec = {
-                val duration = 1300  // 👈 改这里控制速度（单位 ms）
-                
-               /* slideInVertically { height -> height } + fadeIn() togetherWith
-                        slideOutVertically { height -> -height } + fadeOut()
-                */  
-                slideInVertically(
+    modifier = Modifier.fillMaxWidth(),
+    targetState = currentLine,
+    transitionSpec = {
+        slideInVertically(
             initialOffsetY = { height -> height },
-            animationSpec = tween(durationMillis = duration)
-        ) + fadeIn(
-            animationSpec = tween(durationMillis = duration)
+            animationSpec = tween(1600)
         ) togetherWith
         slideOutVertically(
             targetOffsetY = { height -> -height },
-            animationSpec = tween(durationMillis = duration)
-        ) + fadeOut(
-            animationSpec = tween(durationMillis = duration)
-        )      
-            },
-            label = "mini_lyrics"
-        ) { text ->
+            animationSpec = tween(1600)
+        )
+    },
+    label = "mini_lyrics"
+) { text ->
 
-            Text(
-                text = text,
-                maxLines = 1,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
+    Text(
+        text = text,
+        maxLines = 1,
+        fontSize = 10.sp,
+        fontWeight = FontWeight.Medium
+    )
+}
+
     }
 }
 
