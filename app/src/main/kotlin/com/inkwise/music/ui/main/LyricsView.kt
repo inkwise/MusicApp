@@ -243,7 +243,7 @@ fun MiniLyricsView(
     }
 
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         state = listState,
     ) {
         itemsIndexed(lyrics) { index, line ->
