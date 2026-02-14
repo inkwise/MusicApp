@@ -684,7 +684,9 @@ fun LyricsView(
     
     // 1. 定义你想要的“居中线”比例（0.4f 代表屏幕从上往下 40% 的位置）
     val bias = 0.4f 
-    val viewportHeight = layoutInfo.viewportEndOffset
+   // val viewportHeight = layoutInfo.viewportEndOffset
+    val viewportHeight =
+    layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
     val targetPosition = (viewportHeight * bias).toInt()
 
     // 尝试找到当前正在显示的 item
