@@ -680,43 +680,39 @@ fun LyricsView(
     
     LaunchedEffect(highlight?.lineIndex) {
     val index = highlight?.lineIndex ?: return@LaunchedEffect
-    val layoutInfo = listState.layoutInfo
-    
-    // 1. 定义你想要的“居中线”比例（0.4f 代表屏幕从上往下 40% 的位置）
-    val bias = 0.4f 
-   // val viewportHeight = layoutInfo.viewportEndOffset
-    val viewportHeight =
-    layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
-    
-    val targetPosition = (viewportHeight * bias).toInt()
 
-    // 尝试找到当前正在显示的 item
-    val visibleItem = layoutInfo.visibleItemsInfo.find { it.index == index }
-    
+    val layoutInfo = listState.layoutInfo
+    val visibleItem = layoutInfo.visibleItemsInfo
+        .firstOrNull { it.index == index }
+
     if (visibleItem != null) {
-        // 2. 计算像素位移差
-        // 目标是让 item 的中心点（item.offset + size/2）移动到 targetPosition
-      /*  val itemCenter = visibleItem.offset + (visibleItem.size / 2)
-        val scrollDelta = itemCenter - targetPosition
-    */    
-        val itemCenter = visibleItem.offset + visibleItem.size / 2
-        val targetCenter = viewportHeight / 2
-        val scrollDelta = itemCenter - targetCenter
-        
-    
+
+        val viewportStart = layoutInfo.viewportStartOffset
+        val viewportEnd = layoutInfo.viewportEndOffset
+        val viewportHeight = viewportEnd - viewportStart
+
+        // 🔥 注意这里
+        val itemCenter =
+            visibleItem.offset + visibleItem.size / 2
+
+        val viewportCenter =
+            viewportStart + viewportHeight / 2
+
+        val scrollDelta =
+            itemCenter - viewportCenter
+
         listState.animateScrollBy(
-            value = scrollDelta.toFloat(),
+            scrollDelta.toFloat(),
             animationSpec = tween(
-                durationMillis = 600, 
+                durationMillis = 500,
                 easing = LinearOutSlowInEasing
             )
         )
+
     } else {
-        // 3. 修复跳转逻辑：即使目标在屏幕外，跳转后也要位于 bias 位置
-        // scrollOffset 为负数表示将 item 向下推，避开顶部
-        listState.scrollToItem(index, scrollOffset = -targetPosition + 100) 
+        listState.scrollToItem(index)
     }
-}
+}    
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
