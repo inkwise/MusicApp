@@ -208,6 +208,7 @@ fun BottomDrawerContent(
                         }*/
                         LyricsPage(
                             playerViewModel = playerViewModel,
+                            animatedThemeColor = animatedThemeColor,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
