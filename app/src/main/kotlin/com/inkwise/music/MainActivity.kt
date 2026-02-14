@@ -131,7 +131,7 @@ fun AllFilesPermissionScreen() {
         Button(onClick = {
             requestAllFilesPermission(context)
         }) {
-            Text("前往系统设置开启")
+            Text("前往系统设置开启2")
         }
     } else {
         MainScreen()
