@@ -723,8 +723,8 @@ fun LyricsView(
                 .align(Alignment.TopCenter)
                 .background(
                     Brush.verticalGradient(
-                        listOf(MaterialTheme.colorScheme.surface, Color.Transparent)
-                    )
+        colors = listOf(bgColor, Color.Transparent)
+    )
                 )
         )
 
@@ -736,8 +736,8 @@ fun LyricsView(
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface)
-                    )
+        colors = listOf(bgColor, Color.Transparent)
+    )
                 )
         )
     }
