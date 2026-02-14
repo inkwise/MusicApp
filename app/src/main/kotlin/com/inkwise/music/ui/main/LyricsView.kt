@@ -250,46 +250,31 @@ fun LyricsView(
                     // drawWithContent 绘制内容后再画顶部/底部渐变遮罩，不会阻塞触摸
                     // 1. 必须开启渲染层合成策略，否则 BlendMode 不会作用于整个图层
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-                    .drawWithContent {
+      
+                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+.drawWithContent {
     drawContent()
 
-    val fadeHeightPx = fadeHeightDp.toPx()
+    val fadeHeight = 18.dp.toPx() // 👈 改小一点
 
-    // 顶部：透明 -> 黑
-    val topBrush = Brush.verticalGradient(
-        colors = listOf(Color.Transparent, Color.Black),
-        startY = 0f,
-        endY = fadeHeightPx,
+    // 顶部渐隐
+    drawRect(
+        brush = Brush.verticalGradient(
+            0f to Color.Transparent,
+            fadeHeight to Color.Black
+        ),
+        blendMode = BlendMode.DstIn
     )
 
-    // 底部：黑 -> 透明
-    val bottomBrush = Brush.verticalGradient(
-        colors = listOf(Color.Black, Color.Transparent),
-        startY = size.height - fadeHeightPx,
-        endY = size.height,
+    // 底部渐隐
+    drawRect(
+        brush = Brush.verticalGradient(
+            (size.height - fadeHeight) to Color.Black,
+            size.height to Color.Transparent
+        ),
+        blendMode = BlendMode.DstIn
     )
-
-    // ⚠️ 关键：用 saveLayer，把两次 DstIn 放在同一个图层里
-    drawIntoCanvas { canvas ->
-        val paint = Paint()
-        canvas.saveLayer(size.toRect(), paint)
-
-        // 上遮罩
-        drawRect(
-            brush = topBrush,
-            blendMode = BlendMode.DstIn,
-        )
-
-        // 下遮罩
-        drawRect(
-            brush = bottomBrush,
-            blendMode = BlendMode.DstIn,
-        )
-
-        canvas.restore()
-    }
-}
-                    ,
+},
             state = listState,
             // contentPadding = PaddingValues(vertical = 8.dp),
             contentPadding = PaddingValues(vertical = 40.dp), // 增加 padding 让第一行也能被“擦除”
