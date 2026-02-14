@@ -667,7 +667,7 @@ fun LyricsView(
         
         val dynamicDuration = if (nextLineTime != null) {
             // 计算与下一行的间隔，并设定一个阈值（比如最快 200ms，最慢 800ms）
-            (nextLineTime - currentLineTime).toInt().coerceIn(200, 800)
+            (nextLineTime - currentLineTime).toInt().coerceIn(10, 1200)
         } else {
             500 // 最后一行默认值
         }
@@ -695,7 +695,7 @@ fun LyricsView(
                 scrollDelta.toFloat(),
                 animationSpec =
                     tween(
-                        durationMillis = 500,
+                        durationMillis = dynamicDuration,
                         easing = LinearOutSlowInEasing,
                     ),
             )
