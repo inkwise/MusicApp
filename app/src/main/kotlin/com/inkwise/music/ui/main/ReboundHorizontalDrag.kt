@@ -30,7 +30,8 @@ import com.inkwise.music.data.model.Song
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun ReboundHorizontalDrag(
     onPrev: () -> Unit,
@@ -182,9 +183,17 @@ fun SongPage(
 
         if (song != null && isVisible) {
             Text(
-                text = song.title,
-                maxLines = 1,
-            )
+    text = song.title,
+    maxLines = 1,
+    overflow = TextOverflow.Clip,
+    modifier = Modifier
+        .fillMaxWidth()
+        .basicMarquee(
+            iterations = Int.MAX_VALUE,      // 无限循环
+            animationMode = MarqueeAnimationMode.Immediately,
+            repeatDelayMillis = 1000         // 👈 每次滚完停 1 秒
+        )
+)
             Text(
                 text = text,
                 maxLines = 1,
