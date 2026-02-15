@@ -204,8 +204,8 @@ fun AudioQualityIcon(
         // 包裹 Box，用 Modifier.size 控制宽高，并裁剪
         Box(
             modifier = Modifier
-                .size(width = 15.dp, height = 12.dp) // 原来是 16.dp -> 宽减1、高减2
-                .clip(RoundedCornerShape(4.dp))
+                .size(width = 15.dp, height = 10.dp) // 原来是 16.dp -> 宽减1、高减2
+                .clip(RoundedCornerShape(5.dp))
                 .clipToBounds() // 确保 Icon 不超出 Box
         ) {
             Icon(
