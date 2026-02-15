@@ -155,9 +155,15 @@ fun SongItem(
                 }
 
             }
+            
             IconButton(
                 onClick = onMoreClick,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier
+        .size(32.dp) // 整体按钮尺寸
+        .background(
+            color = Color.White,
+            shape = CircleShape
+        )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_more_vert),
