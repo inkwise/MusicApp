@@ -5,7 +5,7 @@ import androidx.compose.ui.res.painterResource
 
 // Color
 import androidx.compose.ui.graphics.Color
-
+import androidx.compose.foundation.layout.fillMaxSize
 // 如果你使用 R.drawable
 import com.inkwise.music.R
 import android.annotation.SuppressLint
