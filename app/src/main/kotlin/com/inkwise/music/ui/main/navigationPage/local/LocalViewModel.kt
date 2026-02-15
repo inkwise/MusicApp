@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.inkwise.music.audio.AudioAnalyzer
 @HiltViewModel
 class LocalViewModel
 @Inject
