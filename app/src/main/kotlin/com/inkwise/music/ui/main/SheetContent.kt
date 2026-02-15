@@ -126,7 +126,7 @@ fun controlContent2(
             // 🎵 Icon 占位（只在没封面时显示）
             if (coverUri == null) {
                 Icon(
-                    imageVector = Icons.Default.Pause,
+                    painter = painterResource(R.drawable.),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
