@@ -205,7 +205,7 @@ fun AudioQualityIcon(
         Box(
     contentAlignment = Alignment.Center, // 关键：让图标居中，从而均匀裁剪上下左右
     modifier = Modifier
-        .size(width = 14.dp, height = 12.dp) // 1. 设定可视区域：宽(16-2)，高(16-4)
+        .size(width = 14.dp, height = 6.dp) // 1. 设定可视区域：宽(16-2)，高(16-4)
         .clip(RoundedCornerShape(3.dp))      // 2. 添加圆角
 ) {
     Icon(
