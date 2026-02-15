@@ -159,7 +159,7 @@ fun SongItem(
             IconButton(
                 onClick = onMoreClick,
                 modifier = Modifier
-        .size(14.dp) // 整体按钮尺寸
+        .size(10.dp) // 整体按钮尺寸
         .background(
             color = Color.White,
             shape = CircleShape
