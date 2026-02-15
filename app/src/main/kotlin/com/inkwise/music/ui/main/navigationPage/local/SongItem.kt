@@ -179,3 +179,25 @@ fun formatTime(millis: Long): String {
     val seconds = totalSeconds % 60
     return String.format("%d:%02d", minutes, seconds)
 }
+
+@Composable
+fun AudioQualityIcon(
+    sampleRate: Int,
+    bitDepth: Int,
+    bitrate: Int
+) {
+    // 直接在 Compose 里判断音质
+    val (iconRes, color) = when {
+        bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_more_vert to Color.Red   // HR
+        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_more_vert to Color.Blue  // FLAC
+        bitrate >= 320_000 -> R.drawable.ic_more_vert to Color.Green                     // HQ
+        else -> R.drawable.ic_more_vert to Color.Gray                                    // SQ
+    }
+
+    Icon(
+        painter = painterResource(id = iconRes),
+        contentDescription = "音质",
+        tint = color,
+        modifier = Modifier.size(16.dp)
+    )
+}
