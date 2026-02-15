@@ -185,7 +185,6 @@ fun formatTime(millis: Long): String {
     return String.format("%d:%02d", minutes, seconds)
 
 }
-
 @Composable
 fun AudioQualityIcon(
     sampleRate: Int,
@@ -202,11 +201,18 @@ fun AudioQualityIcon(
 
     // 只有 iconRes 不为 null 才显示 Icon
     iconRes?.let { res ->
-        Icon(
-            painter = painterResource(id = res),
-            contentDescription = "音质",
-            tint = Color.Unspecified,
-            modifier = Modifier.size(16.dp)
-        )
+        // 包裹 Box，用 Modifier.size 控制宽高，并裁剪
+        Box(
+            modifier = Modifier
+                .size(width = 15.dp, height = 14.dp) // 原来是 16.dp -> 宽减1、高减2
+                .clipToBounds() // 确保 Icon 不超出 Box
+        ) {
+            Icon(
+                painter = painterResource(id = res),
+                contentDescription = "音质",
+                tint = Color.Unspecified,
+                modifier = Modifier.fillMaxSize() // 填满 Box
+            )
+        }
     }
 }
