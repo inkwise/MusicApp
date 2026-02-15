@@ -126,10 +126,11 @@ fun controlContent2(
             // 🎵 Icon 占位（只在没封面时显示）
             if (coverUri == null) {
                 Icon(
-                    painter = painterResource(R.drawable.),
+                    painter = painterResource(R.drawable.ic_song_cover),
                     contentDescription = null,
+                    
                     modifier = Modifier.size(32.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = Color.Unspecified,
                 )
             }
         }
