@@ -1,5 +1,5 @@
 package com.inkwise.music.ui.main.navigationPage.local
-
+import androidx.compose.ui.draw.clipToBounds
 import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
