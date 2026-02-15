@@ -209,7 +209,7 @@ fun AudioQualityIcon(
     contentAlignment = Alignment.Center, // 关键：让图标居中，从而均匀裁剪上下左右
     modifier = Modifier
         .size(width = 14.dp, height = 10.dp) // 1. 设定可视区域：宽(16-2)，高(16-4)
-        .clip(RoundedCornerShape(1.dp))      // 2. 添加圆角
+        .clip(RoundedCornerShape(2.dp))      // 2. 添加圆角
 ) {
     Icon(
         painter = painterResource(id = res),
