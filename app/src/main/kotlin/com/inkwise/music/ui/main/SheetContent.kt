@@ -1,5 +1,13 @@
 package com.inkwise.music.ui.main
 
+// painterResource
+import androidx.compose.ui.res.painterResource
+
+// Color
+import androidx.compose.ui.graphics.Color
+
+// 如果你使用 R.drawable
+import com.inkwise.music.R
 import android.annotation.SuppressLint
 import android.widget.ImageView
 import androidx.compose.foundation.background
