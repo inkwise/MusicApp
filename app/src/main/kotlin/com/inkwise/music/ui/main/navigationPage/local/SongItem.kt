@@ -206,13 +206,13 @@ fun AudioQualityIcon(
             modifier = Modifier
                 .size(width = 15.dp, height = 10.dp) // 原来是 16.dp -> 宽减1、高减2
                 .clip(RoundedCornerShape(5.dp))
-                .clipToBounds() // 确保 Icon 不超出 Box
+               // .clipToBounds() // 确保 Icon 不超出 Box
         ) {
             Icon(
                 painter = painterResource(id = res),
                 contentDescription = "音质",
                 tint = Color.Unspecified,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
