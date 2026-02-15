@@ -205,7 +205,7 @@ fun AudioQualityIcon(
         Box(
             modifier = Modifier
                 .size(width = 15.dp, height = 12.dp) // 原来是 16.dp -> 宽减1、高减2
-                .clip(RoundedCornerShape(2.dp))
+                .clip(RoundedCornerShape(4.dp))
                 .clipToBounds() // 确保 Icon 不超出 Box
         ) {
             Icon(
