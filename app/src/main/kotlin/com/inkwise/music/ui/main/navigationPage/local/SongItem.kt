@@ -189,9 +189,9 @@ fun AudioQualityIcon(
     // 直接在 Compose 里判断音质
     val (iconRes, color) = when {
         bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_more_vert to Color.Red   // HR
-        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_more_vert to Color.Blue  // FLAC
+        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_more_vert to Color.Blue  // SQ
         bitrate >= 320_000 -> R.drawable.ic_more_vert to Color.Green                     // HQ
-        else -> R.drawable.ic_more_vert to Color.Gray                                    // SQ
+        else -> R.drawable.ic_more_vert to Color.Gray                                    
     }
 
     Icon(
