@@ -43,6 +43,8 @@ constructor(
     /** 扫描本地音乐并更新 _localSongs */
     fun scanSongs(context: Context) {
         if (_isScanning.value) return
+        
+        val analyzer = AudioAnalyzer() // 创建 Rust JNI 分析器
 
         viewModelScope.launch(Dispatchers.IO) {
             _isScanning.value = true
@@ -92,6 +94,27 @@ constructor(
                                         Uri.parse("content://media/external/audio/albumart"),
                                         albumId,
                                     ).toString()
+                            // ⭐ 调用 Rust 分析器
+                        val analysisResult = try {
+                            analyzer.analyze(path) // 返回 "codec=AAC, sample_rate=44100, bit_depth=16"
+                        } catch (e: Exception) {
+                            "Error: analysis failed"
+                        }
+
+                        // 可以拆分字符串，解析 codec / sample_rate / bit_depth
+                        var codec = ""
+                        var sampleRate = 0
+                        var bitDepth = 0
+                        analysisResult.split(",").forEach { part ->
+                            val kv = part.split("=")
+                            if (kv.size == 2) {
+                                when (kv[0].trim()) {
+                                    "codec" -> codec = kv[1].trim()
+                                    "sample_rate" -> sampleRate = kv[1].trim().toIntOrNull() ?: 0
+                                    "bit_depth" -> bitDepth = kv[1].trim().toIntOrNull() ?: 0
+                                }
+                            }
+                        }
                             val song =
                                 Song(
                                     localId = id,
