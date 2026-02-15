@@ -137,7 +137,7 @@ fun controlContent2(
                     painter = painterResource(R.drawable.ic_song_cover),
                     contentDescription = null,
                     
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.fillMaxSize(),
                     tint = Color.Unspecified,
                 )
             }
