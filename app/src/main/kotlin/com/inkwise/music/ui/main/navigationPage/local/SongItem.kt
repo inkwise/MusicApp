@@ -211,7 +211,7 @@ fun AudioQualityIcon(
                 painter = painterResource(id = res),
                 contentDescription = "音质",
                 tint = Color.Unspecified,
-                modifier = Modifier.fillMaxSize() // 填满 Box
+                modifier = Modifier.size(16.dp)
             )
         }
     }
