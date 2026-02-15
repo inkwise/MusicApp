@@ -31,7 +31,7 @@ import coil.request.ImageRequest
 import coil.size.Precision
 import com.inkwise.music.R
 import com.inkwise.music.data.model.Song
-
+import androidx.compose.foundation.layout.fillMaxSize
 @Composable
 fun SongItem(
     song: Song,
