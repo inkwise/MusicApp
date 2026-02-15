@@ -114,7 +114,7 @@ fun SongItem(
 
                     Icon(
                         painter = painterResource(id = R.drawable.ic_more_vert),
-                        contentDescription = "下一首",
+                        contentDescription = "音质",
                         //tint = animatedThemeColor,
                         modifier = Modifier.size(12.dp),
                     )
