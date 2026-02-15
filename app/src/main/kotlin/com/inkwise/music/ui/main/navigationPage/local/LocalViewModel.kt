@@ -116,7 +116,7 @@ constructor(
                                 }
                             }
                         }
-                            val song =
+                            val song = 
                                 Song(
                                     localId = id,
                                     title = title,
@@ -125,7 +125,7 @@ constructor(
                                     duration = duration,
                                     codec = codec,           // 新增属性
                                     sampleRate = sampleRate, // 新增属性
-                                    bitDepth = bitDepth      // 新增属性
+                                    bitDepth = bitDepth,      // 新增属性
                                     path = path,
                                     uri =
                                         ContentUris
