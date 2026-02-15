@@ -159,17 +159,17 @@ fun SongItem(
             IconButton(
                 onClick = onMoreClick,
                 modifier = Modifier
-        .size(32.dp) // 整体按钮尺寸
+        .size(20.dp) // 整体按钮尺寸
         .background(
             color = Color.White,
             shape = CircleShape
         )
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_more_vert),
+                    painter = painterResource(id = R.drawable.ic_add),
                     contentDescription = "菜单",
                     tint = Color.Black.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(14.dp),
                 )
             }
             IconButton(
