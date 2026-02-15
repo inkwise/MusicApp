@@ -203,17 +203,19 @@ fun AudioQualityIcon(
     iconRes?.let { res ->
         // 包裹 Box，用 Modifier.size 控制宽高，并裁剪
         Box(
-            modifier = Modifier
-                .size(width = 15.dp, height = 5.dp) // 原来是 16.dp -> 宽减1、高减2
-                .clip(RoundedCornerShape(5.dp))
-               // .clipToBounds() // 确保 Icon 不超出 Box
-        ) {
-            Icon(
-                painter = painterResource(id = res),
-                contentDescription = "音质",
-                tint = Color.Unspecified,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+    contentAlignment = Alignment.Center, // 关键：让图标居中，从而均匀裁剪上下左右
+    modifier = Modifier
+        .size(width = 14.dp, height = 12.dp) // 1. 设定可视区域：宽(16-2)，高(16-4)
+        .clip(RoundedCornerShape(3.dp))      // 2. 添加圆角
+) {
+    Icon(
+        painter = painterResource(id = res),
+        contentDescription = "音质",
+        tint = Color.Unspecified,
+        // 3. 图标保持原始大小，超出 Box 的部分会被自动切除
+        modifier = Modifier.size(16.dp) 
+    )
+}
+
     }
 }
