@@ -33,7 +33,7 @@ import com.inkwise.music.R
 import com.inkwise.music.data.model.Song
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
-
+import androidx.compose.foundation.shape.CircleShape
 
 @Composable
 fun SongItem(
