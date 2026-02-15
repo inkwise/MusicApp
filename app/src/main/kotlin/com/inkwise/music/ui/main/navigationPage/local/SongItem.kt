@@ -159,18 +159,29 @@ fun SongItem(
             IconButton(
                 onClick = onMoreClick,
                 modifier = Modifier
-        .size(10.dp) // 整体按钮尺寸
-        .background(
-            color = Color.White,
-            shape = CircleShape
-        )
+        .size(22.dp) // 整体按钮尺寸
+            
             ) {
-                Icon(
+             /*   Icon(
                     painter = painterResource(id = R.drawable.ic_add),
                     contentDescription = "菜单",
                     tint = Color.Black.copy(alpha = 0.5f),
                     modifier = Modifier.size(14.dp),
-                )
+                )*/
+                Box(
+    modifier = Modifier
+        .size(24.dp) // 控制圆形大小
+        .background(Color.White, CircleShape)
+        .clickable { onMoreClick() },
+    contentAlignment = Alignment.Center
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_add),
+        contentDescription = "菜单",
+        tint = Color.Black.copy(alpha = 0.5f),
+        modifier = Modifier.size(14.dp),
+    )
+}
             }
             IconButton(
                 onClick = onMoreClick,
