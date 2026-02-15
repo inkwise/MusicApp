@@ -111,12 +111,17 @@ fun SongItem(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
+                    /*
                     Icon(
                         painter = painterResource(id = R.drawable.ic_more_vert),
                         contentDescription = "音质",
                         //tint = animatedThemeColor,
                         modifier = Modifier.size(12.dp),
+                    )*/
+                    AudioQualityIcon(
+                        sampleRate=song.sampleRate,
+                        bitDepth=song.bitDepth,
+                        bitrate=song.bitrate
                     )
                     Spacer(modifier = Modifier.width(4.dp))
 
