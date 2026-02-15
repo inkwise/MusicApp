@@ -213,7 +213,7 @@ fun AudioQualityIcon(
         contentDescription = "音质",
         tint = Color.Unspecified,
         // 3. 图标保持原始大小，超出 Box 的部分会被自动切除
-        modifier = Modifier.size(16.dp) 
+        modifier = Modifier.requiredSize(16.dp) 
     )
 }
 
