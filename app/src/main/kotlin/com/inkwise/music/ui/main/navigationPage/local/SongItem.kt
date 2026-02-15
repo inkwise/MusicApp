@@ -188,9 +188,9 @@ fun AudioQualityIcon(
 ) {
     // 根据音质返回对应图标资源，else 为 null 表示不显示
     val iconRes: Int? = when {
-        bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_hr     // HR
-        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_flac   // SQ
-        bitrate >= 320_000 -> R.drawable.ic_hq                          // HQ
+        bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_song_quality_hi     // HR
+        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_song_quality_sq   // SQ
+        bitrate >= 320_000 -> R.drawable.ic_song_quality_hq                          // HQ
         else -> null
     }
 
