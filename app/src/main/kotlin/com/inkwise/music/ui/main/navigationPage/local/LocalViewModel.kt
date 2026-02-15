@@ -104,18 +104,25 @@ constructor(
 
                         // 可以拆分字符串，解析 codec / sample_rate / bit_depth
                         var codec = ""
-                        var sampleRate = 0
-                        var bitDepth = 0
-                        analysisResult.split(",").forEach { part ->
-                            val kv = part.split("=")
-                            if (kv.size == 2) {
-                                when (kv[0].trim()) {
-                                    "codec" -> codec = kv[1].trim()
-                                    "sample_rate" -> sampleRate = kv[1].trim().toIntOrNull() ?: 0
-                                    "bit_depth" -> bitDepth = kv[1].trim().toIntOrNull() ?: 0
-                                }
-                            }
-                        }
+var sampleRate = 0
+var bitDepth = 0
+var channels = 0
+var bitrate = 0
+var durationFrames = 0L
+
+analysisResult.split(",").forEach { part ->
+    val kv = part.split("=")
+    if (kv.size == 2) {
+        when (kv[0].trim()) {
+            "codec" -> codec = kv[1].trim()
+            "sample_rate" -> sampleRate = kv[1].trim().toIntOrNull() ?: 0
+            "bit_depth" -> bitDepth = kv[1].trim().toIntOrNull() ?: 0
+            "channels" -> channels = kv[1].trim().toIntOrNull() ?: 0
+            "bitrate" -> bitrate = kv[1].trim().toIntOrNull() ?: 0
+            "duration" -> durationFrames = kv[1].trim().toLongOrNull() ?: 0L
+        }
+    }
+}
                             val song = 
                                 Song(
                                     localId = id,
@@ -126,6 +133,8 @@ constructor(
                                     codec = codec,           // 新增属性
                                     sampleRate = sampleRate, // 新增属性
                                     bitDepth = bitDepth,      // 新增属性
+                                    channels=channels,
+                                    bitrate=bitrate,
                                     path = path,
                                     uri =
                                         ContentUris

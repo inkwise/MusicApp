@@ -36,6 +36,12 @@ data class Song(
     //位深
     @ColumnInfo(name = "bitDepth") 
     val bitDepth: Int = 0,
+    //声道
+    @ColumnInfo(name = "channels")
+    var channels: Int=0,
+    //码率
+    @ColumnInfo(name = "bitrate")
+    var bitrate: Int =0,
     
     // url
     @ColumnInfo(name = "uri")
