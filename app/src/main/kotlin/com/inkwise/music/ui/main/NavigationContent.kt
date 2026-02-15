@@ -18,7 +18,6 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -64,7 +63,7 @@ fun NavigationContent(
             viewModel.closeSidebar()
         }
     }
-
+//侧边栏
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -87,7 +86,7 @@ fun NavigationContent(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("音乐播放器") },
+                    title = { },
                     navigationIcon = {
                         IconButton(onClick = { viewModel.toggleSidebar() }) {
                             Icon(Icons.Default.Menu, "菜单")
@@ -129,7 +128,8 @@ fun NavigationContent(
 
                 // --- 关键：在这里定义 BackHandler ---
                 // 使用 targetValue 能更早感知到“正在展开”的状态，比 currentValue 更灵敏
-                val shouldIntercept = sheetState.targetValue == SheetValue.Expanded || pagerState.currentPage > 0
+                val shouldIntercept =
+                    sheetState.targetValue == SheetValue.Expanded || pagerState.currentPage > 0
 
                 BackHandler(enabled = shouldIntercept) {
                     scope.launch {

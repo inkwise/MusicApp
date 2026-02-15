@@ -194,26 +194,13 @@ fun BottomDrawerContent(
                     }
 
                     1 -> {
-                        // 歌词页（占位）
-                        /*
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-
-                            LyricsView(playerViewModel)
-                        }*/
+                        // 歌词页
                         LyricsPage(
                             playerViewModel = playerViewModel,
                             animatedThemeColor = animatedThemeColor,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
-
-                    // /////
                 }
             }
         }
@@ -392,7 +379,7 @@ fun BottomDrawerContent(
 @Composable
 fun LyricsPage(
     playerViewModel: PlayerViewModel,
-    animatedThemeColor : Color,
+    animatedThemeColor: Color,
     modifier: Modifier = Modifier,
 ) {
     val lyricsState by playerViewModel.lyricsState.collectAsState()

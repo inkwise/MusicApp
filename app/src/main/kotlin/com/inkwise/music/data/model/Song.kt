@@ -1,10 +1,7 @@
 package com.inkwise.music.data.model
 
-import android.net.Uri
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "songs")
@@ -23,6 +20,10 @@ data class Song(
     // 歌手
     @ColumnInfo(name = "artist")
     val artist: String,
+    //标题
+    @ColumnInfo(name = "album")
+    val album: String,
+
     // 时长
     @ColumnInfo(name = "duration")
     val duration: Long, // 毫秒

@@ -1,4 +1,6 @@
 package com.inkwise.music.ui.main
+
+import android.annotation.SuppressLint
 import android.widget.ImageView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,6 +38,7 @@ import com.inkwise.music.ui.player.PlayerViewModel
 import com.inkwise.music.ui.theme.LocalAppDimens
 
 // 手柄区域
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun controlContent(
@@ -45,12 +48,13 @@ fun controlContent(
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val dimens = LocalAppDimens.current
+
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .height(dimens.sheetPeekHeightDp)
-                // .fillMaxHeight()
+
                 .clickable(
                     indication = null, // 🚫 去掉波纹
                     interactionSource = remember { MutableInteractionSource() },
@@ -66,6 +70,7 @@ fun controlContent(
         // 控制层
         controlContent2(showPlayQueue = showPlayQueue)
     }
+
 }
 
 @Composable
@@ -92,7 +97,7 @@ fun controlContent2(
         Box(
             modifier =
                 Modifier
-                    .size(64.dp)
+                    .size(50.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
