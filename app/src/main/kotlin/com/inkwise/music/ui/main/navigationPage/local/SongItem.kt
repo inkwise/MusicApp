@@ -185,6 +185,7 @@ fun formatTime(millis: Long): String {
     return String.format("%d:%02d", minutes, seconds)
 
 }
+
 @Composable
 fun AudioQualityIcon(
     sampleRate: Int,
@@ -204,6 +205,7 @@ fun AudioQualityIcon(
         Icon(
             painter = painterResource(id = res),
             contentDescription = "音质",
+            tint = Color.Unspecified,
             modifier = Modifier.size(16.dp)
         )
     }
