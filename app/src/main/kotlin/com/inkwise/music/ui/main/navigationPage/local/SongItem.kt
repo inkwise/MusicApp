@@ -178,26 +178,28 @@ fun formatTime(millis: Long): String {
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     return String.format("%d:%02d", minutes, seconds)
-}
 
+}
 @Composable
 fun AudioQualityIcon(
     sampleRate: Int,
     bitDepth: Int,
     bitrate: Int
 ) {
-    // 直接在 Compose 里判断音质
-    val (iconRes, color) = when {
-        bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_more_vert to Color.Red   // HR
-        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_more_vert to Color.Blue  // SQ
-        bitrate >= 320_000 -> R.drawable.ic_more_vert to Color.Green                     // HQ
-        else -> R.drawable.ic_more_vert to Color.Gray                                    
+    // 根据音质返回对应图标资源，else 为 null 表示不显示
+    val iconRes: Int? = when {
+        bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_hr     // HR
+        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_flac   // SQ
+        bitrate >= 320_000 -> R.drawable.ic_hq                          // HQ
+        else -> null
     }
 
-    Icon(
-        painter = painterResource(id = iconRes),
-        contentDescription = "音质",
-        tint = color,
-        modifier = Modifier.size(16.dp)
-    )
+    // 只有 iconRes 不为 null 才显示 Icon
+    iconRes?.let { res ->
+        Icon(
+            painter = painterResource(id = res),
+            contentDescription = "音质",
+            modifier = Modifier.size(16.dp)
+        )
+    }
 }
