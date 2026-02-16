@@ -119,6 +119,7 @@ fun LocalSongsScreen(
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
             state = pullToRefreshState, 
+            /*
      indicator = {
         // 直接在这个作用域调用，不要写 state -> 
         // 也不要手动传 state 参数
@@ -127,10 +128,25 @@ fun LocalSongsScreen(
             state = pullToRefreshState, 
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.Transparent, // 去掉背景
-            //color = MaterialTheme.colorScheme.primary,
-            // 注意：如果这里还报错说需要 state，
-            // 请查看下方“如果仍然报错”的部分
-        )
+            
+        )*/
+        indicator = {
+        // 如果正在刷新，显示自定义的、无背景的进度条
+        if (isScanning) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp), // 留出顶部间距
+                contentAlignment = Alignment.TopCenter
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(28.dp), // 控制大小
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 3.dp // 控制线条粗细
+                )
+            }
+        }
+    }
     }
         ) {
             if (isScanning && songs.isEmpty()) {
