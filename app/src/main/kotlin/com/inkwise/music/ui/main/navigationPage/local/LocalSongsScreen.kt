@@ -63,7 +63,9 @@ fun LocalSongsScreen(
                     modifier = Modifier.size(18.dp),
                 )
             }
-            Text(text=songs.size+"")
+            Text(
+                text = songs.size.toString()
+            )
 
             if (songs.isNotEmpty()) {
                 FilledTonalButton(
