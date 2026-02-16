@@ -170,7 +170,7 @@ fun SongItem(
                 )*/
                 Box(
     modifier = Modifier
-        .size(18.dp) // 控制圆形大小
+        .size(16.dp) // 控制圆形大小
         .background(Color.White, CircleShape)
         .clickable { onMoreClick() },
     contentAlignment = Alignment.Center
