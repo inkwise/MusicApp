@@ -118,16 +118,13 @@ fun LocalSongsScreen(
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
      indicator = {
+        // 注意：新版本直接调用，不需要 'it'
         PullToRefreshDefaults.Indicator(
-            state = it,
+            state = it, // 如果报错，请确认 Lambda 头部是否有 state ->
             isRefreshing = isScanning,
             modifier = Modifier.align(Alignment.TopCenter),
-            // 将背景色设为透明
-            containerColor = Color.Transparent, 
-            // 将阴影高度设为 0dp
-            elevation = 0.dp,
-            // 如果需要，也可以修改进度条本身的颜色
-            color = MaterialTheme.colorScheme.primary 
+            containerColor = Color.Transparent, // 去掉背景
+            color = MaterialTheme.colorScheme.primary // 设置进度条颜色
         )
     }
         ) {
