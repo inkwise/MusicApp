@@ -42,6 +42,7 @@ fun LocalSongsScreen(
         modifier =
             Modifier
                 .fillMaxSize()
+                .padding(10.dp)
     ) {
         Row(
             modifier =
@@ -68,7 +69,7 @@ fun LocalSongsScreen(
                 text = songs.size.toString()
             )}
 
-            if (songs.isNotEmpty()) {
+        /*    if (songs.isNotEmpty()) {
                 FilledTonalButton(
                     onClick = { playerViewModel.playSongs(songs) },
                 ) {
@@ -76,7 +77,7 @@ fun LocalSongsScreen(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("播放全部")
                 }
-            }
+            }*/
             
             Row{
                 IconButton(
