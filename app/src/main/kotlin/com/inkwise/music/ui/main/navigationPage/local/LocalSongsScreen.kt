@@ -119,23 +119,46 @@ fun LocalSongsScreen(
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
             state = pullToRefreshState, 
-            
+            /*
      indicator = {
         // 直接在这个作用域调用，不要写 state -> 
         // 也不要手动传 state 参数
-        /*
+        
         PullToRefreshDefaults.Indicator(
             isRefreshing = isScanning,
             state = pullToRefreshState, 
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.Transparent, // 去掉背景
-            
         )*/
-        CircularProgressIndicator(
-                    modifier = Modifier.size(28.dp), // 控制大小
+        indicator = {
+        // 计算当前下拉的透明度或缩放，让过渡更自然
+        val progress = pullToRefreshState.distanceFraction
+        
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp), // 距离顶部的偏移量
+            contentAlignment = Alignment.TopCenter
+        ) {
+            if (isScanning) {
+                // 1. 正在刷新状态：显示不断旋转的进度条
+                CircularProgressIndicator(
+                    modifier = Modifier.size(28.dp),
                     color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 3.dp // 控制线条粗细
+                    strokeWidth = 3.dp
                 )
+            } else if (progress > 0f) {
+                // 2. 下拉过程中：进度条随手指下滑距离而填满
+                CircularProgressIndicator(
+                    progress = { progress }, // 关键：绑定下拉进度
+                    modifier = Modifier.size(28.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = progress.coerceIn(0.3f, 1f)),
+                    strokeWidth = 3.dp,
+                    trackColor = Color.Transparent // 确保背景也是透明的
+                )
+            }
+        }
+    }
     }
     
         ) {
