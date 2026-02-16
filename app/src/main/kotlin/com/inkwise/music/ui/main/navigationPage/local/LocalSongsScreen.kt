@@ -130,7 +130,7 @@ fun LocalSongsScreen(
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.Transparent, // 去掉背景
         )*/
-        indicator = {
+      /*  indicator = {
         // 计算当前下拉的透明度或缩放，让过渡更自然
         val progress = pullToRefreshState.distanceFraction
         
@@ -158,8 +158,24 @@ fun LocalSongsScreen(
                 )
             }
         }
+    }*/
+    indicator = {
+        PullToRefreshDefaults.Indicator(
+            state = pullToRefreshState,
+            isRefreshing = isScanning,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                // 核心黑科技：通过 graphicsLayer 确保容器内容（进度条）可见，
+                // 但由于 containerColor 已经是透明，shadowColor 也设为透明，背景圆圈就彻底隐身了
+                .graphicsLayer {
+                    // 如果你觉得还有残影，可以在这里微调缩放或透明度
+                    alpha = 1f 
+                },
+            containerColor = Color.Transparent, // 关键：背景透明
+            contentColor = MaterialTheme.colorScheme.primary, // 进度条颜色
+            shadowColor = Color.Transparent, // 必须：去掉阴影
+        )
     }
-    
     
         ) {
             if (isScanning && songs.isEmpty()) {
