@@ -34,7 +34,7 @@ class MusicApp : Application() {
         init {
             System.loadLibrary("audio_analyzer") // 注意不要 .so
         }
-    
+
         @Throws(IOException::class)
         fun write(
             input: InputStream,

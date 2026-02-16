@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlaylistDao {
-
     /**
      * 插入或更新单个播放列表。
      * 如果主键冲突，则替换已有记录。

@@ -43,7 +43,6 @@ fun HomeScreen(
     onNavigateToCloud: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-
     val playlists by viewModel.playlists.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     val dimens = LocalAppDimens.current
@@ -52,11 +51,11 @@ fun HomeScreen(
             Modifier
                 .fillMaxSize()
                 .padding(
-                    //start = 24.dp,
-                    //top = 24.dp,
-                    //end = 24.dp,
-                    bottom = dimens.sheetPeekHeightDp
-                )
+                    // start = 24.dp,
+                    // top = 24.dp,
+                    // end = 24.dp,
+                    bottom = dimens.sheetPeekHeightDp,
+                ),
     ) {
         // 本地 & 云端按钮横向排列
         Row(
@@ -68,9 +67,10 @@ fun HomeScreen(
         ) {
             ElevatedButton(
                 onClick = onNavigateToLocal,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(64.dp),
             ) {
                 Icon(
                     Icons.Default.MusicNote,
@@ -83,9 +83,10 @@ fun HomeScreen(
 
             ElevatedButton(
                 onClick = onNavigateToCloud,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(64.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(64.dp),
             ) {
                 Icon(
                     Icons.Default.Cloud,
@@ -110,21 +111,23 @@ fun HomeScreen(
                     // viewModel.refreshPlaylists()
                     showDialog = true
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(48.dp),
             ) {
                 Text("刷新")
             }
 
             Button(
                 onClick = {
-                    //viewModel.createPlaylist("测试歌单")
+                    // viewModel.createPlaylist("测试歌单")
                     showDialog = true
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(48.dp),
             ) {
                 Text("创建歌单")
             }
@@ -156,7 +159,7 @@ fun HomeScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 playlist.playlist.title,
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
                             )
                             // Text("${playlist.size} 首歌曲", style = MaterialTheme.typography.bodySmall)
                         }
@@ -169,8 +172,7 @@ fun HomeScreen(
             onDismiss = { showDialog = false },
             onConfirm = { title ->
                 viewModel.createPlaylist(title)
-            }
+            },
         )
     }
 }
-

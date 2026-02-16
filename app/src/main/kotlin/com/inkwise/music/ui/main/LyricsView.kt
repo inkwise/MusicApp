@@ -606,7 +606,7 @@ fun LyricsView(
 fun LyricLineItem(
     line: LyricLine, // 请确保这里的类名和你 ViewModel 里的歌词行类名一致
     isHighlighted: Boolean,
-    animatedThemeColor :Color,
+    animatedThemeColor: Color,
     showTranslation: Boolean,
     alpha: Float,
 ) {
@@ -649,7 +649,7 @@ fun LyricLineItem(
 @Composable
 fun LyricsView(
     viewModel: PlayerViewModel,
-    animatedThemeColor : Color,
+    animatedThemeColor: Color,
     showTranslation: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -666,13 +666,14 @@ fun LyricsView(
         // 1. 动态计算动画时长
         val currentLineTime = lyrics[index].timeMs
         val nextLineTime = lyrics.getOrNull(index + 1)?.timeMs
-        
-        val dynamicDuration = if (nextLineTime != null) {
-            // 计算与下一行的间隔，并设定一个阈值（比如最快 200ms，最慢 800ms）
-            (nextLineTime - currentLineTime).toInt().coerceIn(10, 1200)
-        } else {
-            500 // 最后一行默认值
-        }
+
+        val dynamicDuration =
+            if (nextLineTime != null) {
+                // 计算与下一行的间隔，并设定一个阈值（比如最快 200ms，最慢 800ms）
+                (nextLineTime - currentLineTime).toInt().coerceIn(10, 1200)
+            } else {
+                500 // 最后一行默认值
+            }
 
         val layoutInfo = listState.layoutInfo
         val visibleItem =
@@ -705,7 +706,7 @@ fun LyricsView(
             listState.scrollToItem(index)
         }
     }
-    
+
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val boxHeight = maxHeight // LyricsView 的高度
 

@@ -20,29 +20,27 @@ data class Song(
     // 歌手
     @ColumnInfo(name = "artist")
     val artist: String,
-    //标题
+    // 标题
     @ColumnInfo(name = "album")
     val album: String,
-
     // 时长
     @ColumnInfo(name = "duration")
     val duration: Long, // 毫秒
-    //编码
+    // 编码
     @ColumnInfo(name = "codec")
     val codec: String = "",
-    //采样率
+    // 采样率
     @ColumnInfo(name = "sampleRate")
     val sampleRate: Int = 0,
-    //位深
-    @ColumnInfo(name = "bitDepth") 
+    // 位深
+    @ColumnInfo(name = "bitDepth")
     val bitDepth: Int = 0,
-    //声道
+    // 声道
     @ColumnInfo(name = "channels")
-    var channels: Int=0,
-    //码率
+    var channels: Int = 0,
+    // 码率
     @ColumnInfo(name = "bitrate")
-    var bitrate: Int =0,
-    
+    var bitrate: Int = 0,
     // url
     @ColumnInfo(name = "uri")
     val uri: String, // Content URI 或文件路径
@@ -55,6 +53,4 @@ data class Song(
     // 是否本地
     @ColumnInfo(name = "is_local")
     val isLocal: Boolean = true, // 本地标记
-    
-    
 )

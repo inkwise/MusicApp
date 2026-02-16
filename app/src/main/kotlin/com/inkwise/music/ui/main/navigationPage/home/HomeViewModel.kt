@@ -12,43 +12,42 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class HomeViewModel
-@Inject
-constructor(
-    private val repository: PlaylistRepository,
-    private val playlistdao: PlaylistDao, // ✅ 变成成员属性
-) : ViewModel() {
+    @Inject
+    constructor(
+        private val repository: PlaylistRepository,
+        private val playlistdao: PlaylistDao, // ✅ 变成成员属性
+    ) : ViewModel() {
+        // 歌单列表
+        private val _playlists = MutableStateFlow<List<PlaylistWithSongs>>(emptyList())
+        val playlists: StateFlow<List<PlaylistWithSongs>> = _playlists
 
-    //歌单列表
-    private val _playlists = MutableStateFlow<List<PlaylistWithSongs>>(emptyList())
-    val playlists: StateFlow<List<PlaylistWithSongs>> = _playlists
+        init {
+            // 启动协程收集数据库变化
+            viewModelScope.launch {
+                repository
+                    .getAllPlaylistsWithSongs()
+                    .collect { list ->
+                        _playlists.value = list
+                    }
+            }
+        }
 
-    init {
-        // 启动协程收集数据库变化
-        viewModelScope.launch {
-            repository.getAllPlaylistsWithSongs()
-                .collect { list ->
-                    _playlists.value = list
-                }
+        fun refreshPlaylists() {
+            // TODO: 重新从数据库或者网络加载数据
+        }
+
+        fun createPlaylist(title: String) {
+            viewModelScope.launch {
+                // TODO: 调用 DAO 插入新歌单
+                val newPlaylist =
+                    PlaylistEntity(
+                        title = title,
+                        coverUri = "测试图片",
+                        description = "测试说明",
+                    )
+                playlistdao.insert(newPlaylist)
+            }
         }
     }
-
-    fun refreshPlaylists() {
-        // TODO: 重新从数据库或者网络加载数据
-    }
-
-    fun createPlaylist(title: String) {
-        viewModelScope.launch {
-            // TODO: 调用 DAO 插入新歌单
-            val newPlaylist =
-                PlaylistEntity(
-                    title = title,
-                    coverUri = "测试图片",
-                    description = "测试说明",
-                )
-            playlistdao.insert(newPlaylist)
-        }
-    }
-}

@@ -32,12 +32,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
-
 @Composable
 fun PlaylistTitleDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     if (!visible) return
 
@@ -53,29 +52,27 @@ fun PlaylistTitleDialog(
     }
 
     Dialog(
-        onDismissRequest = { onDismiss() }
+        onDismissRequest = { onDismiss() },
     ) {
-
         Card(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
         ) {
-
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(20.dp),
             ) {
-
                 Box(
                     modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.TopEnd
+                    contentAlignment = Alignment.TopEnd,
                 ) {
                     IconButton(onClick = { onDismiss() }) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "关闭"
+                            contentDescription = "关闭",
                         )
                     }
                 }
@@ -84,7 +81,7 @@ fun PlaylistTitleDialog(
 
                 Text(
                     text = "输入歌单标题",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -94,9 +91,10 @@ fun PlaylistTitleDialog(
                     onValueChange = { title = it },
                     placeholder = { Text("歌单标题") },
                     singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester) // 👈 关键
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester), // 👈 关键
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -108,7 +106,7 @@ fun PlaylistTitleDialog(
                             onDismiss()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text("创建")
                 }

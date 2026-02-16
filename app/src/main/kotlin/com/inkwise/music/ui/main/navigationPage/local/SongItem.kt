@@ -1,5 +1,4 @@
 package com.inkwise.music.ui.main.navigationPage.local
-import androidx.compose.ui.draw.clipToBounds
 import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,10 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -31,9 +34,6 @@ import coil.request.ImageRequest
 import coil.size.Precision
 import com.inkwise.music.R
 import com.inkwise.music.data.model.Song
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.shape.CircleShape
 
 @Composable
 fun SongItem(
@@ -50,7 +50,7 @@ fun SongItem(
                 .padding(vertical = 4.dp)
                 .clickable(onClick = onClick),
     )
-    */
+     */
     Box(
         modifier =
             Modifier
@@ -81,19 +81,19 @@ fun SongItem(
                 contentAlignment = Alignment.Center,
             ) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(song.albumArt)
-                        .size(128)
-                        .precision(Precision.INEXACT)
-                        .bitmapConfig(Bitmap.Config.RGB_565)
-                        .crossfade(false)
-                        .build(),
+                    model =
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(song.albumArt)
+                            .size(128)
+                            .precision(Precision.INEXACT)
+                            .bitmapConfig(Bitmap.Config.RGB_565)
+                            .crossfade(false)
+                            .build(),
                     contentDescription = null,
                     modifier = Modifier.size(50.dp),
                     contentScale = ContentScale.Crop,
                 )
-
-
             }
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -112,30 +112,25 @@ fun SongItem(
                 )
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    /*
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_more_vert),
-                        contentDescription = "音质",
-                        //tint = animatedThemeColor,
-                        modifier = Modifier.size(12.dp),
-                    )*/
+                    
                     AudioQualityIcon(
-                        sampleRate=song.sampleRate,
-                        bitDepth=song.bitDepth,
-                        bitrate=song.bitrate
+                        sampleRate = song.sampleRate,
+                        bitDepth = song.bitDepth,
+                        bitrate = song.bitrate,
                     )
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
                         text = song.artist,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (isPlaying) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
+                        color =
+                            if (isPlaying) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
                         maxLines = 1,
                     )
 
@@ -143,45 +138,40 @@ fun SongItem(
                         Text(
                             text = " - ${song.album}",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (isPlaying) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
+                            color =
+                                if (isPlaying) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
                             maxLines = 1,
                         )
                     }
-
                 }
-
             }
-            
+
             IconButton(
                 onClick = onMoreClick,
-                modifier = Modifier
-        .size(22.dp) // 整体按钮尺寸
-            
+                modifier =
+                    Modifier
+                        .size(22.dp), // 整体按钮尺寸
             ) {
-             /*   Icon(
-                    painter = painterResource(id = R.drawable.ic_add),
-                    contentDescription = "菜单",
-                    tint = Color.Black.copy(alpha = 0.5f),
-                    modifier = Modifier.size(14.dp),
-                )*/
+            
                 Box(
-    modifier = Modifier
-        .size(12.dp) // 控制圆形大小
-        .background(Color.White, CircleShape)
-        .clickable { onMoreClick() },
-    contentAlignment = Alignment.Center
-) {
-    Icon(
-        painter = painterResource(id = R.drawable.ic_add),
-        contentDescription = "菜单",
-        tint = Color.Black.copy(alpha = 0.5f),
-        modifier = Modifier.size(10.dp),
-    )
-}
+                    modifier =
+                        Modifier
+                            .size(12.dp) // 控制圆形大小
+                            .background(Color.White, CircleShape)
+                            .clickable { onMoreClick() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_add),
+                        contentDescription = "菜单",
+                        tint = Color.Black.copy(alpha = 0.5f),
+                        modifier = Modifier.size(10.dp),
+                    )
+                }
             }
             IconButton(
                 onClick = onMoreClick,
@@ -203,39 +193,46 @@ fun formatTime(millis: Long): String {
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     return String.format("%d:%02d", minutes, seconds)
-
 }
+
 @Composable
 fun AudioQualityIcon(
     sampleRate: Int,
     bitDepth: Int,
-    bitrate: Int
+    bitrate: Int,
 ) {
     // 根据音质返回对应图标资源，else 为 null 表示不显示
-    val iconRes: Int? = when {
-        bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_song_quality_hi     // HR
-        bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_song_quality_sq   // SQ
-        bitrate >= 320_000 -> R.drawable.ic_song_quality_hq                          // HQ
-        else -> null
-    }
+    val iconRes: Int? =
+        when {
+            bitDepth >= 24 && sampleRate >= 96000 -> R.drawable.ic_song_quality_hi
+
+            // HR
+            bitDepth >= 16 && sampleRate >= 44100 -> R.drawable.ic_song_quality_sq
+
+            // SQ
+            bitrate >= 320_000 -> R.drawable.ic_song_quality_hq
+
+            // HQ
+            else -> null
+        }
 
     // 只有 iconRes 不为 null 才显示 Icon
     iconRes?.let { res ->
         // 包裹 Box，用 Modifier.size 控制宽高，并裁剪
         Box(
-    contentAlignment = Alignment.Center, // 关键：让图标居中，从而均匀裁剪上下左右
-    modifier = Modifier
-        .size(width = 14.dp, height = 10.dp) // 1. 设定可视区域：宽(16-2)，高(16-4)
-        .clip(RoundedCornerShape(2.dp))      // 2. 添加圆角
-) {
-    Icon(
-        painter = painterResource(id = res),
-        contentDescription = "音质",
-        tint = Color.Unspecified,
-        // 3. 图标保持原始大小，超出 Box 的部分会被自动切除
-        modifier = Modifier.requiredSize(16.dp) 
-    )
-}
-
+            contentAlignment = Alignment.Center, // 关键：让图标居中，从而均匀裁剪上下左右
+            modifier =
+                Modifier
+                    .size(width = 14.dp, height = 10.dp) // 1. 设定可视区域：宽(16-2)，高(16-4)
+                    .clip(RoundedCornerShape(2.dp)), // 2. 添加圆角
+        ) {
+            Icon(
+                painter = painterResource(id = res),
+                contentDescription = "音质",
+                tint = Color.Unspecified,
+                // 3. 图标保持原始大小，超出 Box 的部分会被自动切除
+                modifier = Modifier.requiredSize(16.dp),
+            )
+        }
     }
 }

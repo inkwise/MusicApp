@@ -62,7 +62,6 @@ fun controlContent(
             modifier
                 .fillMaxWidth()
                 .height(dimens.sheetPeekHeightDp)
-
                 .clickable(
                     indication = null, // 🚫 去掉波纹
                     interactionSource = remember { MutableInteractionSource() },
@@ -78,7 +77,6 @@ fun controlContent(
         // 控制层
         controlContent2(showPlayQueue = showPlayQueue)
     }
-
 }
 
 @Composable
@@ -136,7 +134,6 @@ fun controlContent2(
                 Icon(
                     painter = painterResource(R.drawable.ic_song_cover),
                     contentDescription = null,
-                    
                     modifier = Modifier.fillMaxSize(),
                     tint = Color.Unspecified,
                 )

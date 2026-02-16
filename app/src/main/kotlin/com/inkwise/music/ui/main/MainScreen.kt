@@ -32,10 +32,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-
     val dimens = LocalAppDimens.current
     val peekHeight = rememberSheetPeekHeight(dimens.sheetPeekHeightDp)
-
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val scope = rememberCoroutineScope()
@@ -43,7 +41,7 @@ fun MainScreen() {
     var expandProgress by remember { mutableStateOf(0f) }
     var initialOffset by remember { mutableStateOf<Float?>(null) }
     val density = LocalDensity.current
-    //val peekHeightPx = with(density) { dimens.sheetPeekHeightDp.toPx() }
+    // val peekHeightPx = with(density) { dimens.sheetPeekHeightDp.toPx() }
     val peekHeightPx = with(density) { peekHeight.toPx() }
 
     val savedPage = rememberSaveable { mutableIntStateOf(0) }
@@ -89,8 +87,9 @@ fun MainScreen() {
         sheetShape = RectangleShape,
         sheetContent = {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
             ) {
                 // 背景播放器：展开时显示
                 playerScreen(
@@ -145,11 +144,11 @@ fun MainScreen() {
 
 @Composable
 fun rememberSheetPeekHeight(baseHeight: Dp): Dp {
-
     val density = LocalDensity.current
-    val navigationBarHeight = WindowInsets.navigationBars
-        .asPaddingValues()
-        .calculateBottomPadding()
+    val navigationBarHeight =
+        WindowInsets.navigationBars
+            .asPaddingValues()
+            .calculateBottomPadding()
 
     return baseHeight + navigationBarHeight
 }

@@ -69,9 +69,7 @@ class MainActivity : ComponentActivity() {
                     LocalAppDimens provides dimens,
                 ) {
                     Scaffold(modifier = Modifier.fillMaxSize()) {
-                        Box(
-                        ) { AllFilesPermissionScreen() }
-
+                        Box { AllFilesPermissionScreen() }
                     }
                 }
             }
