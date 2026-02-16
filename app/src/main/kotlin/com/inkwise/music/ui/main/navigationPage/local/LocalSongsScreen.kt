@@ -32,11 +32,7 @@ fun LocalSongsScreen(
     val playbackState by playerViewModel.playbackState.collectAsState()
     val songs by localViewModel.localSongs.collectAsState()
     val isScanning by localViewModel.isScanning.collectAsState()
-    // PullRefresh 状态
-    val pullState = rememberPullToRefreshState(
-        isRefreshing = isScanning,
-        onRefresh = { localViewModel.scanSongs(context) }
-    )
+    
     // 首次加载
     LaunchedEffect(Unit) {
         // localViewModel.loadLocalSongsFromStore()
