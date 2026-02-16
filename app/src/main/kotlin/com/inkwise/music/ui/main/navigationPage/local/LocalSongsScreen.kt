@@ -116,6 +116,18 @@ fun LocalSongsScreen(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
+            indicator = { state, trigger ->
+        if (state.progress > 0f || isScanning) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
