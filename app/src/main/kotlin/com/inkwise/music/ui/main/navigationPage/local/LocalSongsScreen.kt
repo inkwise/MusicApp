@@ -131,7 +131,7 @@ fun LocalSongsScreen(
             containerColor = Color.White, // 去掉背景
             contentColor = Color.Black      
         )*/
-        val pullIndicatorColor = Color.Black
+        val pullIndicatorColor = Color.Blue
 
 MaterialTheme(
     colorScheme = MaterialTheme.colorScheme.copy(primary = pullIndicatorColor)
