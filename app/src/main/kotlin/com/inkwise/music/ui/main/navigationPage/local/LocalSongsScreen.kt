@@ -117,7 +117,19 @@ fun LocalSongsScreen(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
-     
+     indicator = {
+        PullToRefreshDefaults.Indicator(
+            state = it,
+            isRefreshing = isScanning,
+            modifier = Modifier.align(Alignment.TopCenter),
+            // 将背景色设为透明
+            containerColor = Color.Transparent, 
+            // 将阴影高度设为 0dp
+            elevation = 0.dp,
+            // 如果需要，也可以修改进度条本身的颜色
+            color = MaterialTheme.colorScheme.primary 
+        )
+    }
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
