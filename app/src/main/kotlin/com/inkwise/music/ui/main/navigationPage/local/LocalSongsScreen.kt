@@ -126,7 +126,7 @@ fun LocalSongsScreen(
         state = pullToRefreshState,
         isRefreshing = isScanning,
         modifier = Modifier.align(Alignment.TopCenter),
-        containerColor = Color.White // 背景圆，可透明
+        containerColor = Color.White, // 背景圆，可透明
         color = Color.Blue
     )
 
