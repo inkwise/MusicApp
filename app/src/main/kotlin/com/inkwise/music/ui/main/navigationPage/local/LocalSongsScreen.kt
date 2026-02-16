@@ -130,7 +130,7 @@ fun LocalSongsScreen(
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.White, // 去掉背景
         )
-     
+     }
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
