@@ -50,10 +50,17 @@ fun LocalSongsScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "扫描",
-                style = MaterialTheme.typography.headlineMedium,
-            )
+            IconButton(
+                onClick = onMoreClick,
+                modifier = Modifier.size(22.dp),
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_player_random),
+                    contentDescription = "随机播放",
+                    tint = Color.Black,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
 
             if (songs.isNotEmpty()) {
                 FilledTonalButton(
@@ -66,7 +73,7 @@ fun LocalSongsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // 下拉刷新封装
         PullToRefreshBox(
