@@ -117,14 +117,7 @@ fun LocalSongsScreen(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
-            indicator = {
-        PullToRefreshDefaults.Indicator(
-            isRefreshing = isScanning,
-            containerColor = Color.Transparent,   // 去掉圆形背景
-            color = Color.Black,                  // 旋转图标颜色
-            state = rememberPullToRefreshState()
-        )
-    }
+     
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
