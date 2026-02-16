@@ -127,7 +127,7 @@ fun LocalSongsScreen(
             state = pullToRefreshState, 
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.Transparent, // 去掉背景
-            color = MaterialTheme.colorScheme.primary,
+            //color = MaterialTheme.colorScheme.primary,
             // 注意：如果这里还报错说需要 state，
             // 请查看下方“如果仍然报错”的部分
         )
