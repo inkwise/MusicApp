@@ -129,6 +129,7 @@ fun LocalSongsScreen(
             state = pullToRefreshState, 
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.White, // 去掉背景
+            contentColor = Color.Black      
         )
      }
         ) {
