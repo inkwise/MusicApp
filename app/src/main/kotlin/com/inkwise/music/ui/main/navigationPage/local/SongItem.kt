@@ -170,7 +170,7 @@ fun SongItem(
                 )*/
                 Box(
     modifier = Modifier
-        .size(24.dp) // 控制圆形大小
+        .size(18.dp) // 控制圆形大小
         .background(Color.White, CircleShape)
         .clickable { onMoreClick() },
     contentAlignment = Alignment.Center
@@ -179,7 +179,7 @@ fun SongItem(
         painter = painterResource(id = R.drawable.ic_add),
         contentDescription = "菜单",
         tint = Color.Black.copy(alpha = 0.5f),
-        modifier = Modifier.size(14.dp),
+        modifier = Modifier.size(12.dp),
     )
 }
             }
