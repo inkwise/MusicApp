@@ -117,16 +117,18 @@ fun LocalSongsScreen(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
-     indicator = { state ->  // 显式声明 state
-    PullToRefreshDefaults.Indicator(
-        state = state,
-        isRefreshing = isScanning,
-        modifier = Modifier.align(Alignment.TopCenter),
-        containerColor = Color.Transparent,
-        color = MaterialTheme.colorScheme.primary
-    )
-}
-
+     indicator = {
+        // 直接在这个作用域调用，不要写 state -> 
+        // 也不要手动传 state 参数
+        PullToRefreshDefaults.Indicator(
+            isRefreshing = isScanning,
+            modifier = Modifier.align(Alignment.TopCenter),
+            containerColor = Color.Transparent, // 去掉背景
+            color = MaterialTheme.colorScheme.primary,
+            // 注意：如果这里还报错说需要 state，
+            // 请查看下方“如果仍然报错”的部分
+        )
+    }
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
