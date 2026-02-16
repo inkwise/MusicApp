@@ -124,13 +124,25 @@ fun LocalSongsScreen(
         // 直接在这个作用域调用，不要写 state -> 
         // 也不要手动传 state 参数
         
-        PullToRefreshDefaults.Indicator(
+     /*   PullToRefreshDefaults.Indicator(
             isRefreshing = isScanning,
             state = pullToRefreshState, 
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.White, // 去掉背景
             contentColor = Color.Black      
-        )
+        )*/
+        val pullIndicatorColor = Color.Black
+
+MaterialTheme(
+    colorScheme = MaterialTheme.colorScheme.copy(primary = pullIndicatorColor)
+) {
+    PullToRefreshDefaults.Indicator(
+        state = pullToRefreshState,
+        isRefreshing = isScanning,
+        modifier = Modifier.align(Alignment.TopCenter),
+        containerColor = Color.White // 背景圆，可透明
+    )
+}
      }
         ) {
             if (isScanning && songs.isEmpty()) {
