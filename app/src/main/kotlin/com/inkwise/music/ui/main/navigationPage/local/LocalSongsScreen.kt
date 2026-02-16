@@ -117,7 +117,8 @@ fun LocalSongsScreen(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
-     indicator = {
+     indicator = {state ->
+
         // 注意：新版本直接调用，不需要 'it'
         PullToRefreshDefaults.Indicator(
             state = it, // 如果报错，请确认 Lambda 头部是否有 state ->
