@@ -84,8 +84,8 @@ fun LocalSongsScreen(
                 modifier = Modifier.size(24.dp),
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_player_random),
-                    contentDescription = "随机播放",
+                    painter = painterResource(id = R.drawable.ic_sort),
+                    contentDescription = "排序",
                     tint = Color.Black,
                     modifier = Modifier.size(22.dp),
                 )
@@ -95,8 +95,8 @@ fun LocalSongsScreen(
                 modifier = Modifier.size(24.dp),
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_player_random),
-                    contentDescription = "随机播放",
+                    painter = painterResource(id = R.drawable.ic_multiple_choice),
+                    contentDescription = "选择",
                     tint = Color.Black,
                     modifier = Modifier.size(22.dp),
                 )
