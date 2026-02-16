@@ -40,7 +40,6 @@ fun LocalSongsScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(16.dp),
     ) {
         Row(
             modifier =
