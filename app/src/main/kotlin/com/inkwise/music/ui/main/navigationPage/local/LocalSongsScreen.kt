@@ -160,23 +160,40 @@ fun LocalSongsScreen(
         }
     }*/
     indicator = {
-        PullToRefreshDefaults.Indicator(
-            state = pullToRefreshState,
-            isRefreshing = isScanning,
+        // 使用 Box 包裹，手动实现原版 Indicator 的缩放和位移逻辑
+        Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                // 核心黑科技：通过 graphicsLayer 确保容器内容（进度条）可见，
-                // 但由于 containerColor 已经是透明，shadowColor 也设为透明，背景圆圈就彻底隐身了
+                .padding(top = 16.dp)
+                // 模拟原版的缩放消失效果
                 .graphicsLayer {
-                    // 如果你觉得还有残影，可以在这里微调缩放或透明度
-                    alpha = 1f 
+                    val scale = if (isScanning) 1f else pullToRefreshState.distanceFraction.coerceIn(0f, 1f)
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = scale
                 },
-            containerColor = Color.Transparent, // 关键：背景透明
-            contentColor = MaterialTheme.colorScheme.primary, // 进度条颜色
-            shadowColor = Color.Transparent, // 必须：去掉阴影
-        )
+            contentAlignment = Alignment.Center
+        ) {
+            // 这里用最纯净的 CircularProgressIndicator
+            // 它没有背景，没有阴影，只有那个旋转的线
+            if (isScanning) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(28.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 3.dp
+                )
+            } else {
+                CircularProgressIndicator(
+                    // 绑定进度，实现随手指拉动而填充的效果
+                    progress = { pullToRefreshState.distanceFraction },
+                    modifier = Modifier.size(28.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 3.dp,
+                    trackColor = Color.Transparent // 确保轨道也是透明的
+                )
+            }
+        }
     }
-    
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
