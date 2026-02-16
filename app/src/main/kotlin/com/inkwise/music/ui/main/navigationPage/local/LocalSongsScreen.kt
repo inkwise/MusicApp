@@ -55,13 +55,13 @@ fun LocalSongsScreen(
         Row{
             IconButton(
                 onClick = {},
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(24.dp),
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_player_random),
                     contentDescription = "随机播放",
                     tint = Color.Black,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(22.dp),
                 )
             }
             Text(
@@ -76,6 +76,31 @@ fun LocalSongsScreen(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("播放全部")
                 }
+            }
+            
+            Row{
+                IconButton(
+                onClick = {},
+                modifier = Modifier.size(24.dp),
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_player_random),
+                    contentDescription = "随机播放",
+                    tint = Color.Black,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            IconButton(
+                onClick = {},
+                modifier = Modifier.size(24.dp),
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_player_random),
+                    contentDescription = "随机播放",
+                    tint = Color.Black,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
             }
         }
 
