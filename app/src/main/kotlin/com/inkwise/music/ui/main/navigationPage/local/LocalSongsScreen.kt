@@ -147,7 +147,7 @@ fun LocalSongsScreen(
             }
         }
     }
-    }
+    
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(
