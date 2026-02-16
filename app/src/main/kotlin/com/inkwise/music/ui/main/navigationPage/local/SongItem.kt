@@ -42,15 +42,7 @@ fun SongItem(
     onClick: () -> Unit,
     onMoreClick: () -> Unit,
 ) {
-    /*
-    Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable(onClick = onClick),
-    )
-     */
+    
     Box(
         modifier =
             Modifier
