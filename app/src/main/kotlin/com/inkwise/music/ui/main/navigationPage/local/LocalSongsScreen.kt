@@ -52,6 +52,7 @@ fun LocalSongsScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+        Row{
             IconButton(
                 onClick = {},
                 modifier = Modifier.size(22.dp),
@@ -65,7 +66,7 @@ fun LocalSongsScreen(
             }
             Text(
                 text = songs.size.toString()
-            )
+            )}
 
             if (songs.isNotEmpty()) {
                 FilledTonalButton(
