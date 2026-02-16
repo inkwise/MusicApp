@@ -2,7 +2,6 @@
 package com.inkwise.music.ui.main.navigationPage.home
 
 // 放在檔案最上面，其他 import 旁邊
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
