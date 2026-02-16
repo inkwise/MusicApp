@@ -36,7 +36,8 @@ import com.inkwise.music.ui.main.navigationPage.local.LocalSongsScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.painterResource
-
+import androidx.compose.ui.graphics.Color
+import com.inkwise.music.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationContent(
@@ -97,7 +98,7 @@ fun NavigationContent(
                         // 添加一个按钮来打开底部抽屉
                         IconButton(onClick = { viewModel.toggleBottomDrawer() }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_player_random),
+                                painter = painterResource(id = R.drawable.ic_search),
                                 contentDescription = "搜索",
                                 tint = Color.Black,
                                 modifier = Modifier.size(22.dp),
