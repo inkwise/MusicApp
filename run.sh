@@ -57,6 +57,6 @@ fi
 # Git 提交 & 推送
 git add .
 git commit -m "$COMMIT_MSG"
-#git push
+git push
 
 echo "🚀 已提交并推送：$COMMIT_MSG"
