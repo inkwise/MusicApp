@@ -51,7 +51,7 @@ fun LocalSongsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(
-                onClick = onMoreClick,
+                onClick = {},
                 modifier = Modifier.size(22.dp),
             ) {
                 Icon(
