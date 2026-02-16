@@ -32,7 +32,8 @@ fun LocalSongsScreen(
     val playbackState by playerViewModel.playbackState.collectAsState()
     val songs by localViewModel.localSongs.collectAsState()
     val isScanning by localViewModel.isScanning.collectAsState()
-    
+    val pullToRefreshState = rememberPullToRefreshState()
+
     // 首次加载
     LaunchedEffect(Unit) {
         // localViewModel.loadLocalSongsFromStore()
@@ -117,11 +118,13 @@ fun LocalSongsScreen(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
+            state = pullToRefreshState, 
      indicator = {
         // 直接在这个作用域调用，不要写 state -> 
         // 也不要手动传 state 参数
         PullToRefreshDefaults.Indicator(
             isRefreshing = isScanning,
+            state = pullToRefreshState, 
             modifier = Modifier.align(Alignment.TopCenter),
             containerColor = Color.Transparent, // 去掉背景
             color = MaterialTheme.colorScheme.primary,
