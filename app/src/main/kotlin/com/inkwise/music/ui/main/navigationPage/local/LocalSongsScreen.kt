@@ -65,6 +65,8 @@ fun LocalSongsScreen(
                     modifier = Modifier.size(22.dp),
                 )
             }
+            Spacer(modifier = Modifier.width(6.dp))
+
             Text(
                 text = songs.size.toString()
             )}
@@ -91,6 +93,8 @@ fun LocalSongsScreen(
                     modifier = Modifier.size(22.dp),
                 )
             }
+                        Spacer(modifier = Modifier.width(6.dp))
+
             IconButton(
                 onClick = {},
                 modifier = Modifier.size(24.dp),
