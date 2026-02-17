@@ -82,11 +82,11 @@ fun SongItem(
                             .bitmapConfig(Bitmap.Config.RGB_565)
                             .crossfade(false)
                             .build(),
-                    contentDescription = null,
+                    contentDescription = null, 
                     modifier = Modifier.size(50.dp),
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.ic_album_placeholder),
-                    error = painterResource(R.drawable.ic_album_placeholder)
+                    placeholder = painterResource(R.drawable.ic_song_cover),
+                    error = painterResource(R.drawable.ic_song_cover)
                 )
             }
 
