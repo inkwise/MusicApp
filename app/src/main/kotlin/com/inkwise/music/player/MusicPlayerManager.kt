@@ -202,6 +202,43 @@ object MusicPlayerManager {
     }
 }
 
+    fun setPlayQueueShuffle(songs: List<Song>) {
+    if (songs.isEmpty()) return
+
+    _playQueue.value = songs
+
+    val mediaItems = songs.map { song ->
+        MediaItem.Builder()
+            .setMediaId(song.id.toString())
+            .setUri(song.uri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artist)
+                    .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
+                    .build()
+            )
+            .build()
+    }
+
+    val randomIndex = (songs.indices).random()
+
+    mediaController?.apply {
+
+        // 1️⃣ 先开启 shuffle
+        shuffleModeEnabled = true
+
+        // 2️⃣ 设置列表循环（避免播完停止）
+        repeatMode = Player.REPEAT_MODE_ALL
+
+        // 3️⃣ 设置媒体列表
+        setMediaItems(mediaItems, randomIndex, 0)
+
+        prepare()
+        play()
+    }
+}
+
     // 添加歌曲到队列
     fun addToQueue(song: Song) {
         val currentQueue = _playQueue.value.toMutableList()
