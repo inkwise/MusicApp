@@ -137,6 +137,7 @@ object MusicPlayerManager {
     }
 
     // 切换随机播放
+    /*
     fun toggleShuffle() {
         mediaController?.let {
             it.shuffleModeEnabled = !it.shuffleModeEnabled
@@ -145,7 +146,7 @@ object MusicPlayerManager {
                     shuffleMode = it.shuffleModeEnabled,
                 )*/
         }
-    }
+    }*/
 
     // 切换循环模式
     fun toggleRepeatMode() {
