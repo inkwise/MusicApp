@@ -335,6 +335,21 @@ fun BottomDrawerContent(
                     modifier = Modifier.size(24.dp),
                 )
             }
+            // 循环模式按钮
+        IconButton(onClick = { viewModel.toggleRepeatMode() }) {
+            Icon(
+                imageVector = when (playbackState.repeatMode) {
+                    RepeatMode.ONE -> Icons.Default.RepeatOne
+                    RepeatMode.ALL -> Icons.Default.Repeat
+                    RepeatMode.OFF -> Icons.Default.Repeat
+                },
+                contentDescription = "循环模式",
+                tint = if (playbackState.repeatMode == RepeatMode.OFF)
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                else
+                    MaterialTheme.colorScheme.primary
+            )
+        }
             IconButton(onClick = { /* 定时逻辑 */ }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_sleep_timer),
