@@ -149,7 +149,7 @@ object MusicPlayerManager {
     }*/
  
     // 切换循环模式
-    fun toggleRepeatMode() {
+  /*  fun toggleRepeatMode() {
         mediaController?.let { controller ->
             val newMode =
                 when (controller.repeatMode) {
@@ -169,7 +169,37 @@ object MusicPlayerManager {
                         },
                 )
         }
+    }*/
+    fun togglePlayMode() {
+    mediaController?.let { controller ->
+
+        val newMode = when (_playbackState.value.playMode) {
+            PlayMode.LIST -> PlayMode.SINGLE
+            PlayMode.SINGLE -> PlayMode.SHUFFLE
+            PlayMode.SHUFFLE -> PlayMode.LIST
+        }
+
+        when (newMode) {
+            PlayMode.LIST -> {
+                controller.repeatMode = Player.REPEAT_MODE_ALL
+                controller.shuffleModeEnabled = false
+            }
+
+            PlayMode.SINGLE -> {
+                controller.repeatMode = Player.REPEAT_MODE_ONE
+                controller.shuffleModeEnabled = false
+            }
+
+            PlayMode.SHUFFLE -> {
+                controller.repeatMode = Player.REPEAT_MODE_ALL
+                controller.shuffleModeEnabled = true
+            }
+        }
+
+        _playbackState.value =
+            _playbackState.value.copy(playMode = newMode)
     }
+}
 
     // 添加歌曲到队列
     fun addToQueue(song: Song) {
