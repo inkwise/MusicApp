@@ -141,7 +141,7 @@ object MusicPlayerManager {
     fun toggleShuffle() {
         mediaController?.let {
             it.shuffleModeEnabled = !it.shuffleModeEnabled
-            /*_playbackState.value =
+            _playbackState.value =
                 _playbackState.value.copy(
                     shuffleMode = it.shuffleModeEnabled,
                 )
