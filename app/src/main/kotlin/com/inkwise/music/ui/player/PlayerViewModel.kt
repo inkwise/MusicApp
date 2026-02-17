@@ -135,9 +135,9 @@ class PlayerViewModel
         }
 
         // 切换随机播放
-        fun toggleShuffle() {
+       /* fun toggleShuffle() {
             MusicPlayerManager.toggleShuffle()
-        }
+        }*/
 
         // 切换循环模式
         fun toggleRepeatMode() {

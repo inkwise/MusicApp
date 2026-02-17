@@ -144,7 +144,7 @@ object MusicPlayerManager {
             /*_playbackState.value =
                 _playbackState.value.copy(
                     shuffleMode = it.shuffleModeEnabled,
-                )*/
+                )
         }
     }*/
 
