@@ -134,10 +134,10 @@ class PlayerViewModel
             MusicPlayerManager.seekTo(position)
         }
 
-        // 切换随机播放
-       /* fun toggleShuffle() {
-            MusicPlayerManager.toggleShuffle()
-        }*/
+        // 随机播放
+        fun playSongsShuffle(songs: List<Song>) {
+    MusicPlayerManager.setPlayQueueShuffle(songs)
+}
 
         // 切换循环模式
         fun togglePlayMode() {
