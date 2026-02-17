@@ -11,7 +11,8 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.inkwise.music.data.model.PlaybackState
-import com.inkwise.music.data.model.RepeatMode
+import com.inkwise.music.data.model.PlayMode
+
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.service.MusicService
 import kotlinx.coroutines.CoroutineScope
