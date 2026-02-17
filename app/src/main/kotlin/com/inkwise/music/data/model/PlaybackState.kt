@@ -10,8 +10,9 @@ data class PlaybackState(
     val shuffleMode: Boolean = false,
 )
 
-enum class RepeatMode {
-    OFF, // 不循环
-    ONE, // 单曲循环
-    ALL, // 列表循环
+
+enum class PlayMode {
+    LIST,      // 列表循环
+    SINGLE,    // 单曲循环
+    SHUFFLE    // 随机播放
 }
