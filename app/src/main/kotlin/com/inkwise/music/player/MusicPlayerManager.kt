@@ -260,7 +260,7 @@ object MusicPlayerManager {
         }
     }
 
-    private fun updatePlaybackState() {
+  /*  private fun updatePlaybackState() {
         mediaController?.let { controller ->
             val currentSong = _playQueue.value.getOrNull(controller.currentMediaItemIndex)
 
@@ -280,8 +280,31 @@ object MusicPlayerManager {
                     shuffleMode = controller.shuffleModeEnabled,
                 )
         }
-    }
+    }*/
+private fun updatePlaybackState() {
+    mediaController?.let { controller ->
 
+        val currentSong =
+            _playQueue.value.getOrNull(controller.currentMediaItemIndex)
+
+        // ⭐ 根据 controller 状态反推出 PlayMode
+        val playMode = when {
+            controller.shuffleModeEnabled -> PlayMode.SHUFFLE
+            controller.repeatMode == Player.REPEAT_MODE_ONE -> PlayMode.SINGLE
+            else -> PlayMode.LIST
+        }
+
+        _playbackState.value =
+            PlaybackState(
+                isPlaying = controller.isPlaying,
+                currentSong = currentSong,
+                currentPosition = controller.currentPosition,
+                duration = controller.duration.coerceAtLeast(0),
+                playbackSpeed = controller.playbackParameters.speed,
+                playMode = playMode
+            )
+    }
+}
     private fun startProgressUpdates() {
         if (progressJob != null) return
 
