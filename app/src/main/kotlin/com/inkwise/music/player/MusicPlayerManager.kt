@@ -147,7 +147,7 @@ object MusicPlayerManager {
                 )
         }
     }*/
-
+ 
     // 切换循环模式
     fun toggleRepeatMode() {
         mediaController?.let { controller ->
