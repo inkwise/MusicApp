@@ -56,7 +56,7 @@ import com.inkwise.music.data.model.LyricsSource
 import com.inkwise.music.ui.main.navigationPage.local.formatTime
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
-import com.inkwise.music.data.model.RepeatMode
+import com.inkwise.music.data.model.PlayMode
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
