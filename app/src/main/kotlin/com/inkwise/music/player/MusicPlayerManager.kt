@@ -260,7 +260,7 @@ object MusicPlayerManager {
         }
     }
 
-    private fun updatePlaybackState() {
+/*    private fun updatePlaybackState() {
         mediaController?.let { controller ->
             val currentSong = _playQueue.value.getOrNull(controller.currentMediaItemIndex)
 
@@ -280,7 +280,7 @@ object MusicPlayerManager {
                     shuffleMode = controller.shuffleModeEnabled,
                 )
         }
-    }
+    }*/
 
     private fun startProgressUpdates() {
         if (progressJob != null) return
