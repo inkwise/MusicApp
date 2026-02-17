@@ -303,7 +303,7 @@ fun BottomDrawerContent(
                                 },
                         ),
                     null,
-                    modifier = Modifier.size(38.dp),
+                    modifier = Modifier.size(32.dp),
                     tint = animatedThemeColor,
                 )
             }
