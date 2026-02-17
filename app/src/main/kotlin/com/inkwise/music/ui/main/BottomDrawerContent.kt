@@ -56,6 +56,7 @@ import com.inkwise.music.data.model.LyricsSource
 import com.inkwise.music.ui.main.navigationPage.local.formatTime
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
+import com.inkwise.music.data.model.RepeatMode
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -336,10 +337,10 @@ fun BottomDrawerContent(
                 )
             }
             // 循环模式按钮
-        IconButton(onClick = { viewModel.toggleRepeatMode() }) {
+        IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
             Icon(
-                imageVector = when (playbackState.repeatMode) {
-                    RepeatMode.ONE -> Icons.Default.RepeatOne
+                painter = when (playbackState.repeatMode) {
+                    RepeatMode.ONE -> painterResource(id = R.drawable.ic_player_circle)
                     RepeatMode.ALL -> Icons.Default.Repeat
                     RepeatMode.OFF -> Icons.Default.Repeat
                 },
