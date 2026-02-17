@@ -331,9 +331,9 @@ fun BottomDrawerContent(
             IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
                 Icon(
                     painter = when (playbackState.repeatMode) {
-                    RepeatMode.ONE -> painterResource(id = R.drawable.ic_player_repeat_one)
-                    RepeatMode.ALL -> painterResource(id = R.drawable.ic_player_circle)
-                    RepeatMode.OFF -> painterResource(id = R.drawable.ic_player_random)
+                    PlayMode.LIST -> painterResource(id = R.drawable.ic_player_repeat_one)
+                    PlayMode.SINGLE -> painterResource(id = R.drawable.ic_player_circle)
+                    PlayMode.SHUFFLE -> painterResource(id = R.drawable.ic_player_random)
                 },
                     contentDescription = "播放模式",
                     tint = animatedThemeColor,
