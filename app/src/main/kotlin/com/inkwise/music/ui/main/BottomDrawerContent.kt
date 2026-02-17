@@ -341,8 +341,8 @@ fun BottomDrawerContent(
             Icon(
                 painter = when (playbackState.repeatMode) {
                     RepeatMode.ONE -> painterResource(id = R.drawable.ic_player_repeat_one)
-                    RepeatMode.ALL -> painterResource(id = R.drawable.ic_player_repeat_one)
-                    RepeatMode.OFF -> painterResource(id = R.drawable.ic_player_repeat_one)
+                    RepeatMode.ALL -> painterResource(id = R.drawable.ic_player_circle)
+                    RepeatMode.OFF -> painterResource(id = R.drawable.ic_player_random)
                 },
                 contentDescription = "循环模式",
                 tint = if (playbackState.repeatMode == RepeatMode.OFF)
