@@ -140,8 +140,8 @@ class PlayerViewModel
         }*/
 
         // 切换循环模式
-        fun toggleRepeatMode() {
-            MusicPlayerManager.toggleRepeatMode()
+        fun togglePlayMode() {
+            MusicPlayerManager.togglePlayMode()
         }
 
         // 添加到播放队列
