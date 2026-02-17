@@ -73,16 +73,7 @@ fun LocalSongsScreen(
                 text = songs.size.toString()
             )}
 
-        /*    if (songs.isNotEmpty()) {
-                FilledTonalButton(
-                    onClick = { playerViewModel.playSongs(songs) },
-                ) {
-                    Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("播放全部")
-                }
-            }*/
-            
+        
             Row{
                 IconButton(
                 onClick = {},
