@@ -330,7 +330,7 @@ fun BottomDrawerContent(
         ) {
             IconButton(onClick = { playerViewModel.togglePlayMode() }) {
                 Icon(
-                    painter = when (playbackState.repeatMode) {
+                    painter = when (playbackState.playMode) {
                     PlayMode.LIST -> painterResource(id = R.drawable.ic_player_circle)
                     PlayMode.SINGLE -> painterResource(id = R.drawable.ic_player_repeat_one)
                     PlayMode.SHUFFLE -> painterResource(id = R.drawable.ic_player_random)
