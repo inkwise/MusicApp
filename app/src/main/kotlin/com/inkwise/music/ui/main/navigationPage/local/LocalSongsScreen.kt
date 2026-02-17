@@ -57,7 +57,7 @@ fun LocalSongsScreen(
         ) {
         Row{
             IconButton(
-                onClick = {},
+                onClick = { playerViewModel.playSongsShuffle(songs)},
                 modifier = Modifier.size(24.dp),
             ) {
                 Icon(
