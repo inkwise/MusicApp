@@ -330,27 +330,18 @@ fun BottomDrawerContent(
         ) {
             IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_player_circle),
+                    painter = when (playbackState.repeatMode) {
+                    RepeatMode.ONE -> painterResource(id = R.drawable.ic_player_repeat_one)
+                    RepeatMode.ALL -> painterResource(id = R.drawable.ic_player_circle)
+                    RepeatMode.OFF -> painterResource(id = R.drawable.ic_player_random)
+                },
                     contentDescription = "播放模式",
                     tint = animatedThemeColor,
                     modifier = Modifier.size(24.dp),
                 )
             }
             // 循环模式按钮
-        IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
-            Icon(
-                painter = when (playbackState.repeatMode) {
-                    RepeatMode.ONE -> painterResource(id = R.drawable.ic_player_repeat_one)
-                    RepeatMode.ALL -> painterResource(id = R.drawable.ic_player_circle)
-                    RepeatMode.OFF -> painterResource(id = R.drawable.ic_player_random)
-                },
-                contentDescription = "循环模式",
-                tint = if (playbackState.repeatMode == RepeatMode.OFF)
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                else
-                    MaterialTheme.colorScheme.primary
-            )
-        }
+        
             IconButton(onClick = { /* 定时逻辑 */ }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_sleep_timer),
