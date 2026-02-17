@@ -340,9 +340,9 @@ fun BottomDrawerContent(
         IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
             Icon(
                 painter = when (playbackState.repeatMode) {
-                    RepeatMode.ONE -> painterResource(id = R.drawable.ic_player_circle)
-                    RepeatMode.ALL -> Icons.Default.Repeat
-                    RepeatMode.OFF -> Icons.Default.Repeat
+                    RepeatMode.ONE -> painterResource(id = R.drawable.ic_player_repeat_one)
+                    RepeatMode.ALL -> painterResource(id = R.drawable.ic_player_repeat_one)
+                    RepeatMode.OFF -> painterResource(id = R.drawable.ic_player_repeat_one)
                 },
                 contentDescription = "循环模式",
                 tint = if (playbackState.repeatMode == RepeatMode.OFF)
