@@ -328,7 +328,7 @@ fun BottomDrawerContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            IconButton(onClick = { playerViewModel.toggleRepeatMode() }) {
+            IconButton(onClick = { playerViewModel.togglePlayMode() }) {
                 Icon(
                     painter = when (playbackState.repeatMode) {
                     PlayMode.LIST -> painterResource(id = R.drawable.ic_player_circle)
