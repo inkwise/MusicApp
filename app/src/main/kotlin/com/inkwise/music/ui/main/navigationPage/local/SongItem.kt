@@ -155,7 +155,7 @@ fun SongItem(
                     modifier =
                         Modifier
                             .size(12.dp) // 控制圆形大小
-                            .background(Color.White, CircleShape)
+                            .background(Color.White, CircleShape),
                        
                     contentAlignment = Alignment.Center,
                 ) {
