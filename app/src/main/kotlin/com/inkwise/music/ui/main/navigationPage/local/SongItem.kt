@@ -156,7 +156,7 @@ fun SongItem(
                         Modifier
                             .size(12.dp) // 控制圆形大小
                             .background(Color.White, CircleShape)
-                            .clickable { onMoreClick() },
+                       
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -168,7 +168,7 @@ fun SongItem(
                 }
             }
             IconButton(
-                onClick = onMoreClick,
+                onClick = addToQueue,
                 modifier = Modifier.size(22.dp),
             ) {
                 Icon(
