@@ -40,7 +40,7 @@ fun SongItem(
     song: Song,
     isPlaying: Boolean,
     onClick: () -> Unit,
-    onMoreClick: () -> Unit,
+    addToQueue:()->Unit,
 ) {
     
     Box(
@@ -145,7 +145,7 @@ fun SongItem(
             }
 
             IconButton(
-                onClick = onMoreClick,
+                onClick = addToQueue,
                 modifier =
                     Modifier
                         .size(22.dp), // 整体按钮尺寸

@@ -137,7 +137,7 @@ fun LocalSongsScreen(
                             song = song,
                             isPlaying = playbackState.currentSong?.localId == song.localId,
                             onClick = { playerViewModel.playSongs(songs, index) },
-                            onMoreClick = { /* 更多操作 */ },
+                            addToQueue = { playerViewModel.addToQueue(song) },
                         )
                     }
                 }
