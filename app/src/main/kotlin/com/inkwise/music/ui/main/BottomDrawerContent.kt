@@ -82,7 +82,7 @@ fun BottomDrawerContent(
         
     val context = LocalContext.current
     //定时器
-    val sleepRemaining by viewModel.sleepRemaining.collectAsState()
+    val sleepRemaining by playerViewModel.sleepRemaining.collectAsState()
     
     Column(
         modifier =
