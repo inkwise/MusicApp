@@ -350,7 +350,7 @@ fun BottomDrawerContent(
                 )
             }
             // 循环模式按钮
-        
+            Column{
             IconButton(onClick = { showSleepSheet = true }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_sleep_timer),
@@ -358,6 +358,18 @@ fun BottomDrawerContent(
                     tint = animatedThemeColor,
                     modifier = Modifier.size(24.dp),
                 )
+            }
+            sleepRemaining?.let { millis ->
+
+    val totalSeconds = millis / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+
+    Text(
+        text = "剩余 ${minutes}分${seconds}秒",
+        style = MaterialTheme.typography.bodyMedium
+    )
+}
             }
 
             IconButton(onClick = { /* 音效 */ }) {
