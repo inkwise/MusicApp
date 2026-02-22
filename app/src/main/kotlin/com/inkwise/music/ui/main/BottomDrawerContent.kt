@@ -81,7 +81,8 @@ fun BottomDrawerContent(
         )
         
     val context = LocalContext.current
-    
+    //定时器
+    val sleepRemaining by viewModel.sleepRemaining.collectAsState()
     
     Column(
         modifier =
