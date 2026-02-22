@@ -46,7 +46,9 @@ class PlayerViewModel
         private val _lyricsState = MutableStateFlow(LyricsUiState())
         val lyricsState: StateFlow<LyricsUiState> = _lyricsState.asStateFlow()
         private var synchronizer: LyricsSynchronizer? = null
-        
+        //定时器时间
+        val sleepRemaining: StateFlow<Long?> =
+    MusicPlayerManager.sleepRemaining
         // 当前歌曲对象
         val currentSong: StateFlow<Song?> =
             combine(playQueue, currentIndex) { queue, index ->
