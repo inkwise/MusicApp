@@ -47,8 +47,7 @@ fun HomeScreen(
     Column(
         modifier =
             Modifier
-                .fillMaxSize()
-                
+                .fillMaxSize(),
     ) {
         // 本地 & 云端按钮横向排列
         Row(

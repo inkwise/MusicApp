@@ -1,9 +1,6 @@
 package com.inkwise.music.ui.main
 
-
 import android.app.Activity
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.material3.*
 import android.widget.ImageView
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
@@ -27,6 +24,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,10 +56,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.Glide
 import com.inkwise.music.R
 import com.inkwise.music.data.model.LyricsSource
+import com.inkwise.music.data.model.PlayMode
 import com.inkwise.music.ui.main.navigationPage.local.formatTime
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
-import com.inkwise.music.data.model.PlayMode
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -79,11 +78,11 @@ fun BottomDrawerContent(
         rememberPagerState(
             pageCount = { pageCount },
         )
-        
+
     val context = LocalContext.current
-    //定时器
+    // 定时器
     val sleepRemaining by playerViewModel.sleepRemaining.collectAsState()
-    
+
     Column(
         modifier =
             Modifier
@@ -339,37 +338,38 @@ fun BottomDrawerContent(
         ) {
             IconButton(onClick = { playerViewModel.togglePlayMode() }) {
                 Icon(
-                    painter = when (playbackState.playMode) {
-                    PlayMode.LIST -> painterResource(id = R.drawable.ic_player_circle)
-                    PlayMode.SINGLE -> painterResource(id = R.drawable.ic_player_repeat_one)
-                    PlayMode.SHUFFLE -> painterResource(id = R.drawable.ic_player_random)
-                },
+                    painter =
+                        when (playbackState.playMode) {
+                            PlayMode.LIST -> painterResource(id = R.drawable.ic_player_circle)
+                            PlayMode.SINGLE -> painterResource(id = R.drawable.ic_player_repeat_one)
+                            PlayMode.SHUFFLE -> painterResource(id = R.drawable.ic_player_random)
+                        },
                     contentDescription = "播放模式",
                     tint = animatedThemeColor,
                     modifier = Modifier.size(24.dp),
                 )
             }
             // 循环模式按钮
-            Column{
-            IconButton(onClick = { showSleepSheet = true }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_sleep_timer),
-                    contentDescription = "定时",
-                    tint = animatedThemeColor,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-            sleepRemaining?.let { millis ->
+            Column {
+                IconButton(onClick = { showSleepSheet = true }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_sleep_timer),
+                        contentDescription = "定时",
+                        tint = animatedThemeColor,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+                sleepRemaining?.let { millis ->
 
-    val totalSeconds = millis / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
+                    val totalSeconds = millis / 1000
+                    val minutes = totalSeconds / 60
+                    val seconds = totalSeconds % 60
 
-    Text(
-        text = "剩余 ${minutes}分${seconds}秒",
-        style = MaterialTheme.typography.bodyMedium
-    )
-}
+                    Text(
+                        text = "剩余 ${minutes}分${seconds}秒",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
 
             IconButton(onClick = { /* 音效 */ }) {
@@ -402,21 +402,21 @@ fun BottomDrawerContent(
             }
         }
     }
-    
+
     if (showSleepSheet) {
-    SleepTimerBottomSheet(
-        onDismiss = { showSleepSheet = false },
-        onConfirm = { minutes, stopAfterSong ->
-            playerViewModel.startSleepTimer(
-        minutes = minutes,
-        stopAfterSong = stopAfterSong
-    ) {
-        (context as? Activity)?.finishAffinity()
+        SleepTimerBottomSheet(
+            onDismiss = { showSleepSheet = false },
+            onConfirm = { minutes, stopAfterSong ->
+                playerViewModel.startSleepTimer(
+                    minutes = minutes,
+                    stopAfterSong = stopAfterSong,
+                ) {
+                    (context as? Activity)?.finishAffinity()
+                }
+                showSleepSheet = false
+            },
+        )
     }
-            showSleepSheet = false
-        }
-    )
-}
 }
 
 @Composable
@@ -507,30 +507,30 @@ fun LyricsPage(
 @Composable
 fun SleepTimerBottomSheet(
     onDismiss: () -> Unit,
-    onConfirm: (Int, Boolean) -> Unit
+    onConfirm: (Int, Boolean) -> Unit,
 ) {
     var minutes by remember { mutableStateOf(30f) }
     var stopAfterSong by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
         ) {
-
             Text(
                 text = "睡眠定时",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = "${minutes.toInt()} 分钟",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -539,17 +539,17 @@ fun SleepTimerBottomSheet(
                 value = minutes,
                 onValueChange = { minutes = it },
                 valueRange = 0f..120f,
-                steps = 119
+                steps = 119,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Switch(
                     checked = stopAfterSong,
-                    onCheckedChange = { stopAfterSong = it }
+                    onCheckedChange = { stopAfterSong = it },
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -561,9 +561,8 @@ fun SleepTimerBottomSheet(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
             ) {
-
                 TextButton(onClick = onDismiss) {
                     Text("取消")
                 }
@@ -574,7 +573,7 @@ fun SleepTimerBottomSheet(
                     onClick = {
                         onConfirm(minutes.toInt(), stopAfterSong)
                     },
-                    enabled = minutes > 0
+                    enabled = minutes > 0,
                 ) {
                     Text("确定")
                 }

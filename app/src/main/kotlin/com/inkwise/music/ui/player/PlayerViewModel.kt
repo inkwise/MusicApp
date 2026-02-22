@@ -1,7 +1,5 @@
 package com.inkwise.music.ui.player
 
-import com.inkwise.music.data.model.SleepMode
-
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +10,7 @@ import com.inkwise.music.data.model.Lyrics
 import com.inkwise.music.data.model.LyricsSource
 import com.inkwise.music.data.model.LyricsUiState
 import com.inkwise.music.data.model.PlaybackState
+import com.inkwise.music.data.model.SleepMode
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.data.repository.LyricsRepository
 import com.inkwise.music.data.repository.MusicRepository
@@ -46,9 +45,11 @@ class PlayerViewModel
         private val _lyricsState = MutableStateFlow(LyricsUiState())
         val lyricsState: StateFlow<LyricsUiState> = _lyricsState.asStateFlow()
         private var synchronizer: LyricsSynchronizer? = null
-        //定时器时间
+
+        // 定时器时间
         val sleepRemaining: StateFlow<Long?> =
-    MusicPlayerManager.sleepRemaining
+            MusicPlayerManager.sleepRemaining
+
         // 当前歌曲对象
         val currentSong: StateFlow<Song?> =
             combine(playQueue, currentIndex) { queue, index ->
@@ -58,7 +59,7 @@ class PlayerViewModel
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = null,
             )
-    
+
         init {
             observeCurrentSong()
             observePlayback()
@@ -140,8 +141,8 @@ class PlayerViewModel
 
         // 随机播放
         fun playSongsShuffle(songs: List<Song>) {
-    MusicPlayerManager.setPlayQueueShuffle(songs)
-}
+            MusicPlayerManager.setPlayQueueShuffle(songs)
+        }
 
         // 切换循环模式
         fun togglePlayMode() {
@@ -162,31 +163,30 @@ class PlayerViewModel
             super.onCleared()
             // MusicPlayerManager.release()
         }
-        
+
         fun startSleepTimer(
-    minutes: Int,
-    stopAfterSong: Boolean,
-    onExitApp: () -> Unit
-) {
-    val mode =
-        if (stopAfterSong)
-            SleepMode.STOP_AFTER_SONG
-        else
-            SleepMode.STOP_IMMEDIATELY
+            minutes: Int,
+            stopAfterSong: Boolean,
+            onExitApp: () -> Unit,
+        ) {
+            val mode =
+                if (stopAfterSong) {
+                    SleepMode.STOP_AFTER_SONG
+                } else {
+                    SleepMode.STOP_IMMEDIATELY
+                }
 
-    MusicPlayerManager.startSleepTimer(
-        durationMillis = minutes * 60 * 1000L,
-        mode = mode,
-        onExitApp = onExitApp
-    )
-}
+            MusicPlayerManager.startSleepTimer(
+                durationMillis = minutes * 60 * 1000L,
+                mode = mode,
+                onExitApp = onExitApp,
+            )
+        }
 
-fun cancelSleepTimer() {
-    MusicPlayerManager.cancelSleepTimer()
-}
+        fun cancelSleepTimer() {
+            MusicPlayerManager.cancelSleepTimer()
+        }
     }
-    
-    
 
 data class PlayerUiState(
     val localSongs: List<Song> = emptyList(),

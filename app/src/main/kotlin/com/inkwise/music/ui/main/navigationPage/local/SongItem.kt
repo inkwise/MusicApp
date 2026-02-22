@@ -40,9 +40,8 @@ fun SongItem(
     song: Song,
     isPlaying: Boolean,
     onClick: () -> Unit,
-    addToQueue:()->Unit,
+    addToQueue: () -> Unit,
 ) {
-    
     Box(
         modifier =
             Modifier
@@ -82,11 +81,11 @@ fun SongItem(
                             .bitmapConfig(Bitmap.Config.RGB_565)
                             .crossfade(false)
                             .build(),
-                    contentDescription = null, 
+                    contentDescription = null,
                     modifier = Modifier.size(50.dp),
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(R.drawable.ic_song_cover),
-                    error = painterResource(R.drawable.ic_song_cover)
+                    error = painterResource(R.drawable.ic_song_cover),
                 )
             }
 
@@ -108,7 +107,6 @@ fun SongItem(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    
                     AudioQualityIcon(
                         sampleRate = song.sampleRate,
                         bitDepth = song.bitDepth,
@@ -150,13 +148,11 @@ fun SongItem(
                     Modifier
                         .size(22.dp), // 整体按钮尺寸
             ) {
-            
                 Box(
                     modifier =
                         Modifier
                             .size(12.dp) // 控制圆形大小
                             .background(Color.White, CircleShape),
-                       
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(

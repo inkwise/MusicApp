@@ -22,6 +22,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.graphics.Color
 import com.inkwise.music.R
 import androidx.compose.ui.res.painterResource
+
 @Composable
 fun LocalSongsScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
@@ -43,7 +44,7 @@ fun LocalSongsScreen(
     Column(
         modifier =
             Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
     ) {
         Row(
             modifier =
@@ -54,50 +55,50 @@ fun LocalSongsScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-        Row{
-            IconButton(
-                onClick = { playerViewModel.playSongsShuffle(songs)},
-                modifier = Modifier.size(24.dp),
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_player_random),
-                    contentDescription = "随机播放",
-                    tint = Color.Black,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
-            Spacer(modifier = Modifier.width(6.dp))
-
-            Text(
-                text = songs.size.toString()
-            )}
-
-        
-            Row{
+            Row {
                 IconButton(
-                onClick = {},
-                modifier = Modifier.size(24.dp),
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_sort),
-                    contentDescription = "排序",
-                    tint = Color.Black,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
-                        Spacer(modifier = Modifier.width(6.dp))
+                    onClick = { playerViewModel.playSongsShuffle(songs) },
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_player_random),
+                        contentDescription = "随机播放",
+                        tint = Color.Black,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
 
-            IconButton(
-                onClick = {},
-                modifier = Modifier.size(24.dp),
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_multiple_choice),
-                    contentDescription = "选择",
-                    tint = Color.Black,
-                    modifier = Modifier.size(22.dp),
+                Text(
+                    text = songs.size.toString(),
                 )
             }
+
+            Row {
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_sort),
+                        contentDescription = "排序",
+                        tint = Color.Black,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_multiple_choice),
+                        contentDescription = "选择",
+                        tint = Color.Black,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
             }
         }
 
@@ -108,19 +109,16 @@ fun LocalSongsScreen(
             isRefreshing = isScanning,
             onRefresh = { localViewModel.scanSongs(context) },
             modifier = Modifier.fillMaxSize(),
-            state = pullToRefreshState, 
-            
-     indicator = {
-  
-    PullToRefreshDefaults.Indicator(
-        state = pullToRefreshState,
-        isRefreshing = isScanning,
-        modifier = Modifier.align(Alignment.TopCenter),
-        containerColor = Color.White, // 背景圆，可透明
-        color = Color.Blue
-    )
-
-     }
+            state = pullToRefreshState,
+            indicator = {
+                PullToRefreshDefaults.Indicator(
+                    state = pullToRefreshState,
+                    isRefreshing = isScanning,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    containerColor = Color.White, // 背景圆，可透明
+                    color = Color.Blue,
+                )
+            },
         ) {
             if (isScanning && songs.isEmpty()) {
                 Box(

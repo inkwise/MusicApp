@@ -10,8 +10,8 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import com.inkwise.music.data.model.PlaybackState
 import com.inkwise.music.data.model.PlayMode
+import com.inkwise.music.data.model.PlaybackState
 import com.inkwise.music.data.model.SleepMode
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.service.MusicService
@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-
 
 object MusicPlayerManager {
     // 进度条协程
@@ -50,10 +49,11 @@ object MusicPlayerManager {
     private var sleepJob: Job? = null
     private var sleepMode: SleepMode = SleepMode.STOP_IMMEDIATELY
     private var exitAppCallback: (() -> Unit)? = null
-    //定时器剩余时间
-        private val _sleepRemaining = MutableStateFlow<Long?>(null)
-        val sleepRemaining: StateFlow<Long?> = _sleepRemaining
-            
+
+    // 定时器剩余时间
+    private val _sleepRemaining = MutableStateFlow<Long?>(null)
+    val sleepRemaining: StateFlow<Long?> = _sleepRemaining
+
     fun init(context: Context) {
         if (!::appContext.isInitialized) {
             appContext = context.applicationContext
@@ -74,63 +74,65 @@ object MusicPlayerManager {
             mediaController?.addListener(PlayerListener())
         }, MoreExecutors.directExecutor())
     }
-    
-fun startSleepTimer(
-    durationMillis: Long,
-    mode: SleepMode,
-    onExitApp: () -> Unit
-) {
-    cancelSleepTimer()
 
-    sleepMode = mode
-    exitAppCallback = onExitApp
+    fun startSleepTimer(
+        durationMillis: Long,
+        mode: SleepMode,
+        onExitApp: () -> Unit,
+    ) {
+        cancelSleepTimer()
 
-    sleepJob = scope.launch {
+        sleepMode = mode
+        exitAppCallback = onExitApp
 
-        var remaining = durationMillis
-        _sleepRemaining.value = remaining
+        sleepJob =
+            scope.launch {
+                var remaining = durationMillis
+                _sleepRemaining.value = remaining
 
-        while (remaining > 0) {
-            delay(1000)
-            remaining -= 1000
-            _sleepRemaining.value = remaining
-        }
+                while (remaining > 0) {
+                    delay(1000)
+                    remaining -= 1000
+                    _sleepRemaining.value = remaining
+                }
 
-        _sleepRemaining.value = null  // 定时结束后清空
+                _sleepRemaining.value = null // 定时结束后清空
 
-        when (sleepMode) {
-            SleepMode.STOP_IMMEDIATELY -> stopAndExit()
-            SleepMode.STOP_AFTER_SONG -> waitForSongFinishThenExit()
-        }
+                when (sleepMode) {
+                    SleepMode.STOP_IMMEDIATELY -> stopAndExit()
+                    SleepMode.STOP_AFTER_SONG -> waitForSongFinishThenExit()
+                }
+            }
     }
-}    
+
     private suspend fun waitForSongFinishThenExit() {
-    val controller = mediaController ?: return
+        val controller = mediaController ?: return
 
-    while (true) {
-        val remaining =
-            controller.duration - controller.currentPosition
+        while (true) {
+            val remaining =
+                controller.duration - controller.currentPosition
 
-        if (remaining <= 1000) {
-            break
+            if (remaining <= 1000) {
+                break
+            }
+
+            delay(1000)
         }
 
-        delay(1000)
+        stopAndExit()
     }
-
-    stopAndExit()
-}
 
     private fun stopAndExit() {
-    mediaController?.stop()
-    exitAppCallback?.invoke()
-}
- 
-fun cancelSleepTimer() {
-    sleepJob?.cancel()
-    sleepJob = null
-    _sleepRemaining.value = null
-}
+        mediaController?.stop()
+        exitAppCallback?.invoke()
+    }
+
+    fun cancelSleepTimer() {
+        sleepJob?.cancel()
+        sleepJob = null
+        _sleepRemaining.value = null
+    }
+
     // 设置播放队列
     fun setPlayQueue(
         songs: List<Song>,
@@ -213,7 +215,7 @@ fun cancelSleepTimer() {
                 )
         }
     }*/
- 
+
     // 切换循环模式
   /*  fun toggleRepeatMode() {
         mediaController?.let { controller ->
@@ -237,72 +239,74 @@ fun cancelSleepTimer() {
         }
     }*/
     fun togglePlayMode() {
-    mediaController?.let { controller ->
+        mediaController?.let { controller ->
 
-        val newMode = when (_playbackState.value.playMode) {
-            PlayMode.LIST -> PlayMode.SINGLE
-            PlayMode.SINGLE -> PlayMode.SHUFFLE
-            PlayMode.SHUFFLE -> PlayMode.LIST
+            val newMode =
+                when (_playbackState.value.playMode) {
+                    PlayMode.LIST -> PlayMode.SINGLE
+                    PlayMode.SINGLE -> PlayMode.SHUFFLE
+                    PlayMode.SHUFFLE -> PlayMode.LIST
+                }
+
+            when (newMode) {
+                PlayMode.LIST -> {
+                    controller.repeatMode = Player.REPEAT_MODE_ALL
+                    controller.shuffleModeEnabled = false
+                }
+
+                PlayMode.SINGLE -> {
+                    controller.repeatMode = Player.REPEAT_MODE_ONE
+                    controller.shuffleModeEnabled = false
+                }
+
+                PlayMode.SHUFFLE -> {
+                    controller.repeatMode = Player.REPEAT_MODE_ALL
+                    controller.shuffleModeEnabled = true
+                }
+            }
+
+            _playbackState.value =
+                _playbackState.value.copy(playMode = newMode)
         }
-
-        when (newMode) {
-            PlayMode.LIST -> {
-                controller.repeatMode = Player.REPEAT_MODE_ALL
-                controller.shuffleModeEnabled = false
-            }
-
-            PlayMode.SINGLE -> {
-                controller.repeatMode = Player.REPEAT_MODE_ONE
-                controller.shuffleModeEnabled = false
-            }
-
-            PlayMode.SHUFFLE -> {
-                controller.repeatMode = Player.REPEAT_MODE_ALL
-                controller.shuffleModeEnabled = true
-            }
-        }
-
-        _playbackState.value =
-            _playbackState.value.copy(playMode = newMode)
     }
-}
 
     fun setPlayQueueShuffle(songs: List<Song>) {
-    if (songs.isEmpty()) return
+        if (songs.isEmpty()) return
 
-    _playQueue.value = songs
+        _playQueue.value = songs
 
-    val mediaItems = songs.map { song ->
-        MediaItem.Builder()
-            .setMediaId(song.id.toString())
-            .setUri(song.uri)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.title)
-                    .setArtist(song.artist)
-                    .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
-                    .build()
-            )
-            .build()
+        val mediaItems =
+            songs.map { song ->
+                MediaItem
+                    .Builder()
+                    .setMediaId(song.id.toString())
+                    .setUri(song.uri)
+                    .setMediaMetadata(
+                        MediaMetadata
+                            .Builder()
+                            .setTitle(song.title)
+                            .setArtist(song.artist)
+                            .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
+                            .build(),
+                    ).build()
+            }
+
+        val randomIndex = (songs.indices).random()
+
+        mediaController?.apply {
+            // 1️⃣ 先开启 shuffle
+            shuffleModeEnabled = true
+
+            // 2️⃣ 设置列表循环（避免播完停止）
+            repeatMode = Player.REPEAT_MODE_ALL
+
+            // 3️⃣ 设置媒体列表
+            setMediaItems(mediaItems, randomIndex, 0)
+
+            prepare()
+            play()
+        }
     }
-
-    val randomIndex = (songs.indices).random()
-
-    mediaController?.apply {
-
-        // 1️⃣ 先开启 shuffle
-        shuffleModeEnabled = true
-
-        // 2️⃣ 设置列表循环（避免播完停止）
-        repeatMode = Player.REPEAT_MODE_ALL
-
-        // 3️⃣ 设置媒体列表
-        setMediaItems(mediaItems, randomIndex, 0)
-
-        prepare()
-        play()
-    }
-}
 
     // 添加歌曲到队列
     fun addToQueue(song: Song) {
@@ -383,30 +387,32 @@ fun cancelSleepTimer() {
                 )
         }
     }*/
-private fun updatePlaybackState() {
-    mediaController?.let { controller ->
+    private fun updatePlaybackState() {
+        mediaController?.let { controller ->
 
-        val currentSong =
-            _playQueue.value.getOrNull(controller.currentMediaItemIndex)
+            val currentSong =
+                _playQueue.value.getOrNull(controller.currentMediaItemIndex)
 
-        // ⭐ 根据 controller 状态反推出 PlayMode
-        val playMode = when {
-            controller.shuffleModeEnabled -> PlayMode.SHUFFLE
-            controller.repeatMode == Player.REPEAT_MODE_ONE -> PlayMode.SINGLE
-            else -> PlayMode.LIST
+            // ⭐ 根据 controller 状态反推出 PlayMode
+            val playMode =
+                when {
+                    controller.shuffleModeEnabled -> PlayMode.SHUFFLE
+                    controller.repeatMode == Player.REPEAT_MODE_ONE -> PlayMode.SINGLE
+                    else -> PlayMode.LIST
+                }
+
+            _playbackState.value =
+                PlaybackState(
+                    isPlaying = controller.isPlaying,
+                    currentSong = currentSong,
+                    currentPosition = controller.currentPosition,
+                    duration = controller.duration.coerceAtLeast(0),
+                    playbackSpeed = controller.playbackParameters.speed,
+                    playMode = playMode,
+                )
         }
-
-        _playbackState.value =
-            PlaybackState(
-                isPlaying = controller.isPlaying,
-                currentSong = currentSong,
-                currentPosition = controller.currentPosition,
-                duration = controller.duration.coerceAtLeast(0),
-                playbackSpeed = controller.playbackParameters.speed,
-                playMode = playMode
-            )
     }
-}
+
     private fun startProgressUpdates() {
         if (progressJob != null) return
 
@@ -432,6 +438,4 @@ private fun updatePlaybackState() {
             MediaController.releaseFuture(it)
         }
     }
-    
-    
 }

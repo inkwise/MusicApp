@@ -6,12 +6,11 @@ data class PlaybackState(
     val currentPosition: Long = 0L,
     val duration: Long = 0L,
     val playbackSpeed: Float = 1f,
-    val playMode: PlayMode = PlayMode.LIST
+    val playMode: PlayMode = PlayMode.LIST,
 )
 
-
 enum class PlayMode {
-    LIST,      // 列表循环
-    SINGLE,    // 单曲循环
-    SHUFFLE    // 随机播放
+    LIST, // 列表循环
+    SINGLE, // 单曲循环
+    SHUFFLE, // 随机播放
 }

@@ -1,10 +1,9 @@
 package com.inkwise.music.ui.main
-import com.inkwise.music.ui.theme.LocalAppDimens
-import androidx.compose.foundation.layout.size
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
@@ -26,19 +25,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.inkwise.music.R
 import com.inkwise.music.ui.main.navigationPage.cloud.CloudSongsScreen
 import com.inkwise.music.ui.main.navigationPage.home.HomeScreen
 import com.inkwise.music.ui.main.navigationPage.local.LocalSongsScreen
+import com.inkwise.music.ui.theme.LocalAppDimens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.graphics.Color
-import com.inkwise.music.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationContent(
@@ -106,7 +107,6 @@ fun NavigationContent(
                                 tint = Color.Black,
                                 modifier = Modifier.size(22.dp),
                             )
-                            
                         }
                     },
                 )
@@ -122,7 +122,7 @@ fun NavigationContent(
                 NavHost(
                     navController = navController,
                     startDestination = "home",
-                    modifier = Modifier.padding(bottom = peekHeight)
+                    modifier = Modifier.padding(bottom = peekHeight),
                 ) {
                     composable("home") {
                         HomeScreen(
