@@ -79,6 +79,10 @@ fun BottomDrawerContent(
         rememberPagerState(
             pageCount = { pageCount },
         )
+        
+    val context = LocalContext.current
+    
+    
     Column(
         modifier =
             Modifier
@@ -391,11 +395,11 @@ fun BottomDrawerContent(
         onDismiss = { showSleepSheet = false },
         onConfirm = { minutes, stopAfterSong ->
             playerViewModel.startSleepTimer(
-                minutes = minutes,
-                stopAfterSong = stopAfterSong
-            ) {
-                (context as? Activity)?.finishAffinity()
-            }
+        minutes = minutes,
+        stopAfterSong = stopAfterSong
+    ) {
+        (context as? Activity)?.finishAffinity()
+    }
             showSleepSheet = false
         }
     )
