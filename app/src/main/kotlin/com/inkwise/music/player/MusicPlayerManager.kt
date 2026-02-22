@@ -125,10 +125,11 @@ fun startSleepTimer(
     mediaController?.stop()
     exitAppCallback?.invoke()
 }
-    
+ 
 fun cancelSleepTimer() {
     sleepJob?.cancel()
     sleepJob = null
+    _sleepRemaining.value = null
 }
     // 设置播放队列
     fun setPlayQueue(
