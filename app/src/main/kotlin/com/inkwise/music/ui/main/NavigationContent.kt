@@ -49,6 +49,8 @@ fun NavigationContent(
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val dimens = LocalAppDimens.current
+    val peekHeight = rememberSheetPeekHeight(dimens.sheetPeekHeightDp)
 
     // 同步 ViewModel 和侧边栏状态
     LaunchedEffect(uiState.sidebarOpen) {
@@ -119,7 +121,7 @@ fun NavigationContent(
                 NavHost(
                     navController = navController,
                     startDestination = "home",
-                    modifier = Modifier.padding(bottom = 80.dp)
+                    modifier = Modifier.padding(bottom = peekHeight)
                 ) {
                     composable("home") {
                         HomeScreen(
