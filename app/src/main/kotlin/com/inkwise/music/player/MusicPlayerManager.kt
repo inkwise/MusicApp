@@ -75,7 +75,7 @@ object MusicPlayerManager {
         }, MoreExecutors.directExecutor())
     }
     
-    fun startSleepTimer(
+fun startSleepTimer(
     durationMillis: Long,
     mode: SleepMode,
     onExitApp: () -> Unit
@@ -86,19 +86,24 @@ object MusicPlayerManager {
     exitAppCallback = onExitApp
 
     sleepJob = scope.launch {
-        delay(durationMillis)
+
+        var remaining = durationMillis
+        _sleepRemaining.value = remaining
+
+        while (remaining > 0) {
+            delay(1000)
+            remaining -= 1000
+            _sleepRemaining.value = remaining
+        }
+
+        _sleepRemaining.value = null  // 定时结束后清空
 
         when (sleepMode) {
-            SleepMode.STOP_IMMEDIATELY -> {
-                stopAndExit()
-            }
-
-            SleepMode.STOP_AFTER_SONG -> {
-                waitForSongFinishThenExit()
-            }
+            SleepMode.STOP_IMMEDIATELY -> stopAndExit()
+            SleepMode.STOP_AFTER_SONG -> waitForSongFinishThenExit()
         }
     }
-}
+}    
     private suspend fun waitForSongFinishThenExit() {
     val controller = mediaController ?: return
 
