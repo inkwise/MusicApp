@@ -43,7 +43,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
-
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun playerScreen(
@@ -226,4 +226,195 @@ fun playerScreen(
             }
         }
     }
+}
+*/
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun playerScreen(
+    modifier: Modifier = Modifier,
+    pagerState: PagerState,
+    playerViewModel: PlayerViewModel = hiltViewModel(),
+) {
+
+    val playbackState by playerViewModel.playbackState.collectAsState()
+    val currentSong = playbackState.currentSong
+    val coverUri = currentSong?.albumArt
+
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    /* ---------------- Pager 修复逻辑 ---------------- */
+
+    val fixStuckConnection = remember {
+        object : NestedScrollConnection {
+            override suspend fun onPostFling(
+                consumed: Velocity,
+                available: Velocity,
+            ): Velocity {
+                if (pagerState.currentPageOffsetFraction != 0f) {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.targetPage)
+                    }
+                }
+                return super.onPostFling(consumed, available)
+            }
+        }
+    }
+
+    val flingBehavior = PagerDefaults.flingBehavior(
+        state = pagerState,
+        snapPositionalThreshold = 0.08f,
+        snapAnimationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow,
+        ),
+    )
+
+    /* ---------------- 背景主题色状态 ---------------- */
+
+    var themeColor by remember { mutableStateOf(Color(0xFFECEFF1)) }
+
+    val animatedThemeColor by animateColorAsState(
+        targetValue = themeColor,
+        animationSpec = tween(600),
+        label = "ThemeColorAnimation",
+    )
+
+    /* ---------------- 取色逻辑 ---------------- */
+
+    AsyncImage(
+        model = ImageRequest.Builder(context)
+            .data(coverUri)
+            .allowHardware(false) // 必须
+            .size(150)
+            .build(),
+        contentDescription = null,
+        modifier = Modifier
+            .size(1.dp)
+            .alpha(0f),
+        onSuccess = { success ->
+            val drawable = success.result.drawable
+            val bitmap =
+                (drawable as? BitmapDrawable)?.bitmap ?: return@AsyncImage
+
+            Palette.from(bitmap).generate { palette ->
+                palette?.let { p ->
+
+                    val pickedColor = p.getVibrantColor(
+                        p.getMutedColor(
+                            p.getDominantColor(android.graphics.Color.GRAY)
+                        )
+                    )
+
+                    themeColor = harmonizeToPlayerBackground(pickedColor)
+                }
+            }
+        },
+    )
+
+    /* ---------------- UI ---------------- */
+
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+
+        /* ---------- 图1风格背景 ---------- */
+
+        AnimatedContent(
+            targetState = coverUri,
+            transitionSpec = {
+                fadeIn(tween(400)) togetherWith fadeOut(tween(600))
+            },
+            label = "BackgroundTransition",
+        ) { targetUri ->
+
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                // 1️⃣ 渐变底色
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    animatedThemeColor,
+                                    animatedThemeColor.copy(alpha = 0.96f),
+                                    animatedThemeColor.copy(alpha = 0.88f)
+                                )
+                            )
+                        )
+                )
+
+                // 2️⃣ 轻模糊封面纹理
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(context)
+                            .data(targetUri)
+                            .allowHardware(false)
+                            .size(200)
+                            .build()
+                    ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            alpha = 0.12f // 可调 0.08 ~ 0.18
+                        }
+                        .blur(20.dp)
+                )
+
+                // 3️⃣ 轻提亮层
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White.copy(alpha = 0.04f))
+                )
+            }
+        }
+
+        /* ---------- Pager 内容 ---------- */
+
+        VerticalPager(
+            state = pagerState,
+            key = { it },
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(fixStuckConnection),
+            beyondViewportPageCount = 1,
+            flingBehavior = flingBehavior,
+        ) { page ->
+
+            when (page) {
+
+                0 -> {
+                    BottomDrawerContent(
+                        pagerState = pagerState,
+                        animatedThemeColor = animatedThemeColor
+                    )
+                }
+
+                1 -> {
+                    PlayQueueBottomSheet(
+                        playerViewModel = playerViewModel,
+                    )
+                }
+            }
+        }
+    }
+}
+private fun harmonizeToPlayerBackground(colorInt: Int): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(colorInt, hsl)
+
+    // 保留 hue
+    // 降饱和
+    hsl[1] = (hsl[1] * 0.25f).coerceAtMost(0.35f)
+
+    // 提亮
+    hsl[2] = 0.88f
+
+    val outColor = ColorUtils.HSLToColor(hsl)
+    return Color(outColor)
 }
