@@ -12,7 +12,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.inkwise.music.data.model.PlaybackState
 import com.inkwise.music.data.model.PlayMode
-
+import com.inkwise.music.data.model.SleepMode
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.service.MusicService
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +46,11 @@ object MusicPlayerManager {
 
     private lateinit var appContext: Context
 
+    // 睡眠定时
+    private var sleepJob: Job? = null
+    private var sleepMode: SleepMode = SleepMode.STOP_IMMEDIATELY
+    private var exitAppCallback: (() -> Unit)? = null
+    
     fun init(context: Context) {
         if (!::appContext.isInitialized) {
             appContext = context.applicationContext
@@ -66,7 +71,57 @@ object MusicPlayerManager {
             mediaController?.addListener(PlayerListener())
         }, MoreExecutors.directExecutor())
     }
+    
+    fun startSleepTimer(
+    durationMillis: Long,
+    mode: SleepMode,
+    onExitApp: () -> Unit
+) {
+    cancelSleepTimer()
 
+    sleepMode = mode
+    exitAppCallback = onExitApp
+
+    sleepJob = scope.launch {
+        delay(durationMillis)
+
+        when (sleepMode) {
+            SleepMode.STOP_IMMEDIATELY -> {
+                stopAndExit()
+            }
+
+            SleepMode.STOP_AFTER_SONG -> {
+                waitForSongFinishThenExit()
+            }
+        }
+    }
+}
+    private suspend fun waitForSongFinishThenExit() {
+    val controller = mediaController ?: return
+
+    while (isActive) {
+        val remaining =
+            controller.duration - controller.currentPosition
+
+        if (remaining <= 1000) {
+            break
+        }
+
+        delay(1000)
+    }
+
+    stopAndExit()
+}
+
+    private fun stopAndExit() {
+    mediaController?.stop()
+    exitAppCallback?.invoke()
+}
+    
+fun cancelSleepTimer() {
+    sleepJob?.cancel()
+    sleepJob = null
+}
     // 设置播放队列
     fun setPlayQueue(
         songs: List<Song>,
@@ -368,4 +423,6 @@ private fun updatePlaybackState() {
             MediaController.releaseFuture(it)
         }
     }
+    
+    
 }

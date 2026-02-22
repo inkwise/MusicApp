@@ -158,7 +158,31 @@ class PlayerViewModel
             super.onCleared()
             // MusicPlayerManager.release()
         }
+        
+        fun startSleepTimer(
+    minutes: Int,
+    stopAfterSong: Boolean,
+    onExitApp: () -> Unit
+) {
+    val mode =
+        if (stopAfterSong)
+            SleepMode.STOP_AFTER_SONG
+        else
+            SleepMode.STOP_IMMEDIATELY
+
+    MusicPlayerManager.startSleepTimer(
+        durationMillis = minutes * 60 * 1000L,
+        mode = mode,
+        onExitApp = onExitApp
+    )
+}
+
+fun cancelSleepTimer() {
+    MusicPlayerManager.cancelSleepTimer()
+}
     }
+    
+    
 
 data class PlayerUiState(
     val localSongs: List<Song> = emptyList(),
