@@ -44,17 +44,11 @@ fun HomeScreen(
 ) {
     val playlists by viewModel.playlists.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    val dimens = LocalAppDimens.current
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(
-                    // start = 24.dp,
-                    // top = 24.dp,
-                    // end = 24.dp,
-                    bottom = dimens.sheetPeekHeightDp,
-                ),
+                
     ) {
         // 本地 & 云端按钮横向排列
         Row(
