@@ -366,16 +366,16 @@ fun playerScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
-                            alpha = 0.12f // 可调 0.08 ~ 0.18
+                            alpha = 0.07f // 可调 0.08 ~ 0.18
                         }
-                        .blur(20.dp)
+                        .blur(14.dp)
                 )
 
                 // 3️⃣ 轻提亮层
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White.copy(alpha = 0.04f))
+                        .background(Color.White.copy(alpha = 0.02f))
                 )
             }
         }
@@ -410,17 +410,24 @@ fun playerScreen(
         }
     }
 }
+
 private fun harmonizeToPlayerBackground(colorInt: Int): Color {
     val hsl = FloatArray(3)
     ColorUtils.colorToHSL(colorInt, hsl)
 
-    // 保留 hue
-    // 降饱和
-    hsl[1] = (hsl[1] * 0.25f).coerceAtMost(0.35f)
+    val saturation = hsl[1]
+    val lightness = hsl[2]
 
-    // 提亮
-    hsl[2] = 0.88f
+    // 🎯 如果原图已经很亮（>0.6），就别强行提亮
+    if (lightness > 0.6f) {
+        hsl[1] = (saturation * 0.5f).coerceAtMost(0.6f)
+        hsl[2] = lightness * 0.95f
+    }
+    // 🎯 如果是深色封面
+    else {
+        hsl[1] = (saturation * 0.4f).coerceAtMost(0.5f)
+        hsl[2] = 0.82f
+    }
 
-    val outColor = ColorUtils.HSLToColor(hsl)
-    return Color(outColor)
+    return Color(ColorUtils.HSLToColor(hsl))
 }
