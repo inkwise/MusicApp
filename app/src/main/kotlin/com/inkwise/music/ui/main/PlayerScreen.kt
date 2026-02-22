@@ -190,7 +190,7 @@ fun playerScreen(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(Color.White.copy(alpha = 0.8f)),
+                            .background(Color.White.copy(alpha = 0.5f)),
                 )
             }
         }
