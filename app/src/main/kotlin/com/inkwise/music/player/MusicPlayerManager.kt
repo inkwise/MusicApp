@@ -99,7 +99,7 @@ object MusicPlayerManager {
     private suspend fun waitForSongFinishThenExit() {
     val controller = mediaController ?: return
 
-    while (isActive) {
+    while (true) {
         val remaining =
             controller.duration - controller.currentPosition
 
