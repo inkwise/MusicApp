@@ -398,7 +398,7 @@ fun playerScreen(
                 0 -> {
                     BottomDrawerContent(
                         pagerState = pagerState,
-                        animatedThemeColor = animatedThemeColor
+                        animatedThemeColor = animatedPrimaryColor
                     )
                 }
 
