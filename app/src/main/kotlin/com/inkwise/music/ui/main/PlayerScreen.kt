@@ -234,7 +234,7 @@ fun playerScreen(
     }
 }
 */
-
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun playerScreen(
@@ -250,7 +250,6 @@ fun playerScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    /* ---------------- Pager 修复逻辑 ---------------- */
 
     val fixStuckConnection = remember {
         object : NestedScrollConnection {
@@ -277,7 +276,6 @@ fun playerScreen(
         ),
     )
 
-    /* ---------------- 背景主题色状态 ---------------- */
 
     var themeColor by remember { mutableStateOf(Color(0xFFECEFF1)) }
     var primaryColor by remember { mutableStateOf(Color(0xFF2196F3)) }
@@ -288,7 +286,6 @@ fun playerScreen(
     }
     
 
-    /* ---------------- 取色逻辑 ---------------- */
 
     AsyncImage(
         model = ImageRequest.Builder(context)
@@ -320,13 +317,11 @@ fun playerScreen(
         },
     )
 
-    /* ---------------- UI ---------------- */
 
     Box(
         modifier = modifier.fillMaxSize()
     ) {
 
-        /* ---------- 图1风格背景 ---------- */
 
         AnimatedContent(
             targetState = coverUri,
@@ -381,7 +376,6 @@ fun playerScreen(
             }
         }
 
-        /* ---------- Pager 内容 ---------- */
 
         VerticalPager(
             state = pagerState,
@@ -439,6 +433,226 @@ private fun harmonizeToPlayerBackground(colorInt: Int): Color {
     else {
         hsl[1] = (saturation * 0.4f).coerceAtMost(0.5f)
         hsl[2] = 0.82f
+    }
+
+    return Color(ColorUtils.HSLToColor(hsl))
+}*/
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun playerScreen(
+    modifier: Modifier = Modifier,
+    pagerState: PagerState,
+    playerViewModel: PlayerViewModel = hiltViewModel(),
+) {
+
+    val playbackState by playerViewModel.playbackState.collectAsState()
+    val currentSong = playbackState.currentSong
+    val coverUri = currentSong?.albumArt
+
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    /* ---------------- Pager 修复逻辑 ---------------- */
+
+    val fixStuckConnection = remember {
+        object : NestedScrollConnection {
+            override suspend fun onPostFling(
+                consumed: Velocity,
+                available: Velocity,
+            ): Velocity {
+                if (pagerState.currentPageOffsetFraction != 0f) {
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.targetPage)
+                    }
+                }
+                return super.onPostFling(consumed, available)
+            }
+        }
+    }
+
+    val flingBehavior = PagerDefaults.flingBehavior(
+        state = pagerState,
+        snapPositionalThreshold = 0.08f,
+        snapAnimationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow,
+        ),
+    )
+
+    /* ---------------- 背景主题色状态 ---------------- */
+
+    var themeColor by remember { mutableStateOf(Color(0xFFECEFF1)) }
+    var primaryColor by remember { mutableStateOf(Color(0xFF2196F3)) }
+    val animatedPrimaryColor by animateColorAsState(
+        targetValue = primaryColor,
+        animationSpec = tween(800), // 增加颜色渐变时间，让过渡更丝滑
+        label = "PrimaryColorAnimation"
+    )
+    
+    val backgroundColor = remember(animatedPrimaryColor) {
+        animatedPrimaryColor.toSoftBackground()
+    }
+
+    /* ---------------- 取色逻辑 ---------------- */
+
+    AsyncImage(
+        model = ImageRequest.Builder(context)
+            .data(coverUri)
+            .allowHardware(false) // 必须
+            .size(150)
+            .build(),
+        contentDescription = null,
+        modifier = Modifier
+            .size(1.dp)
+            .alpha(0f),
+        onSuccess = { success ->
+            val drawable = success.result.drawable
+            val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return@AsyncImage
+
+            Palette.from(bitmap).generate { palette ->
+                palette?.let { p ->
+                    // 优先取有活力的颜色作为主色，取不到再退化
+                    val pickedColor = p.getVibrantColor(
+                        p.getMutedColor(
+                            p.getDominantColor(android.graphics.Color.GRAY)
+                        )
+                    )
+                    primaryColor = Color(pickedColor)
+                    themeColor = harmonizeToPlayerBackground(pickedColor)
+                }
+            }
+        },
+    )
+
+    /* ---------------- UI ---------------- */
+
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+
+        /* ---------- 图1风格背景 (核心修改区) ---------- */
+
+        AnimatedContent(
+            targetState = coverUri,
+            transitionSpec = {
+                fadeIn(tween(600)) togetherWith fadeOut(tween(800))
+            },
+            label = "BackgroundTransition",
+        ) { targetUri ->
+
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                // 1️⃣ 第一层：极浅底色渐变 (奠定椒盐音乐那种通透感)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    backgroundColor,
+                                    backgroundColor.copy(alpha = 0.6f),
+                                    Color(0xFFF5F7FA) // 底部偏向干净的灰白色
+                                )
+                            )
+                        )
+                )
+
+                // 2️⃣ 第二层：大半径模糊封面 (灵魂所在，形成晕染效果)
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(context)
+                            .data(targetUri)
+                            .allowHardware(false)
+                            .size(100) // 采样不需要太大
+                            .build()
+                    ),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            alpha = 0.25f // 提高透明度，配合大模糊使用
+                        }
+                        // 使用 Unbounded 防止边缘出现黑边，半径加大到 50dp
+                        .blur(radius = 50.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                )
+
+                // 3️⃣ 第三层：中心高光微调 (模拟屏幕或光线的折射感，提亮状态栏区域)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.2f), 
+                                    Color.Transparent
+                                ),
+                                center = Offset(500f, 300f), // 偏上方的高光
+                                radius = 1200f
+                            )
+                        )
+                )
+            }
+        }
+
+        /* ---------- Pager 内容 ---------- */
+
+        VerticalPager(
+            state = pagerState,
+            key = { it },
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(fixStuckConnection),
+            beyondViewportPageCount = 1,
+            flingBehavior = flingBehavior,
+        ) { page ->
+
+            when (page) {
+                0 -> {
+                    BottomDrawerContent(
+                        pagerState = pagerState,
+                        animatedThemeColor = animatedPrimaryColor
+                    )
+                }
+                1 -> {
+                    PlayQueueBottomSheet(
+                        playerViewModel = playerViewModel,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/* ---------------- 颜色处理工具方法优化 ---------------- */
+
+private fun Color.toSoftBackground(): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hsl)
+
+    // 重点：极低的饱和度，极高的明度
+    hsl[1] = (hsl[1] * 0.15f).coerceAtMost(0.2f) // 只保留极少的色相倾向
+    hsl[2] = 0.95f // 极高明度，接近纯白但有温度
+    
+    return Color(ColorUtils.HSLToColor(hsl))
+}
+
+private fun harmonizeToPlayerBackground(colorInt: Int): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(colorInt, hsl)
+
+    val saturation = hsl[1]
+    val lightness = hsl[2]
+
+    // 让所有颜色向“清透”的方向靠拢
+    if (lightness > 0.6f) {
+        hsl[1] = (saturation * 0.4f).coerceAtMost(0.5f)
+        hsl[2] = lightness * 0.96f
+    } else {
+        hsl[1] = (saturation * 0.3f).coerceAtMost(0.4f)
+        hsl[2] = 0.88f // 深色封面也要强行提亮到灰白级别
     }
 
     return Color(ColorUtils.HSLToColor(hsl))
