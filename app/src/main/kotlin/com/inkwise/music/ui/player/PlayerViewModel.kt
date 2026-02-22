@@ -46,7 +46,10 @@ class PlayerViewModel
         private val _lyricsState = MutableStateFlow(LyricsUiState())
         val lyricsState: StateFlow<LyricsUiState> = _lyricsState.asStateFlow()
         private var synchronizer: LyricsSynchronizer? = null
-
+        
+        //定时器剩余时间
+        private val _sleepRemaining = MutableStateFlow<Long?>(null)
+        val sleepRemaining: StateFlow<Long?> = _sleepRemaining
         // 当前歌曲对象
         val currentSong: StateFlow<Song?> =
             combine(playQueue, currentIndex) { queue, index ->
@@ -56,7 +59,7 @@ class PlayerViewModel
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = null,
             )
-
+    
         init {
             observeCurrentSong()
             observePlayback()
