@@ -309,6 +309,7 @@ object MusicPlayerManager {
     }
 
     // 添加歌曲到队列
+    /*
     fun addToQueue(song: Song) {
         val currentQueue = _playQueue.value.toMutableList()
         currentQueue.add(song)
@@ -328,8 +329,41 @@ object MusicPlayerManager {
                 ).build()
 
         mediaController?.addMediaItem(mediaItem)
+    }*/
+    fun addToQueue(song: Song) {
+
+    val controller = mediaController ?: return
+
+    val currentIndex = controller.currentMediaItemIndex
+    val insertIndex = currentIndex + 1
+
+    // 1️⃣ 更新本地播放队列
+    val currentQueue = _playQueue.value.toMutableList()
+
+    if (insertIndex <= currentQueue.size) {
+        currentQueue.add(insertIndex, song)
+    } else {
+        currentQueue.add(song)
     }
 
+    _playQueue.value = currentQueue
+
+    // 2️⃣ 构建 MediaItem
+    val mediaItem =
+        MediaItem.Builder()
+            .setMediaId(song.id.toString())
+            .setUri(song.uri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artist)
+                    .build()
+            )
+            .build()
+
+    // 3️⃣ 插入到播放器队列的下一首
+    controller.addMediaItem(insertIndex, mediaItem)
+}
     // 从队列移除歌曲
     fun removeFromQueue(index: Int) {
         val currentQueue = _playQueue.value.toMutableList()
