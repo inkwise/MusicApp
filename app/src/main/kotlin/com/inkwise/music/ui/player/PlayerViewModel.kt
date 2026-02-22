@@ -1,5 +1,7 @@
 package com.inkwise.music.ui.player
 
+import com.inkwise.music.data.model.SleepMode
+
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
