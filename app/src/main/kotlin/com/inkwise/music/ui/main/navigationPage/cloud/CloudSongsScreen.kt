@@ -13,7 +13,6 @@ fun CloudSongsScreen() {
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(16.dp),
     ) {
         LazyColumn {
             items(10) { index ->
