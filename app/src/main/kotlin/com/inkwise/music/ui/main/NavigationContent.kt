@@ -1,4 +1,5 @@
 package com.inkwise.music.ui.main
+import com.inkwise.music.ui.theme.LocalAppDimens
 import androidx.compose.foundation.layout.size
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
