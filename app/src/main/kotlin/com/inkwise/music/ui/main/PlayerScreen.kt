@@ -280,12 +280,13 @@ fun playerScreen(
     /* ---------------- 背景主题色状态 ---------------- */
 
     var themeColor by remember { mutableStateOf(Color(0xFFECEFF1)) }
-
-    val animatedThemeColor by animateColorAsState(
-        targetValue = themeColor,
-        animationSpec = tween(600),
-        label = "ThemeColorAnimation",
-    )
+    var primaryColor by remember { mutableStateOf(Color(0xFF2196F3)) }
+    val animatedPrimaryColor by animateColorAsState(primaryColor)
+    
+    val backgroundColor = remember(animatedPrimaryColor) {
+        animatedPrimaryColor.toSoftBackground()
+    }
+    
 
     /* ---------------- 取色逻辑 ---------------- */
 
@@ -343,12 +344,12 @@ fun playerScreen(
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(
-                                    animatedThemeColor,
-                                    animatedThemeColor.copy(alpha = 0.96f),
-                                    animatedThemeColor.copy(alpha = 0.88f)
-                                )
-                            )
+    colors = listOf(
+        backgroundColor,
+        backgroundColor.copy(alpha = 0.95f),
+        backgroundColor.copy(alpha = 0.9f)
+    )
+)
                         )
                 )
 
@@ -410,7 +411,18 @@ fun playerScreen(
         }
     }
 }
+private fun Color.toSoftBackground(): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hsl)
 
+    // 降饱和
+    hsl[1] *= 0.25f
+
+    // 提亮
+    hsl[2] = 0.9f
+
+    return Color(ColorUtils.HSLToColor(hsl))
+}
 private fun harmonizeToPlayerBackground(colorInt: Int): Color {
     val hsl = FloatArray(3)
     ColorUtils.colorToHSL(colorInt, hsl)
