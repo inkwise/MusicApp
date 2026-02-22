@@ -50,7 +50,10 @@ object MusicPlayerManager {
     private var sleepJob: Job? = null
     private var sleepMode: SleepMode = SleepMode.STOP_IMMEDIATELY
     private var exitAppCallback: (() -> Unit)? = null
-    
+    //定时器剩余时间
+        private val _sleepRemaining = MutableStateFlow<Long?>(null)
+        val sleepRemaining: StateFlow<Long?> = _sleepRemaining
+            
     fun init(context: Context) {
         if (!::appContext.isInitialized) {
             appContext = context.applicationContext
