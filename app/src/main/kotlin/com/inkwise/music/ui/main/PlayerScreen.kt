@@ -3,7 +3,7 @@ package com.inkwise.music.ui.main
 import androidx.compose.ui.unit.*
 import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
-
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.Image
 import android.graphics.drawable.BitmapDrawable
