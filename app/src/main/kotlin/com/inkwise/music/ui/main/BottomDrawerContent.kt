@@ -381,11 +381,12 @@ fun BottomDrawerContent(
             }
         }
     }
+    
     if (showSleepSheet) {
     SleepTimerBottomSheet(
         onDismiss = { showSleepSheet = false },
         onConfirm = { minutes, stopAfterSong ->
-            viewModel.startSleepTimer(
+            playerViewModel.startSleepTimer(
                 minutes = minutes,
                 stopAfterSong = stopAfterSong
             ) {
