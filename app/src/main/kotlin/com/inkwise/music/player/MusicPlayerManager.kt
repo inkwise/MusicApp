@@ -27,6 +27,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+enum class SleepMode {
+    STOP_IMMEDIATELY,   // 到点立即停止
+    STOP_AFTER_SONG     // 播完当前歌曲
+}
 object MusicPlayerManager {
     // 进度条协程
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
