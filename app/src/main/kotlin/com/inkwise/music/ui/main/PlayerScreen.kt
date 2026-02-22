@@ -164,7 +164,7 @@ fun playerScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .blur(radius = 200.dp), // 在动画容器内部应用模糊
+                        .blur(radius = 150.dp), // 在动画容器内部应用模糊
             ) {
                 androidx.compose.foundation.Image(
                     painter =
