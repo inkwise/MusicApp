@@ -116,7 +116,7 @@ fun NavigationContent(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                      //  .padding(padding),
+                        .padding(top = padding),
             ) {
                 // 导航内容
                 NavHost(
