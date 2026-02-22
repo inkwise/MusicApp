@@ -119,6 +119,7 @@ fun NavigationContent(
                 NavHost(
                     navController = navController,
                     startDestination = "home",
+                    modifier = Modifier.padding(bottom = 80.dp)
                 ) {
                     composable("home") {
                         HomeScreen(
