@@ -70,7 +70,7 @@ fun BottomDrawerContent(
     val pageCount = 2
     val coverUri = currentSong?.albumArt
     val scope = rememberCoroutineScope()
-
+    var showSleepSheet by remember { mutableStateOf(false) }
     val pagerStateB =
         rememberPagerState(
             pageCount = { pageCount },
@@ -342,7 +342,7 @@ fun BottomDrawerContent(
             }
             // 循环模式按钮
         
-            IconButton(onClick = { /* 定时逻辑 */ }) {
+            IconButton(onClick = { showSleepSheet = true }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_sleep_timer),
                     contentDescription = "定时",
@@ -381,6 +381,20 @@ fun BottomDrawerContent(
             }
         }
     }
+    if (showSleepSheet) {
+    SleepTimerBottomSheet(
+        onDismiss = { showSleepSheet = false },
+        onConfirm = { minutes, stopAfterSong ->
+            viewModel.startSleepTimer(
+                minutes = minutes,
+                stopAfterSong = stopAfterSong
+            ) {
+                (context as? Activity)?.finishAffinity()
+            }
+            showSleepSheet = false
+        }
+    )
+}
 }
 
 @Composable
@@ -463,6 +477,88 @@ fun LyricsPage(
                     )
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SleepTimerBottomSheet(
+    onDismiss: () -> Unit,
+    onConfirm: (Int, Boolean) -> Unit
+) {
+    var minutes by remember { mutableStateOf(30f) }
+    var stopAfterSong by remember { mutableStateOf(false) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+        ) {
+
+            Text(
+                text = "睡眠定时",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "${minutes.toInt()} 分钟",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Slider(
+                value = minutes,
+                onValueChange = { minutes = it },
+                valueRange = 0f..120f,
+                steps = 119
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Switch(
+                    checked = stopAfterSong,
+                    onCheckedChange = { stopAfterSong = it }
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text("播完整首再退出")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+
+                TextButton(onClick = onDismiss) {
+                    Text("取消")
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = {
+                        onConfirm(minutes.toInt(), stopAfterSong)
+                    },
+                    enabled = minutes > 0
+                ) {
+                    Text("确定")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
