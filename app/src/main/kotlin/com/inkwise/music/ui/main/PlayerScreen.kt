@@ -49,6 +49,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.inkwise.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 /*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
