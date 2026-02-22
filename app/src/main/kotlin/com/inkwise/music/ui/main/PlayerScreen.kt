@@ -1,5 +1,6 @@
 package com.inkwise.music.ui.main
-
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.Image
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState

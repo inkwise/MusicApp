@@ -135,4 +135,5 @@ dependencies {
 	implementation ("com.github.AdrienPoupa:jaudiotagger:2.2.3")
 	//主题色
 	implementation("androidx.palette:palette-ktx:1.0.0")
+	implementation ("androidx.core:core-ktx:1.12.0")
 }
