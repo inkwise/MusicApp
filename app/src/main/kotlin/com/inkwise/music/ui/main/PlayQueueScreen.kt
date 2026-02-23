@@ -87,6 +87,11 @@ fun PlayQueueBottomSheet(
                 )
             }
         }
+        LaunchedEffect(currentIndex, playQueue.size) {
+    if (currentIndex >= 0 && currentIndex < playQueue.size) {
+        listState.scrollToItem(currentIndex)
+    }
+}
     }
 }
 
