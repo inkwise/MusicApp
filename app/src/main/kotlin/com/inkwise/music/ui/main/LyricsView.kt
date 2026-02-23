@@ -254,7 +254,7 @@ fun MiniLyricsView(
     val density = LocalDensity.current
         val fadeHeightDp = 33.dp // 👈 在这里改高度
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
-
+ 
     Box(
         modifier =
             modifier
