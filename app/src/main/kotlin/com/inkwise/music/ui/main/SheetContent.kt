@@ -155,7 +155,7 @@ fun controlContent2(
                                 },
                         ),
                 contentDescription = if (playbackState.isPlaying) "暂停" else "播放",
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(24.dp),
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
