@@ -299,7 +299,7 @@ Box(
         ) {
             LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(vertical = centerPadding),
+               // contentPadding = PaddingValues(vertical = centerPadding),
             ) {
                 itemsIndexed(
                     items = lyrics,
