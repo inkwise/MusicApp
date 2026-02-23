@@ -366,12 +366,12 @@ fun BottomDrawerContent(
                     val seconds = totalSeconds % 60
 
                     Text(
-                        text = "${minutes}:${seconds}",
+                        text = "$minutes:$seconds",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
- 
+
             IconButton(onClick = { /* 音效 */ }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_audio_effect),

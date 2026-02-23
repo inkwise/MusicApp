@@ -252,9 +252,9 @@ fun MiniLyricsView(
     // 记录容器高度
     var containerHeight by remember { mutableStateOf(0) }
     val density = LocalDensity.current
-        val fadeHeightDp = 5.dp // 👈 在这里改高度
+    val fadeHeightDp = 5.dp // 👈 在这里改高度
     val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
- 
+
     Box(
         modifier =
             modifier
@@ -262,69 +262,68 @@ fun MiniLyricsView(
                     containerHeight = it.height
                 },
     ) {
-    
         if (containerHeight > 0) {
             // 计算居中 padding
             val centerPadding =
                 with(density) {
                     (containerHeight.toDp() / 2) - (lineHeight / 2)
                 }
-Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        compositingStrategy = CompositingStrategy.Offscreen
-                    }.drawWithContent {
-                        drawContent()
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            compositingStrategy = CompositingStrategy.Offscreen
+                        }.drawWithContent {
+                            drawContent()
 
-                        val height = size.height
+                            val height = size.height
 
-                        val gradient =
-                            Brush.verticalGradient(
-                                colorStops =
-                                    arrayOf(
-                                        0f to Color.Transparent,
-                                        fadeHeightPx / height to Color.Black,
-                                        1f - (fadeHeightPx / height) to Color.Black,
-                                        1f to Color.Transparent,
-                                    ),
+                            val gradient =
+                                Brush.verticalGradient(
+                                    colorStops =
+                                        arrayOf(
+                                            0f to Color.Transparent,
+                                            fadeHeightPx / height to Color.Black,
+                                            1f - (fadeHeightPx / height) to Color.Black,
+                                            1f to Color.Transparent,
+                                        ),
+                                )
+
+                            drawRect(
+                                brush = gradient,
+                                blendMode = BlendMode.DstIn,
                             )
-
-                        drawRect(
-                            brush = gradient,
-                            blendMode = BlendMode.DstIn,
-                        )
-                    },
-        ) {
-            LazyColumn(
-                state = listState,
-                contentPadding = PaddingValues(vertical = centerPadding),
+                        },
             ) {
-                itemsIndexed(
-                    items = lyrics,
-                    key = { index, _ -> index }, // 稳定 key，防止抖动
-                ) { index, line ->
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(vertical = centerPadding),
+                ) {
+                    itemsIndexed(
+                        items = lyrics,
+                        key = { index, _ -> index }, // 稳定 key，防止抖动
+                    ) { index, line ->
 
-                    val isHighlighted = highlight?.lineIndex == index
+                        val isHighlighted = highlight?.lineIndex == index
 
-                    Text(
-                        text = line.text,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(lineHeight),
-                        color =
-                            if (isHighlighted) {
-                                animatedThemeColor
-                            } else {
-                                animatedThemeColor.copy(alpha = 0.5f)
-                            },
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal, // 不要用 Bold（会改变高度）
-                    )
+                        Text(
+                            text = line.text,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
+                                   // .height(lineHeight),
+                            color =
+                                if (isHighlighted) {
+                                    animatedThemeColor
+                                } else {
+                                    animatedThemeColor.copy(alpha = 0.5f)
+                                },
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal, // 不要用 Bold（会改变高度）
+                        )
+                    }
                 }
-            }
             }
 
             // 🔥 自动滚动（不算 offset）
