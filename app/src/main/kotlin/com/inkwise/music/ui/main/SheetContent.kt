@@ -155,10 +155,10 @@ fun controlContent2(
                                 },
                         ),
                 contentDescription = if (playbackState.isPlaying) "暂停" else "播放",
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(20.dp),
             )
         }
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         // 右侧第二个 Icon
         Icon(
