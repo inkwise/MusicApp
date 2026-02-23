@@ -153,7 +153,7 @@ fun controlContent2(
                                 } else {
                                     R.drawable.ic_mini_player_play
                                 },
-                        )
+                        ),
                 contentDescription = if (playbackState.isPlaying) "暂停" else "播放",
                 modifier = Modifier.size(32.dp),
             )
