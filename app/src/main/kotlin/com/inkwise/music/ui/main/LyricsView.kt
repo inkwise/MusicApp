@@ -320,7 +320,7 @@ fun MiniLyricsView(
                                     animatedThemeColor.copy(alpha = 0.5f)
                                 },
                             fontSize = 12.sp,
-                            lineHeight = 16.sp,
+                            lineHeight = 20.sp,
                             fontWeight = FontWeight.Normal, // 不要用 Bold（会改变高度）
                         )
                     }
