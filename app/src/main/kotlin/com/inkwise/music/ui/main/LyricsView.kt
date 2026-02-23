@@ -252,6 +252,8 @@ fun MiniLyricsView(
     // 记录容器高度
     var containerHeight by remember { mutableStateOf(0) }
     val density = LocalDensity.current
+        val fadeHeightDp = 33.dp // 👈 在这里改高度
+    val fadeHeightPx = with(LocalDensity.current) { fadeHeightDp.toPx() }
 
     Box(
         modifier =
