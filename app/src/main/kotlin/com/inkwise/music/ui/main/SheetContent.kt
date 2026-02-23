@@ -153,7 +153,7 @@ fun controlContent2(
 
         // 右侧第二个 Icon
         Icon(
-            imageVector = Icons.Default.SkipNext,
+            painter = painterResource(id = R.drawable.ic_play_queue),
             contentDescription = "下一首",
             modifier =
                 Modifier
