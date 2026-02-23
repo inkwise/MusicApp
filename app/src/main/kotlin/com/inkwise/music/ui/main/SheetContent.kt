@@ -96,8 +96,8 @@ fun controlContent2(
             modifier
                 .fillMaxWidth()
                 // .height(56.dp)
-                .fillMaxHeight(),
-               // .padding(horizontal = 12.dp),
+                .fillMaxHeight()
+                .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
