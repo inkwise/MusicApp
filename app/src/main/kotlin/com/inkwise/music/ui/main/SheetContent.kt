@@ -143,8 +143,17 @@ fun controlContent2(
         Spacer(modifier = Modifier.weight(1f))
 
         IconButton(onClick = { playerViewModel.playPause() }) {
-            Icon(
-                if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+            Icon( 
+                //if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                painter =
+                        painterResource(
+                            id =
+                                if (playbackState.isPlaying) {
+                                    R.drawable.ic_mini_player_pause
+                                } else {
+                                    R.drawable.ic_mini_player_play
+                                },
+                        )
                 contentDescription = if (playbackState.isPlaying) "暂停" else "播放",
                 modifier = Modifier.size(32.dp),
             )
