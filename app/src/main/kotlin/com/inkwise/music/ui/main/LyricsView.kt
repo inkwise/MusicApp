@@ -267,7 +267,34 @@ fun MiniLyricsView(
                 with(density) {
                     (containerHeight.toDp() / 2) - (lineHeight / 2)
                 }
+Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }.drawWithContent {
+                        drawContent()
 
+                        val height = size.height
+
+                        val gradient =
+                            Brush.verticalGradient(
+                                colorStops =
+                                    arrayOf(
+                                        0f to Color.Transparent,
+                                        fadeHeightPx / height to Color.Black,
+                                        1f - (fadeHeightPx / height) to Color.Black,
+                                        1f to Color.Transparent,
+                                    ),
+                            )
+
+                        drawRect(
+                            brush = gradient,
+                            blendMode = BlendMode.DstIn,
+                        )
+                    },
+        ) {
             LazyColumn(
                 state = listState,
                 contentPadding = PaddingValues(vertical = centerPadding),
@@ -295,6 +322,7 @@ fun MiniLyricsView(
                         fontWeight = FontWeight.Normal, // 不要用 Bold（会改变高度）
                     )
                 }
+            }
             }
 
             // 🔥 自动滚动（不算 offset）
