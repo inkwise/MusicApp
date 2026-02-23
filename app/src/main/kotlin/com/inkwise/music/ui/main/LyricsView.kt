@@ -1,5 +1,5 @@
 package com.inkwise.music.ui.main
-
+ 
 import androidx.compose.ui.layout.onSizeChanged
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.draw.clipToBounds
@@ -252,14 +252,42 @@ fun MiniLyricsView(
     // 记录容器高度
     var containerHeight by remember { mutableStateOf(0) }
     val density = LocalDensity.current
-
+/*
     Box(
         modifier =
             modifier
                 .onSizeChanged {
                     containerHeight = it.height
                 },
-    ) {
+    ) {*/
+    Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }.drawWithContent {
+                        drawContent()
+
+                        val height = size.height
+
+                        val gradient =
+                            Brush.verticalGradient(
+                                colorStops =
+                                    arrayOf(
+                                        0f to Color.Transparent,
+                                        fadeHeightPx / height to Color.Black,
+                                        1f - (fadeHeightPx / height) to Color.Black,
+                                        1f to Color.Transparent,
+                                    ),
+                            )
+
+                        drawRect(
+                            brush = gradient,
+                            blendMode = BlendMode.DstIn,
+                        )
+                    },
+        ) {
         if (containerHeight > 0) {
             // 计算居中 padding
             val centerPadding =
