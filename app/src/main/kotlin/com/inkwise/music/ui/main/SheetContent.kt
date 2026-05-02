@@ -75,12 +75,12 @@ fun controlContent(
             onNext = { playerViewModel.skipToNext() },
         )
         // 控制层
-        controlContent2(showPlayQueue = showPlayQueue)
+        MiniPlayerControl(showPlayQueue = showPlayQueue)
     }
 }
 
 @Composable
-fun controlContent2(
+fun MiniPlayerControl(
     modifier: Modifier = Modifier,
     onIcon1Click: () -> Unit = {},
     onIcon2Click: () -> Unit = {},

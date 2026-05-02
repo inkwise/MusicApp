@@ -3,7 +3,6 @@ package com.inkwise.music.ui.main
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -189,50 +188,6 @@ fun ReboundHorizontalDrag(
     }
 }
 
-/*
-@Composable
-fun SongPage(
-    text: String,
-    modifier: Modifier,
-    song: Song?,
-    alignRight: Boolean = false,
-    isVisible: Boolean,
-) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxHeight(),
-        horizontalAlignment =
-            if (alignRight) {
-                Alignment.End
-            } else {
-                Alignment.Start
-            },
-        verticalArrangement = Arrangement.Center,
-    ) {
-        // Text / Icon / whatever
-
-        if (song != null && isVisible) {
-            Text(
-    text = song.title,
-    maxLines = 1,
-    overflow = TextOverflow.Clip,
-    modifier = Modifier
-        .fillMaxWidth()
-        .basicMarquee(
-            iterations = Int.MAX_VALUE,      // 无限循环
-            animationMode = MarqueeAnimationMode.Immediately,
-            repeatDelayMillis = 1000         // 👈 每次滚完停 1 秒
-        )
-)
-            Text(
-                text = text,
-                maxLines = 1,
-            )
-        }
-    }
-}
-*/
 @Composable
 fun CurrentSongPage(
     song: Song?,
