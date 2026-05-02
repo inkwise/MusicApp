@@ -2,6 +2,7 @@ package com.inkwise.music.ui.main.navigationPage.cloud
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inkwise.music.data.dao.SongDao
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.data.network.ApiService
 import com.inkwise.music.data.prefs.PreferencesManager
@@ -31,7 +32,7 @@ data class CloudUiState(
 class CloudViewModel @Inject constructor(
     private val api: ApiService,
     private val prefs: PreferencesManager,
-    private val songDao: com.inkwise.music.data.dao.SongDao
+    private val songDao: SongDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CloudUiState())
@@ -47,34 +48,12 @@ class CloudViewModel @Inject constructor(
             try {
                 val token = prefs.authToken.first()
                 val serverUrl = prefs.serverUrl.first()
-                val sortBy = _uiState.value.sortBy
-                val sortOrder = if (_uiState.value.sortOrderAsc) "asc" else "desc"
-
-                val response = api.getMusicList(
-                    token = "Bearer ${token ?: ""}",
-                    page = 1,
-                    pageSize = 200,
-                    sortBy = sortBy.apiField,
-                    sortOrder = sortOrder
+                val songs = fetchAndSaveSongs(token, serverUrl)
+                _uiState.value = _uiState.value.copy(
+                    songs = songs,
+                    isLoading = false,
+                    error = null
                 )
-
-                if (response.isSuccessful && response.body() != null) {
-                    val songs = response.body()!!.data.map { item ->
-                        mapToSong(item, serverUrl)
-                    }
-                    // 保存到本地数据库以获取 ID
-                    songDao.insertSongs(songs)
-                    _uiState.value = _uiState.value.copy(
-                        songs = songs,
-                        isLoading = false,
-                        error = null
-                    )
-                } else {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "加载失败: ${response.code()}"
-                    )
-                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -90,34 +69,12 @@ class CloudViewModel @Inject constructor(
             try {
                 val token = prefs.authToken.first()
                 val serverUrl = prefs.serverUrl.first()
-                val sortBy = _uiState.value.sortBy
-                val sortOrder = if (_uiState.value.sortOrderAsc) "asc" else "desc"
-
-                val response = api.getMusicList(
-                    token = "Bearer ${token ?: ""}",
-                    page = 1,
-                    pageSize = 200,
-                    sortBy = sortBy.apiField,
-                    sortOrder = sortOrder
+                val songs = fetchAndSaveSongs(token, serverUrl)
+                _uiState.value = _uiState.value.copy(
+                    songs = songs,
+                    isRefreshing = false,
+                    error = null
                 )
-
-                if (response.isSuccessful && response.body() != null) {
-                    val songs = response.body()!!.data.map { item ->
-                        mapToSong(item, serverUrl)
-                    }
-                    // 保存到本地数据库以获取 ID
-                    songDao.insertSongs(songs)
-                    _uiState.value = _uiState.value.copy(
-                        songs = songs,
-                        isRefreshing = false,
-                        error = null
-                    )
-                } else {
-                    _uiState.value = _uiState.value.copy(
-                        isRefreshing = false,
-                        error = "刷新失败: ${response.code()}"
-                    )
-                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isRefreshing = false,
@@ -127,9 +84,43 @@ class CloudViewModel @Inject constructor(
         }
     }
 
+    private suspend fun fetchAndSaveSongs(token: String?, serverUrl: String): List<Song> {
+        val sortBy = _uiState.value.sortBy
+        val sortOrder = if (_uiState.value.sortOrderAsc) "asc" else "desc"
+
+        val response = api.getMusicList(
+            token = "Bearer ${token ?: ""}",
+            page = 1,
+            pageSize = 200,
+            sortBy = sortBy.apiField,
+            sortOrder = sortOrder
+        )
+
+        if (response.isSuccessful && response.body() != null) {
+            val mappedSongs = response.body()!!.data.map { item -> mapToSong(item, serverUrl) }
+
+            // 为每个歌曲确保 DB 中有记录，获取有效 ID
+            return mappedSongs.map { song ->
+                if (song.cloudId != null) {
+                    val existing = songDao.getSongByCloudId(song.cloudId!!)
+                    if (existing != null) {
+                        existing
+                    } else {
+                        val newId = songDao.insertSong(song)
+                        song.copy(id = newId)
+                    }
+                } else {
+                    val newId = songDao.insertSong(song)
+                    song.copy(id = newId)
+                }
+            }
+        } else {
+            throw Exception("加载失败: ${response.code()}")
+        }
+    }
+
     fun setSortBy(sortBy: CloudSortBy) {
         if (_uiState.value.sortBy == sortBy) {
-            // 切换升序/降序
             _uiState.value = _uiState.value.copy(sortOrderAsc = !_uiState.value.sortOrderAsc)
         } else {
             _uiState.value = _uiState.value.copy(sortBy = sortBy, sortOrderAsc = false)
@@ -141,7 +132,6 @@ class CloudViewModel @Inject constructor(
         item: com.inkwise.music.data.network.model.MusicItem,
         serverUrl: String
     ): Song {
-        // 服务器根地址：去掉 /api/v1 前缀
         val baseUrl = serverUrl.removeSuffix("/api/v1")
 
         val streamPath = item.stream_url ?: ""
