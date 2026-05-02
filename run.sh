@@ -51,7 +51,7 @@ if ./gradlew assembleDebug; then
   echo "🚀 已提交并推送：$NEW_VERSION"
 else
   echo "❌ 构建失败"
-  termux-toast "❌ 构建失败"
+#  termux-toast "❌ 构建失败"
   # 不更新 VERSION，不 commit，不 push
   exit 1
 fi

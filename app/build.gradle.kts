@@ -136,4 +136,13 @@ dependencies {
 	//主题色
 	implementation("androidx.palette:palette-ktx:1.0.0")
 	implementation ("androidx.core:core-ktx:1.12.0")
+
+	// Retrofit + OkHttp for networking
+	implementation("com.squareup.retrofit2:retrofit:2.9.0")
+	implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+	implementation("com.squareup.okhttp3:okhttp:4.12.0")
+	implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+	// DataStore for persistent preferences
+	implementation("androidx.datastore:datastore-preferences:1.0.0")
 }

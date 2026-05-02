@@ -1,4 +1,5 @@
 package com.inkwise.music.ui.main
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,9 +34,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.inkwise.music.R
+import com.inkwise.music.ui.main.navigationPage.auth.LoginScreen
+import com.inkwise.music.ui.main.navigationPage.auth.RegisterScreen
 import com.inkwise.music.ui.main.navigationPage.cloud.CloudSongsScreen
 import com.inkwise.music.ui.main.navigationPage.home.HomeScreen
 import com.inkwise.music.ui.main.navigationPage.local.LocalSongsScreen
+import com.inkwise.music.ui.main.navigationPage.settings.SettingsScreen
 import com.inkwise.music.ui.theme.LocalAppDimens
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -43,7 +47,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationContent(
-    sheetState: SheetState, // 接收状态
+    sheetState: SheetState,
     pagerState: PagerState,
     scope: CoroutineScope,
     viewModel: MainViewModel = hiltViewModel(),
@@ -54,7 +58,6 @@ fun NavigationContent(
     val dimens = LocalAppDimens.current
     val peekHeight = rememberSheetPeekHeight(dimens.sheetPeekHeightDp)
 
-    // 同步 ViewModel 和侧边栏状态
     LaunchedEffect(uiState.sidebarOpen) {
         if (uiState.sidebarOpen) {
             drawerState.open()
@@ -63,13 +66,12 @@ fun NavigationContent(
         }
     }
 
-    // 监听侧边栏关闭
     LaunchedEffect(drawerState.isClosed) {
         if (drawerState.isClosed && uiState.sidebarOpen) {
             viewModel.closeSidebar()
         }
     }
-// 侧边栏
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -79,7 +81,6 @@ fun NavigationContent(
                 SidebarContent(
                     onNavigate = { route ->
                         navController.navigate(route) {
-                            // 避免重复导航
                             launchSingleTop = true
                         }
                         viewModel.closeSidebar()
@@ -99,7 +100,6 @@ fun NavigationContent(
                         }
                     },
                     actions = {
-                        // 添加一个按钮来打开底部抽屉
                         IconButton(onClick = { viewModel.toggleBottomDrawer() }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_search),
@@ -113,12 +113,10 @@ fun NavigationContent(
             },
         ) { padding ->
             Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(top = padding.calculateTopPadding()),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = padding.calculateTopPadding()),
             ) {
-                // 导航内容
                 NavHost(
                     navController = navController,
                     startDestination = "home",
@@ -136,10 +134,37 @@ fun NavigationContent(
                     composable("cloud") {
                         CloudSongsScreen()
                     }
+                    composable("settings") {
+                        SettingsScreen()
+                    }
+                    composable("login") {
+                        LoginScreen(
+                            onNavigateToRegister = {
+                                navController.navigate("register") {
+                                    launchSingleTop = true
+                                }
+                            },
+                            onSuccess = {
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+                    composable("register") {
+                        RegisterScreen(
+                            onNavigateToLogin = {
+                                navController.popBackStack()
+                            },
+                            onSuccess = {
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
                 }
 
-                // --- 关键：在这里定义 BackHandler ---
-                // 使用 targetValue 能更早感知到“正在展开”的状态，比 currentValue 更灵敏
                 val shouldIntercept =
                     sheetState.targetValue == SheetValue.Expanded || pagerState.currentPage > 0
 
