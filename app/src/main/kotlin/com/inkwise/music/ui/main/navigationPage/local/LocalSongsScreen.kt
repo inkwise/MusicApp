@@ -123,7 +123,7 @@ fun LocalSongsScreen(
                     itemsIndexed(songs) { index, song ->
                         SongItem(
                             song = song,
-                            isPlaying = playbackState.currentSong?.localId == song.localId,
+                            isPlaying = playbackState.currentSong?.id == song.id,
                             onClick = { playerViewModel.playSongs(songs, index) },
                             addToQueue = { playerViewModel.addToQueue(song) },
                             onMoreClick = { actionSong = song }

@@ -184,9 +184,7 @@ fun CloudSongsScreen(
                         itemsIndexed(uiState.songs) { index, song ->
                             SongItem(
                                 song = song,
-                                isPlaying = playbackState.currentSong?.let { current ->
-                                    current.cloudId != null && current.cloudId == song.cloudId
-                                } ?: false,
+                                isPlaying = playbackState.currentSong?.id == song.id,
                                 onClick = { playerViewModel.playSongs(uiState.songs, index) },
                                 addToQueue = { playerViewModel.addToQueue(song) },
                                 onMoreClick = { actionSong = song }
