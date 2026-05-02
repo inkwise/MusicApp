@@ -1,8 +1,6 @@
 package com.inkwise.music.ui.main
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,19 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,7 +27,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,13 +45,28 @@ fun SidebarContent(
             .fillMaxHeight()
             .padding(16.dp)
     ) {
+        // 用户信息区域 - 移到顶部
+        if (authState.isLoggedIn) {
+            UserInfoSection(
+                username = authState.displayName,
+                onLogout = { authViewModel.logout() }
+            )
+        } else {
+            GuestSection(
+                onLogin = { onNavigate("login") },
+                onRegister = { onNavigate("register") }
+            )
+        }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
         Text(
             text = "菜单",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        Divider()
+        HorizontalDivider()
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -93,22 +100,8 @@ fun SidebarContent(
             onClick = { onNavigate("settings") }
         )
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Divider(modifier = Modifier.padding(vertical = 12.dp))
-
-        // 用户信息区域
-        if (authState.isLoggedIn) {
-            UserInfoSection(
-                username = authState.displayName,
-                onLogout = { authViewModel.logout() }
-            )
-        } else {
-            GuestSection(
-                onLogin = { onNavigate("login") },
-                onRegister = { onNavigate("register") }
-            )
-        }
+        // 底部留出播放器高度的边距，避免被遮挡
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
@@ -142,14 +135,9 @@ private fun UserInfoSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Icon(
-            Icons.Default.Logout,
-            contentDescription = "退出登录",
-            modifier = Modifier
-                .size(20.dp)
-                .clickable { onLogout() },
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        TextButton(onClick = onLogout) {
+            Text("退出", fontSize = 12.sp)
+        }
     }
 }
 

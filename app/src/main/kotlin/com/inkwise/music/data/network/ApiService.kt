@@ -3,6 +3,7 @@ package com.inkwise.music.data.network
 import com.inkwise.music.data.network.model.AuthResponse
 import com.inkwise.music.data.network.model.HealthResponse
 import com.inkwise.music.data.network.model.LoginRequest
+import com.inkwise.music.data.network.model.MusicListResponse
 import com.inkwise.music.data.network.model.ProfileResponse
 import com.inkwise.music.data.network.model.RegisterRequest
 import retrofit2.Response
@@ -10,6 +11,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -24,4 +26,13 @@ interface ApiService {
 
     @GET("/health")
     suspend fun healthCheck(): Response<HealthResponse>
+
+    @GET("/music/list")
+    suspend fun getMusicList(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 50,
+        @Query("sort_by") sortBy: String? = null,
+        @Query("sort_order") sortOrder: String? = null
+    ): Response<MusicListResponse>
 }
