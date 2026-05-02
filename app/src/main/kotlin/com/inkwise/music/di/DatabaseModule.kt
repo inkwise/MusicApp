@@ -17,7 +17,9 @@ object DatabaseModule {
     @Singleton
     fun provideDb(
         @ApplicationContext ctx: Context,
-    ): MusicDatabase = Room.databaseBuilder(ctx, MusicDatabase::class.java, "music.db").build()
+    ): MusicDatabase = Room.databaseBuilder(ctx, MusicDatabase::class.java, "music.db")
+        .fallbackToDestructiveMigration()
+        .build()
 
     @Provides
     fun providePlaylistDao(db: MusicDatabase) = db.playlistDao()

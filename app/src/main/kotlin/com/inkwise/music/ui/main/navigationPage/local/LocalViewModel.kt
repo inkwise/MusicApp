@@ -22,6 +22,7 @@ class LocalViewModel
     @Inject
     constructor(
         private val musicRepository: MusicRepository,
+        private val songDao: com.inkwise.music.data.dao.SongDao,
     ) : ViewModel() {
         private val _localSongs = MutableStateFlow<List<Song>>(emptyList())
         val localSongs: StateFlow<List<Song>> = _localSongs.asStateFlow()
@@ -42,6 +43,12 @@ class LocalViewModel
         }
 
         /** 扫描本地音乐并更新 _localSongs */
+        fun deleteSong(song: Song) {
+            viewModelScope.launch {
+                songDao.deleteSong(song)
+            }
+        }
+
         fun scanSongs(context: Context) {
             if (_isScanning.value) return
 

@@ -30,7 +30,8 @@ data class CloudUiState(
 @HiltViewModel
 class CloudViewModel @Inject constructor(
     private val api: ApiService,
-    private val prefs: PreferencesManager
+    private val prefs: PreferencesManager,
+    private val songDao: com.inkwise.music.data.dao.SongDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CloudUiState())
@@ -61,6 +62,8 @@ class CloudViewModel @Inject constructor(
                     val songs = response.body()!!.data.map { item ->
                         mapToSong(item, serverUrl)
                     }
+                    // 保存到本地数据库以获取 ID
+                    songDao.insertSongs(songs)
                     _uiState.value = _uiState.value.copy(
                         songs = songs,
                         isLoading = false,
@@ -102,6 +105,8 @@ class CloudViewModel @Inject constructor(
                     val songs = response.body()!!.data.map { item ->
                         mapToSong(item, serverUrl)
                     }
+                    // 保存到本地数据库以获取 ID
+                    songDao.insertSongs(songs)
                     _uiState.value = _uiState.value.copy(
                         songs = songs,
                         isRefreshing = false,

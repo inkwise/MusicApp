@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,14 +29,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.inkwise.music.R
 import com.inkwise.music.ui.main.navigationPage.auth.LoginScreen
 import com.inkwise.music.ui.main.navigationPage.auth.RegisterScreen
+import com.inkwise.music.ui.main.navigationPage.auth.UserProfileScreen
 import com.inkwise.music.ui.main.navigationPage.cloud.CloudSongsScreen
 import com.inkwise.music.ui.main.navigationPage.home.HomeScreen
+import com.inkwise.music.ui.main.navigationPage.home.PlaylistDetailScreen
 import com.inkwise.music.ui.main.navigationPage.local.LocalSongsScreen
 import com.inkwise.music.ui.main.navigationPage.settings.SettingsScreen
 import com.inkwise.music.ui.theme.LocalAppDimens
@@ -126,6 +129,9 @@ fun NavigationContent(
                         HomeScreen(
                             onNavigateToLocal = { navController.navigate("local") },
                             onNavigateToCloud = { navController.navigate("cloud") },
+                            onNavigateToPlaylist = { id ->
+                                navController.navigate("playlist/$id")
+                            }
                         )
                     }
                     composable("local") {
@@ -162,6 +168,23 @@ fun NavigationContent(
                                 }
                             }
                         )
+                    }
+                    composable("profile") {
+                        UserProfileScreen(
+                            onLogout = {
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+                    composable(
+                        route = "playlist/{playlistId}",
+                        arguments = listOf(
+                            navArgument("playlistId") { type = NavType.LongType }
+                        )
+                    ) {
+                        PlaylistDetailScreen()
                     }
                 }
 

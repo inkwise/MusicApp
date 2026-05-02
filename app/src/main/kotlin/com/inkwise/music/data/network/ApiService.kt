@@ -3,7 +3,10 @@ package com.inkwise.music.data.network
 import com.inkwise.music.data.network.model.AuthResponse
 import com.inkwise.music.data.network.model.HealthResponse
 import com.inkwise.music.data.network.model.LoginRequest
+import com.inkwise.music.data.network.model.CreatePlaylistRequest
 import com.inkwise.music.data.network.model.MusicListResponse
+import com.inkwise.music.data.network.model.PlaylistListResponse
+import com.inkwise.music.data.network.model.PlaylistResponse
 import com.inkwise.music.data.network.model.ProfileResponse
 import com.inkwise.music.data.network.model.RegisterRequest
 import retrofit2.Response
@@ -35,4 +38,17 @@ interface ApiService {
         @Query("sort_by") sortBy: String? = null,
         @Query("sort_order") sortOrder: String? = null
     ): Response<MusicListResponse>
+
+    @POST("/playlists")
+    suspend fun createPlaylist(
+        @Header("Authorization") token: String,
+        @Body request: CreatePlaylistRequest
+    ): Response<PlaylistResponse>
+
+    @GET("/playlists")
+    suspend fun getPlaylists(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 50
+    ): Response<PlaylistListResponse>
 }

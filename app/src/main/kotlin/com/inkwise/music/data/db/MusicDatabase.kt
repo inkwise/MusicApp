@@ -13,13 +13,11 @@ import com.inkwise.music.data.model.Song
         PlaylistEntity::class,
         Song::class,
         PlaylistSongEntity::class,
-
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class MusicDatabase : RoomDatabase() {
     abstract fun playlistDao(): PlaylistDao
-
     abstract fun songDao(): SongDao
 }

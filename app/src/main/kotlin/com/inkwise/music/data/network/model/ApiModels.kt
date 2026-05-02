@@ -67,3 +67,28 @@ data class MusicListResponse(
     val data: List<MusicItem>,
     val pagination: Pagination
 )
+
+// 歌单
+data class CreatePlaylistRequest(
+    val name: String,
+    val description: String? = null
+)
+
+data class PlaylistItem(
+    val id: Long,
+    val name: String,
+    val description: String?,
+    val cover_url: String?,
+    val user_id: String?,
+    val created_at: String?
+)
+
+data class PlaylistResponse(
+    val message: String,
+    val playlist: PlaylistItem
+)
+
+data class PlaylistListResponse(
+    val data: List<PlaylistItem>,
+    val pagination: Pagination
+)

@@ -41,6 +41,7 @@ fun SongItem(
     isPlaying: Boolean,
     onClick: () -> Unit,
     addToQueue: () -> Unit,
+    onMoreClick: () -> Unit = {},
 ) {
     Box(
         modifier =
@@ -164,7 +165,7 @@ fun SongItem(
                 }
             }
             IconButton(
-                onClick = addToQueue,
+                onClick = onMoreClick,
                 modifier = Modifier.size(22.dp),
             ) {
                 Icon(
