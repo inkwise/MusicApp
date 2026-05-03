@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)  // ← 必须有这个！它是 android {} 的来源
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.dagger.hilt.android") version "2.48"  // 可以升到最新 2.52 或 2.57.1
+    id("com.google.dagger.hilt.android") version "2.59"
     alias(libs.plugins.ksp)  // 如果你已经加了 KSP
 }
 

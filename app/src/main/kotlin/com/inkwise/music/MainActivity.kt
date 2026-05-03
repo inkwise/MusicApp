@@ -20,19 +20,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.inkwise.music.ui.main.MainScreen
@@ -69,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     LocalAppDimens provides dimens,
                 ) {
                     Scaffold(modifier = Modifier.fillMaxSize()) {
-                        Box { AllFilesPermissionScreen() }
+                        Box { MainScreen() }
                     }
                 }
             }
@@ -96,25 +88,4 @@ fun requestAllFilesPermission(context: Context) {
             context.startActivity(intent)
         }
     }
-}
-
-@Composable
-fun AllFilesPermissionScreen() {
-    val context = LocalContext.current
-    var granted by remember { mutableStateOf(hasAllFilesPermission()) }
-
-    LaunchedEffect(Unit) {
-        granted = hasAllFilesPermission()
-    }
-
-    if (!granted) {
-        Button(onClick = {
-            requestAllFilesPermission(context)
-        }) {
-            Text("前往系统设置开启2")
-        }
-    } else {
-        MainScreen()
-    }
-    // }
 }

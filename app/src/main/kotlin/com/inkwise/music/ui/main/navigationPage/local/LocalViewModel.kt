@@ -2,11 +2,14 @@ package com.inkwise.music.ui.main.navigationPage.local
 
 import android.content.ContentUris
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Environment
 import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inkwise.music.audio.AudioAnalyzer
+import com.inkwise.music.data.dao.SongDao
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.data.repository.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -163,6 +167,105 @@ class LocalViewModel
                     e.printStackTrace()
                 } finally {
                     _isScanning.value = false
+                }
+            }
+        }
+
+        fun detailedScan(context: Context) {
+            if (_isScanning.value) return
+            val analyzer = AudioAnalyzer()
+
+            viewModelScope.launch(Dispatchers.IO) {
+                _isScanning.value = true
+                try {
+                    val songs = mutableListOf<Song>()
+                    val audioExtensions = setOf("mp3", "flac", "wav", "aac", "ogg", "m4a", "wma", "opus")
+                    val scanDirs = listOf(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
+                        File(Environment.getExternalStorageDirectory(), "Music"),
+                        File(Environment.getExternalStorageDirectory(), "Download"),
+                    )
+
+                    val retriever = MediaMetadataRetriever()
+
+                    for (dir in scanDirs) {
+                        scanDir(dir, audioExtensions, analyzer, retriever) { song ->
+                            songs += song
+                        }
+                    }
+
+                    _localSongs.value = songs
+                    musicRepository.saveScannedSongs(songs)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    _isScanning.value = false
+                }
+            }
+        }
+
+        private fun scanDir(
+            dir: File,
+            extensions: Set<String>,
+            analyzer: AudioAnalyzer,
+            retriever: MediaMetadataRetriever,
+            onSong: (Song) -> Unit,
+        ) {
+            val files = dir.listFiles() ?: return
+            for (file in files) {
+                if (file.isDirectory) {
+                    scanDir(file, extensions, analyzer, retriever, onSong)
+                } else if (file.extension.lowercase() in extensions) {
+                    try {
+                        retriever.setDataSource(file.absolutePath)
+
+                        val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+                            ?: file.nameWithoutExtension
+                        val artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "Unknown"
+                        val album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "Unknown"
+                        val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                        val duration = durationStr?.toLongOrNull() ?: 0L
+
+                        val analysis = try {
+                            analyzer.analyze(file.absolutePath)
+                        } catch (_: Exception) {
+                            ""
+                        }
+
+                        var codec = ""
+                        var sampleRate = 0
+                        var bitDepth = 0
+                        var channels = 0
+                        var bitrate = 0
+                        analysis.split(",").forEach { part ->
+                            val kv = part.split("=")
+                            if (kv.size == 2) {
+                                when (kv[0].trim()) {
+                                    "codec" -> codec = kv[1].trim()
+                                    "sample_rate" -> sampleRate = kv[1].trim().toIntOrNull() ?: 0
+                                    "bit_depth" -> bitDepth = kv[1].trim().toIntOrNull() ?: 0
+                                    "channels" -> channels = kv[1].trim().toIntOrNull() ?: 0
+                                    "bitrate" -> bitrate = kv[1].trim().toIntOrNull() ?: 0
+                                }
+                            }
+                        }
+
+                        val song = Song(
+                            title = title,
+                            artist = artist,
+                            album = album,
+                            duration = duration,
+                            codec = codec,
+                            sampleRate = sampleRate,
+                            bitDepth = bitDepth,
+                            channels = channels,
+                            bitrate = bitrate,
+                            uri = Uri.fromFile(file).toString(),
+                            path = file.absolutePath,
+                        )
+                        onSong(song)
+                    } catch (_: Exception) {
+                    }
                 }
             }
         }

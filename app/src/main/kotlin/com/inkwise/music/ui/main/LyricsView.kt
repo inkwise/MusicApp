@@ -293,7 +293,7 @@ fun LyricsView(
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val boxHeight = maxHeight
         val estimatedLineHeightDp = 56.dp
-        val verticalPadding = (boxHeight / 2) - (estimatedLineHeightDp / 2)
+        val verticalPadding = ((boxHeight / 2) - (estimatedLineHeightDp / 2)).coerceAtLeast(0.dp)
         Box(
             modifier =
                 Modifier
