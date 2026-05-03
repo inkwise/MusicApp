@@ -88,6 +88,24 @@ object MusicPlayerManager {
         controllerFuture?.addListener({
             mediaController = controllerFuture?.get()
             mediaController?.addListener(PlayerListener())
+            // 如果恢复时有队列但 controller 还没收到，现在推送
+            val queue = _playQueue.value
+            if (queue.isNotEmpty() && mediaController?.mediaItemCount == 0) {
+                val mediaItems = queue.map { song ->
+                    MediaItem.Builder()
+                        .setMediaId(song.id.toString())
+                        .setUri(song.uri)
+                        .setMediaMetadata(
+                            MediaMetadata.Builder()
+                                .setTitle(song.title)
+                                .setArtist(song.artist)
+                                .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
+                                .build()
+                        ).build()
+                }
+                mediaController?.setMediaItems(mediaItems, _currentIndex.value, 0)
+                mediaController?.prepare()
+            }
             if (pendingSeekPosition > 0) {
                 mediaController?.seekTo(pendingSeekPosition)
                 pendingSeekPosition = -1L
