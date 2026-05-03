@@ -1,6 +1,8 @@
 package com.inkwise.music.data.network
 
 import com.inkwise.music.data.network.model.AuthResponse
+import com.inkwise.music.data.network.model.DeleteMusicRequest
+import com.inkwise.music.data.network.model.DeleteMusicResponse
 import com.inkwise.music.data.network.model.HealthResponse
 import com.inkwise.music.data.network.model.LoginRequest
 import com.inkwise.music.data.network.model.CreatePlaylistRequest
@@ -13,6 +15,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.HTTP
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -51,4 +54,10 @@ interface ApiService {
         @Query("page") page: Int = 1,
         @Query("page_size") pageSize: Int = 50
     ): Response<PlaylistListResponse>
+
+    @HTTP(method = "DELETE", path = "/music", hasBody = true)
+    suspend fun deleteMusic(
+        @Header("Authorization") token: String,
+        @Body request: DeleteMusicRequest
+    ): Response<DeleteMusicResponse>
 }

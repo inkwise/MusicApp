@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -46,7 +47,11 @@ import com.inkwise.music.R
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.hasAllFilesPermission
 import com.inkwise.music.requestAllFilesPermission
+import com.inkwise.music.ui.main.navigationPage.components.MultiSelectBottomBar
+import com.inkwise.music.ui.main.navigationPage.components.PlaylistPickerSheet
 import com.inkwise.music.ui.main.navigationPage.components.SongActionSheet
+import com.inkwise.music.ui.main.navigationPage.components.SortBottomSheet
+import com.inkwise.music.ui.main.navigationPage.components.SortMode
 import com.inkwise.music.ui.main.navigationPage.home.HomeViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 
@@ -67,10 +72,18 @@ fun LocalSongsScreen(
     val playbackState by playerViewModel.playbackState.collectAsState()
     val songs by localViewModel.localSongs.collectAsState()
     val isScanning by localViewModel.isScanning.collectAsState()
+    val sortMode by localViewModel.sortMode.collectAsState()
     val playlists by homeViewModel.playlists.collectAsState()
     val pullToRefreshState = rememberPullToRefreshState()
+
     var actionSong by remember { mutableStateOf<Song?>(null) }
     var showScanDialog by remember { mutableStateOf(false) }
+    var showSortSheet by remember { mutableStateOf(false) }
+
+    // ── 多选状态 ──
+    var multiSelectMode by remember { mutableStateOf(false) }
+    var selectedIds by remember { mutableStateOf(setOf<Long>()) }
+    var showPlaylistPicker by remember { mutableStateOf(false) }
 
     val mediaPermissionLauncher =
         rememberLauncherForActivityResult(
@@ -83,7 +96,6 @@ fun LocalSongsScreen(
             }
         }
 
-    // ── 权限辅助 ──
     fun hasMediaPermission(): Boolean =
         ContextCompat.checkSelfPermission(context, mediaPermission) == PackageManager.PERMISSION_GRANTED
 
@@ -95,13 +107,21 @@ fun LocalSongsScreen(
         }
     }
 
+    fun toggleSelectAll() {
+        selectedIds = if (selectedIds.size == songs.size) emptySet() else songs.map { it.id }.toSet()
+    }
+
+    fun exitMultiSelect() {
+        multiSelectMode = false
+        selectedIds = emptySet()
+    }
+
+    val selectedSongs = songs.filter { it.id in selectedIds }
+
     Column(modifier = Modifier.fillMaxSize()) {
         if (songs.isEmpty() && !isScanning) {
-            // ── 空态：居中扫描按钮 ──
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+            // ── 空态 ──
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Button(onClick = { showScanDialog = true }) {
                     Text("扫描本地歌曲")
                 }
@@ -115,49 +135,73 @@ fun LocalSongsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = { playerViewModel.playSongsShuffle(songs) },
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_player_random),
-                            contentDescription = "随机播放",
-                            tint = Color.Black,
-                            modifier = Modifier.size(22.dp)
+                if (multiSelectMode) {
+                    // 多选工具栏
+                    TextButton(onClick = { toggleSelectAll() }) {
+                        Text(
+                            if (selectedIds.size == songs.size) "取消全选" else "全选",
+                            color = Color.Black
                         )
                     }
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = songs.size.toString())
-                }
-                Row {
-                    IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_sort),
-                            contentDescription = "排序",
-                            tint = Color.Black,
-                            modifier = Modifier.size(22.dp)
-                        )
+                    Text(
+                        text = "已选 ${selectedIds.size} 首",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    TextButton(onClick = { exitMultiSelect() }) {
+                        Text("取消", color = Color.Black)
                     }
-                    Spacer(modifier = Modifier.width(6.dp))
-                    IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_multiple_choice),
-                            contentDescription = "选择",
-                            tint = Color.Black,
-                            modifier = Modifier.size(22.dp)
-                        )
+                } else {
+                    // 普通工具栏
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = { playerViewModel.playSongsShuffle(songs) },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_player_random),
+                                contentDescription = "随机播放",
+                                tint = Color.Black,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(text = songs.size.toString())
+                    }
+                    Row {
+                        IconButton(
+                            onClick = { showSortSheet = true },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_sort),
+                                contentDescription = "排序",
+                                tint = Color.Black,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        IconButton(
+                            onClick = { multiSelectMode = true },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_multiple_choice),
+                                contentDescription = "选择",
+                                tint = Color.Black,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.padding(top = 6.dp))
 
-            // ── 下拉刷新列表 ──
+            // ── 列表 ──
             PullToRefreshBox(
                 isRefreshing = isScanning,
                 onRefresh = { requestScanOrPermission() },
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.weight(1f),
                 state = pullToRefreshState,
                 indicator = {
                     PullToRefreshDefaults.Indicator(
@@ -181,16 +225,68 @@ fun LocalSongsScreen(
                                 isPlaying = playbackState.currentSong?.id == song.id,
                                 onClick = { playerViewModel.playSongs(songs, index) },
                                 addToQueue = { playerViewModel.addToQueue(song) },
-                                onMoreClick = { actionSong = song }
+                                onMoreClick = { actionSong = song },
+                                multiSelectMode = multiSelectMode,
+                                isSelected = song.id in selectedIds,
+                                onToggleSelect = {
+                                    selectedIds = if (song.id in selectedIds)
+                                        selectedIds - song.id
+                                    else
+                                        selectedIds + song.id
+                                }
                             )
                         }
                     }
                 }
             }
+
+            // ── 多选底部栏 ──
+            if (multiSelectMode) {
+                MultiSelectBottomBar(
+                    selectedCount = selectedIds.size,
+                    onDelete = {
+                        localViewModel.deleteSongsPermanently(selectedSongs, context)
+                        Toast.makeText(context, "已删除 ${selectedIds.size} 首", Toast.LENGTH_SHORT).show()
+                        exitMultiSelect()
+                    },
+                    onAddToPlaylist = { showPlaylistPicker = true },
+                    onPlaySelected = {
+                        playerViewModel.playSongs(selectedSongs, 0)
+                        exitMultiSelect()
+                    }
+                )
+            }
         }
     }
 
-    // ── 扫描方式选择对话框 ──
+    // ── 排序面板 ──
+    if (showSortSheet) {
+        SortBottomSheet(
+            currentMode = sortMode,
+            onSelect = {
+                localViewModel.setSortMode(it)
+                showSortSheet = false
+            },
+            onDismiss = { showSortSheet = false }
+        )
+    }
+
+    // ── 歌单选择器 ──
+    if (showPlaylistPicker) {
+        PlaylistPickerSheet(
+            playlists = playlists,
+            onSelect = { playlistId ->
+                selectedIds.forEach { songId ->
+                    homeViewModel.addSongToPlaylist(playlistId, songId)
+                }
+                Toast.makeText(context, "已添加 ${selectedIds.size} 首到歌单", Toast.LENGTH_SHORT).show()
+                showPlaylistPicker = false
+            },
+            onDismiss = { showPlaylistPicker = false }
+        )
+    }
+
+    // ── 扫描对话框 ──
     if (showScanDialog) {
         AlertDialog(
             onDismissRequest = { showScanDialog = false },
@@ -219,7 +315,7 @@ fun LocalSongsScreen(
         )
     }
 
-    // ── 歌曲操作菜单 ──
+    // ── 单曲操作 ──
     actionSong?.let { song ->
         SongActionSheet(
             song = song,

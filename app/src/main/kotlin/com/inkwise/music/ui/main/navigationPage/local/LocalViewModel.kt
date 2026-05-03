@@ -2,6 +2,7 @@ package com.inkwise.music.ui.main.navigationPage.local
 
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Environment
@@ -12,11 +13,13 @@ import com.inkwise.music.audio.AudioAnalyzer
 import com.inkwise.music.data.dao.SongDao
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.data.repository.MusicRepository
+import com.inkwise.music.ui.main.navigationPage.components.SortMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -34,14 +37,64 @@ class LocalViewModel
         private val _isScanning = MutableStateFlow(false)
         val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
+        private val _sortMode = MutableStateFlow(SortMode.CUSTOM)
+        val sortMode: StateFlow<SortMode> = _sortMode.asStateFlow()
+
+        private val _rawSongs = MutableStateFlow<List<Song>>(emptyList())
+
         init {
             observeLocalSongs()
         }
 
         private fun observeLocalSongs() {
             viewModelScope.launch {
-                musicRepository.getLocalSongs().collect { songs ->
-                    _localSongs.value = songs
+                combine(
+                    musicRepository.getLocalSongs(),
+                    _sortMode
+                ) { songs, mode ->
+                    _rawSongs.value = songs
+                    applySort(songs, mode)
+                }.collect { sorted ->
+                    _localSongs.value = sorted
+                }
+            }
+        }
+
+        fun setSortMode(mode: SortMode) {
+            _sortMode.value = mode
+        }
+
+        private fun applySort(songs: List<Song>, mode: SortMode): List<Song> =
+            when (mode) {
+                SortMode.CUSTOM -> songs
+                SortMode.TITLE -> songs.sortedBy { it.title.lowercase() }
+                SortMode.ADDED_ASC -> songs.sortedBy { it.id }
+                SortMode.ADDED_DESC -> songs.sortedByDescending { it.id }
+            }
+
+        fun deleteSongsPermanently(songs: List<Song>, context: Context) {
+            viewModelScope.launch(Dispatchers.IO) {
+                for (song in songs) {
+                    try {
+                        // 从系统媒体库删除
+                        if (song.localId != null) {
+                            val uri = ContentUris.withAppendedId(
+                                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                song.localId
+                            )
+                            context.contentResolver.delete(uri, null, null)
+                        }
+                        // 也尝试直接删除文件
+                        if (song.path.isNotEmpty()) {
+                            val file = File(song.path)
+                            if (file.exists()) {
+                                file.delete()
+                            }
+                        }
+                    } catch (_: Exception) {
+                    }
+                    // 从数据库删除
+                    songDao.deleteSong(song)
                 }
             }
         }

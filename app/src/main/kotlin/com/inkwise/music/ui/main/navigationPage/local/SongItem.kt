@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,13 +45,18 @@ fun SongItem(
     onClick: () -> Unit,
     addToQueue: () -> Unit,
     onMoreClick: () -> Unit = {},
+    multiSelectMode: Boolean = false,
+    isSelected: Boolean = false,
+    onToggleSelect: () -> Unit = {},
 ) {
+    val itemClick: () -> Unit = if (multiSelectMode) onToggleSelect else onClick
+
     Box(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
-                .clickable(onClick = onClick),
+                .clickable(onClick = itemClick),
     )
     {
         Row(
@@ -58,6 +66,16 @@ fun SongItem(
                     .padding(2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (multiSelectMode) {
+                Icon(
+                    imageVector = if (isSelected) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                    contentDescription = if (isSelected) "已选" else "未选",
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable(onClick = onToggleSelect)
+                )
+            }
             Box(
                 modifier =
                     Modifier
@@ -143,37 +161,37 @@ fun SongItem(
                 }
             }
 
-            IconButton(
-                onClick = addToQueue,
-                modifier =
-                    Modifier
-                        .size(22.dp), // 整体按钮尺寸
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(12.dp) // 控制圆形大小
-                            .background(Color.White, CircleShape),
-                    contentAlignment = Alignment.Center,
+            if (!multiSelectMode) {
+                IconButton(
+                    onClick = addToQueue,
+                    modifier = Modifier.size(22.dp),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .background(Color.White, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add),
+                            contentDescription = "添加到队列",
+                            tint = Color.Black.copy(alpha = 0.5f),
+                            modifier = Modifier.size(10.dp),
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = onMoreClick,
+                    modifier = Modifier.size(22.dp),
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_add),
+                        painter = painterResource(id = R.drawable.ic_more_vert),
                         contentDescription = "菜单",
                         tint = Color.Black.copy(alpha = 0.5f),
-                        modifier = Modifier.size(10.dp),
+                        modifier = Modifier.size(18.dp),
                     )
                 }
-            }
-            IconButton(
-                onClick = onMoreClick,
-                modifier = Modifier.size(22.dp),
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_more_vert),
-                    contentDescription = "菜单",
-                    tint = Color.Black.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp),
-                )
             }
         }
     }

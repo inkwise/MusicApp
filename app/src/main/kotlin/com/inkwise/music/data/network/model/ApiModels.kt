@@ -92,3 +92,12 @@ data class PlaylistListResponse(
     val data: List<PlaylistItem>,
     val pagination: Pagination
 )
+
+data class DeleteMusicRequest(
+    val ids: List<Long>
+)
+
+data class DeleteMusicResponse(
+    val message: String,
+    val deleted_count: Int? = null
+)

@@ -15,8 +15,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class CloudSortBy(val label: String, val apiField: String) {
-    CREATED_AT("时间排序", "created_at"),
-    TITLE("首字母排序", "title")
+    CUSTOM("自定义", ""),
+    TITLE("标题首字母", "title"),
+    CREATED_ASC("添加时间正序", "created_at"),
+    CREATED_DESC("添加时间倒序", "created_at")
 }
 
 data class CloudUiState(
@@ -24,8 +26,8 @@ data class CloudUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val error: String? = null,
-    val sortBy: CloudSortBy = CloudSortBy.CREATED_AT,
-    val sortOrderAsc: Boolean = false
+    val sortBy: CloudSortBy = CloudSortBy.CUSTOM,
+    val sortOrderAsc: Boolean = true
 )
 
 @HiltViewModel
@@ -87,12 +89,13 @@ class CloudViewModel @Inject constructor(
     private suspend fun fetchAndSaveSongs(token: String?, serverUrl: String): List<Song> {
         val sortBy = _uiState.value.sortBy
         val sortOrder = if (_uiState.value.sortOrderAsc) "asc" else "desc"
+        val sortField = if (sortBy == CloudSortBy.CUSTOM) null else sortBy.apiField
 
         val response = api.getMusicList(
             token = "Bearer ${token ?: ""}",
             page = 1,
             pageSize = 200,
-            sortBy = sortBy.apiField,
+            sortBy = sortField,
             sortOrder = sortOrder
         )
 
@@ -120,12 +123,37 @@ class CloudViewModel @Inject constructor(
     }
 
     fun setSortBy(sortBy: CloudSortBy) {
-        if (_uiState.value.sortBy == sortBy) {
-            _uiState.value = _uiState.value.copy(sortOrderAsc = !_uiState.value.sortOrderAsc)
-        } else {
-            _uiState.value = _uiState.value.copy(sortBy = sortBy, sortOrderAsc = false)
+        val asc = when (sortBy) {
+            CloudSortBy.CUSTOM -> true
+            CloudSortBy.TITLE -> true
+            CloudSortBy.CREATED_ASC -> true
+            CloudSortBy.CREATED_DESC -> false
         }
+        _uiState.value = _uiState.value.copy(sortBy = sortBy, sortOrderAsc = asc)
         loadSongs()
+    }
+
+    fun deleteCloudSongs(songIds: List<Long>) {
+        viewModelScope.launch {
+            try {
+                val token = prefs.authToken.first()
+                val cloudIds = songIds.mapNotNull { id ->
+                    songDao.getSongById(id)?.cloudId
+                }
+                if (cloudIds.isNotEmpty()) {
+                    api.deleteMusic(
+                        token = "Bearer ${token ?: ""}",
+                        request = com.inkwise.music.data.network.model.DeleteMusicRequest(ids = cloudIds)
+                    )
+                }
+                // 删除本地记录
+                for (id in songIds) {
+                    songDao.deleteSongById(id)
+                }
+            } catch (_: Exception) {
+            }
+            loadSongs()
+        }
     }
 
     private fun mapToSong(
