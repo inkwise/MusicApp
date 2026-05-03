@@ -61,10 +61,11 @@ fun NavigationContent(
     val dimens = LocalAppDimens.current
     val peekHeight = rememberSheetPeekHeight(dimens.sheetPeekHeightDp)
 
-    // 监听登录需求事件
+    // 监听登录需求事件，跳转时清除触发页避免返回循环
     LaunchedEffect(Unit) {
         viewModel.loginRequiredEvents.collect {
             navController.navigate("login") {
+                popUpTo("home") { inclusive = false }
                 launchSingleTop = true
             }
         }
