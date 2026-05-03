@@ -3,7 +3,6 @@ package com.inkwise.music.ui.player
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inkwise.music.data.dao.SongDao
 import com.inkwise.music.data.lyrics.LyricsSynchronizer
 import com.inkwise.music.data.model.LyricHighlight
 import com.inkwise.music.data.model.LyricLine
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -40,7 +38,6 @@ class PlayerViewModel
         private val repository: MusicRepository,
         private val lyricsRepository: LyricsRepository,
         private val prefs: PreferencesManager,
-        private val songDao: SongDao,
     ) : ViewModel() {
 
         private var saveJob: Job? = null
@@ -72,26 +69,8 @@ class PlayerViewModel
             )
 
         init {
-            restorePlaybackState()
             observeCurrentSong()
             observePlayback()
-        }
-
-        private fun restorePlaybackState() {
-            viewModelScope.launch {
-                val saved = prefs.savedPlaybackState.first()
-                if (saved.queueIds.isEmpty()) return@launch
-
-                // 从数据库还原歌曲对象
-                val songs = saved.queueIds.mapNotNull { songDao.getSongById(it) }
-                if (songs.isEmpty()) return@launch
-
-                val index = saved.currentIndex.coerceIn(0, songs.lastIndex)
-                MusicPlayerManager.setPlayQueue(songs, index)
-                if (saved.lastPosition > 0) {
-                    MusicPlayerManager.seekTo(saved.lastPosition)
-                }
-            }
         }
 
         private fun startPeriodicSave() {

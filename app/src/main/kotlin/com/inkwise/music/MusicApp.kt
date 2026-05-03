@@ -14,20 +14,40 @@ import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import android.widget.ScrollView
 import android.widget.TextView
+import com.inkwise.music.di.MusicAppEntryPoint
 import com.inkwise.music.player.MusicPlayerManager
+import dagger.hilt.EntryPoints
 import dagger.hilt.android.HiltAndroidApp
 import java.io.*
 import java.lang.Thread.UncaughtExceptionHandler
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 @HiltAndroidApp
 class MusicApp : Application() {
     override fun onCreate() {
         super.onCreate()
         MusicPlayerManager.init(this)
+        restoreSavedPlaybackState()
         CrashHandler.instance.registerGlobal(this)
+    }
+
+    private fun restoreSavedPlaybackState() {
+        val entryPoint = EntryPoints.get(this, MusicAppEntryPoint::class.java)
+        val prefs = entryPoint.prefsManager
+        val songDao = entryPoint.songDao
+
+        runBlocking {
+            val saved = prefs.savedPlaybackState.first()
+            if (saved.queueIds.isEmpty()) return@runBlocking
+            val songs = saved.queueIds.mapNotNull { songDao.getSongById(it) }
+            if (songs.isNotEmpty()) {
+                MusicPlayerManager.restorePlaybackState(songs, saved.currentIndex, saved.lastPosition)
+            }
+        }
     }
 
     companion object {

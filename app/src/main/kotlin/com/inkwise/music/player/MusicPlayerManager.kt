@@ -54,10 +54,26 @@ object MusicPlayerManager {
     private val _sleepRemaining = MutableStateFlow<Long?>(null)
     val sleepRemaining: StateFlow<Long?> = _sleepRemaining
 
+    // 待恢复的进度（controller 就绪后执行 seek）
+    private var pendingSeekPosition: Long = -1L
+
     fun init(context: Context) {
         if (!::appContext.isInitialized) {
             appContext = context.applicationContext
             initializeController()
+        }
+    }
+
+    fun restorePlaybackState(
+        songs: List<Song>,
+        index: Int,
+        position: Long,
+    ) {
+        if (songs.isEmpty()) return
+        val safeIndex = index.coerceIn(0, songs.lastIndex)
+        setPlayQueue(songs, safeIndex)
+        if (position > 0) {
+            pendingSeekPosition = position
         }
     }
 
@@ -72,6 +88,10 @@ object MusicPlayerManager {
         controllerFuture?.addListener({
             mediaController = controllerFuture?.get()
             mediaController?.addListener(PlayerListener())
+            if (pendingSeekPosition > 0) {
+                mediaController?.seekTo(pendingSeekPosition)
+                pendingSeekPosition = -1L
+            }
         }, MoreExecutors.directExecutor())
     }
 
