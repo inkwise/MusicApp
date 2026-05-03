@@ -103,11 +103,9 @@ object MusicPlayerManager {
                                 .build()
                         ).build()
                 }
-                mediaController?.setMediaItems(mediaItems, _currentIndex.value, 0)
+                val startPos = if (pendingSeekPosition > 0) pendingSeekPosition else 0L
+                mediaController?.setMediaItems(mediaItems, _currentIndex.value, startPos)
                 mediaController?.prepare()
-            }
-            if (pendingSeekPosition > 0) {
-                mediaController?.seekTo(pendingSeekPosition)
                 pendingSeekPosition = -1L
             }
         }, MoreExecutors.directExecutor())
