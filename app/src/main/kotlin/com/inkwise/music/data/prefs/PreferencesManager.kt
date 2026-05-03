@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -13,6 +15,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+data class SavedPlaybackState(
+    val queueIds: List<Long> = emptyList(),
+    val currentIndex: Int = 0,
+    val lastPosition: Long = 0L
+)
 
 @Singleton
 class PreferencesManager @Inject constructor(
@@ -24,6 +32,11 @@ class PreferencesManager @Inject constructor(
         private val KEY_USERNAME = stringPreferencesKey("username")
         private val KEY_EMAIL = stringPreferencesKey("email")
         private val KEY_USER_ID = stringPreferencesKey("user_id")
+
+        private val KEY_QUEUE_IDS = stringPreferencesKey("queue_ids")
+        private val KEY_QUEUE_INDEX = intPreferencesKey("queue_index")
+        private val KEY_LAST_POSITION = longPreferencesKey("last_position")
+
         const val DEFAULT_SERVER_URL = "http://10.0.2.2:8080/api/v1"
     }
 
@@ -70,6 +83,32 @@ class PreferencesManager @Inject constructor(
             prefs.remove(KEY_USERNAME)
             prefs.remove(KEY_EMAIL)
             prefs.remove(KEY_USER_ID)
+        }
+    }
+
+    // ── 播放状态持久化 ──
+
+    val savedPlaybackState: Flow<SavedPlaybackState> = context.dataStore.data.map { prefs ->
+        val idsStr = prefs[KEY_QUEUE_IDS] ?: ""
+        val ids = if (idsStr.isBlank()) emptyList() else idsStr.split(",").mapNotNull { it.toLongOrNull() }
+        SavedPlaybackState(
+            queueIds = ids,
+            currentIndex = prefs[KEY_QUEUE_INDEX] ?: 0,
+            lastPosition = prefs[KEY_LAST_POSITION] ?: 0L
+        )
+    }
+
+    suspend fun savePlaybackState(state: SavedPlaybackState) {
+        context.dataStore.edit { prefs ->
+            if (state.queueIds.isEmpty()) {
+                prefs.remove(KEY_QUEUE_IDS)
+                prefs.remove(KEY_QUEUE_INDEX)
+                prefs.remove(KEY_LAST_POSITION)
+            } else {
+                prefs[KEY_QUEUE_IDS] = state.queueIds.joinToString(",")
+                prefs[KEY_QUEUE_INDEX] = state.currentIndex
+                prefs[KEY_LAST_POSITION] = state.lastPosition
+            }
         }
     }
 }

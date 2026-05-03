@@ -3,6 +3,7 @@ package com.inkwise.music.ui.player
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inkwise.music.data.dao.SongDao
 import com.inkwise.music.data.lyrics.LyricsSynchronizer
 import com.inkwise.music.data.model.LyricHighlight
 import com.inkwise.music.data.model.LyricLine
@@ -12,17 +13,23 @@ import com.inkwise.music.data.model.LyricsUiState
 import com.inkwise.music.data.model.PlaybackState
 import com.inkwise.music.data.model.SleepMode
 import com.inkwise.music.data.model.Song
+import com.inkwise.music.data.prefs.PreferencesManager
+import com.inkwise.music.data.prefs.SavedPlaybackState
 import com.inkwise.music.data.repository.LyricsRepository
 import com.inkwise.music.data.repository.MusicRepository
 import com.inkwise.music.player.MusicPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +39,11 @@ class PlayerViewModel
     constructor(
         private val repository: MusicRepository,
         private val lyricsRepository: LyricsRepository,
+        private val prefs: PreferencesManager,
+        private val songDao: SongDao,
     ) : ViewModel() {
+
+        private var saveJob: Job? = null
         val playbackState: StateFlow<PlaybackState> = MusicPlayerManager.playbackState
         val playQueue: StateFlow<List<Song>> = MusicPlayerManager.playQueue
         val currentIndex: StateFlow<Int> = MusicPlayerManager.currentIndex
@@ -61,8 +72,57 @@ class PlayerViewModel
             )
 
         init {
+            restorePlaybackState()
             observeCurrentSong()
             observePlayback()
+        }
+
+        private fun restorePlaybackState() {
+            viewModelScope.launch {
+                val saved = prefs.savedPlaybackState.first()
+                if (saved.queueIds.isEmpty()) return@launch
+
+                // 从数据库还原歌曲对象
+                val songs = saved.queueIds.mapNotNull { songDao.getSongById(it) }
+                if (songs.isEmpty()) return@launch
+
+                val index = saved.currentIndex.coerceIn(0, songs.lastIndex)
+                MusicPlayerManager.setPlayQueue(songs, index)
+                if (saved.lastPosition > 0) {
+                    MusicPlayerManager.seekTo(saved.lastPosition)
+                }
+            }
+        }
+
+        private fun startPeriodicSave() {
+            if (saveJob != null) return
+            saveJob = viewModelScope.launch {
+                while (isActive) {
+                    delay(5_000)
+                    saveCurrentState()
+                }
+            }
+        }
+
+        private fun stopPeriodicSave() {
+            saveJob?.cancel()
+            saveJob = null
+            // 停止时最后保存一次
+            viewModelScope.launch { saveCurrentState() }
+        }
+
+        private suspend fun saveCurrentState() {
+            val queue = MusicPlayerManager.playQueue.value
+            val index = MusicPlayerManager.currentIndex.value
+            val position = MusicPlayerManager.playbackState.value.currentPosition
+            if (queue.isEmpty()) return
+            prefs.savePlaybackState(
+                SavedPlaybackState(
+                    queueIds = queue.map { it.id },
+                    currentIndex = index,
+                    lastPosition = position
+                )
+            )
         }
 
         private fun observeCurrentSong() {
@@ -85,9 +145,17 @@ class PlayerViewModel
         private fun observePlayback() {
             viewModelScope.launch {
                 playbackState.collect { state ->
-                    val sync = synchronizer ?: return@collect
-                    val highlight = sync.findHighlight(state.currentPosition) // ✅ Long 类型
-                    _lyricsState.value = _lyricsState.value.copy(highlight = highlight)
+                    val sync = synchronizer
+                    if (sync != null) {
+                        val highlight = sync.findHighlight(state.currentPosition)
+                        _lyricsState.value = _lyricsState.value.copy(highlight = highlight)
+                    }
+                    // 根据播放状态控制定时保存
+                    if (state.isPlaying) {
+                        startPeriodicSave()
+                    } else {
+                        stopPeriodicSave()
+                    }
                 }
             }
         }
@@ -112,6 +180,7 @@ class PlayerViewModel
         ) {
             MusicPlayerManager.setPlayQueue(songs, startIndex)
             MusicPlayerManager.play()
+            viewModelScope.launch { saveCurrentState() }
         }
 
         // 播放/暂停
@@ -142,6 +211,7 @@ class PlayerViewModel
         // 随机播放
         fun playSongsShuffle(songs: List<Song>) {
             MusicPlayerManager.setPlayQueueShuffle(songs)
+            viewModelScope.launch { saveCurrentState() }
         }
 
         // 切换循环模式
@@ -152,6 +222,7 @@ class PlayerViewModel
         // 添加到播放队列
         fun addToQueue(song: Song) {
             MusicPlayerManager.addToQueue(song)
+            viewModelScope.launch { saveCurrentState() }
         }
 
         // 从队列移除
@@ -161,7 +232,7 @@ class PlayerViewModel
 
         override fun onCleared() {
             super.onCleared()
-            // MusicPlayerManager.release()
+            stopPeriodicSave()
         }
 
         fun startSleepTimer(
