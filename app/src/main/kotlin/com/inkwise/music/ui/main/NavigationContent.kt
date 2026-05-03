@@ -61,6 +61,15 @@ fun NavigationContent(
     val dimens = LocalAppDimens.current
     val peekHeight = rememberSheetPeekHeight(dimens.sheetPeekHeightDp)
 
+    // 监听登录需求事件
+    LaunchedEffect(Unit) {
+        viewModel.loginRequiredEvents.collect {
+            navController.navigate("login") {
+                launchSingleTop = true
+            }
+        }
+    }
+
     LaunchedEffect(uiState.sidebarOpen) {
         if (uiState.sidebarOpen) {
             drawerState.open()

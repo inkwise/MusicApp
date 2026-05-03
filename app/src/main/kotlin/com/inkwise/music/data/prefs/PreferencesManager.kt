@@ -10,6 +10,10 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,6 +65,16 @@ class PreferencesManager @Inject constructor(
     }
 
     val isLoggedIn: Flow<Boolean> = authToken.map { !it.isNullOrEmpty() }
+
+    // ── 登录需求事件 ──
+    private val _loginRequiredEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val loginRequiredEvents: SharedFlow<Unit> = _loginRequiredEvents.asSharedFlow()
+
+    fun requireLogin() {
+        _loginRequiredEvents.tryEmit(Unit)
+    }
+
+    suspend fun isLoggedInNow(): Boolean = isLoggedIn.first()
 
     suspend fun setServerUrl(url: String) {
         context.dataStore.edit { prefs ->

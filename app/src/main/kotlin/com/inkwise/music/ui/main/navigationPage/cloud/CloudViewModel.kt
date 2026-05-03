@@ -46,6 +46,11 @@ class CloudViewModel @Inject constructor(
 
     fun loadSongs() {
         viewModelScope.launch {
+            if (!prefs.isLoggedInNow()) {
+                prefs.requireLogin()
+                _uiState.value = _uiState.value.copy(isLoading = false)
+                return@launch
+            }
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
                 val token = prefs.authToken.first()
@@ -67,6 +72,10 @@ class CloudViewModel @Inject constructor(
 
     fun refresh() {
         viewModelScope.launch {
+            if (!prefs.isLoggedInNow()) {
+                prefs.requireLogin()
+                return@launch
+            }
             _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
             try {
                 val token = prefs.authToken.first()
@@ -135,6 +144,10 @@ class CloudViewModel @Inject constructor(
 
     fun deleteCloudSongs(songIds: List<Long>) {
         viewModelScope.launch {
+            if (!prefs.isLoggedInNow()) {
+                prefs.requireLogin()
+                return@launch
+            }
             try {
                 val token = prefs.authToken.first()
                 val cloudIds = songIds.mapNotNull { id ->

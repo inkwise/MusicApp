@@ -36,12 +36,12 @@ class HomeViewModel @Inject constructor(
 
     fun createPlaylist(title: String) {
         viewModelScope.launch {
-            val token = prefs.authToken.first()
-            val isLoggedIn = !token.isNullOrEmpty()
+            val isLoggedIn = prefs.isLoggedInNow()
 
             if (isLoggedIn) {
                 // 尝试云端创建
                 try {
+                    val token = prefs.authToken.first()
                     val response = api.createPlaylist(
                         token = "Bearer $token",
                         request = CreatePlaylistRequest(name = title)
