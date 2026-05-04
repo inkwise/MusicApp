@@ -16,6 +16,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.inkwise.music.di.MusicAppEntryPoint
 import com.inkwise.music.player.MusicPlayerManager
+import com.tencent.mmkv.MMKV
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.HiltAndroidApp
 import java.io.*
@@ -30,7 +31,13 @@ import kotlinx.coroutines.runBlocking
 class MusicApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        MusicPlayerManager.init(this)
+        MMKV.initialize(this)
+
+        val entryPoint = EntryPoints.get(this, MusicAppEntryPoint::class.java)
+        // 设置全局 Coil ImageLoader，自动为图片请求添加 Bearer token
+        coil.Coil.setImageLoader(entryPoint.imageLoader)
+
+        MusicPlayerManager.init(this, entryPoint.prefsManager, entryPoint.audioEffectManager)
         restoreSavedPlaybackState()
         CrashHandler.instance.registerGlobal(this)
     }
@@ -41,6 +48,9 @@ class MusicApp : Application() {
         val songDao = entryPoint.songDao
 
         runBlocking {
+            // 恢复缓存的 token 供图片加载器等同步读取
+            prefs.restoreCachedToken(prefs.authToken.first())
+            prefs.restorePlaybackPreferences()
             val saved = prefs.savedPlaybackState.first()
             if (saved.queueIds.isEmpty()) return@runBlocking
             val songs = saved.queueIds.mapNotNull { songDao.getSongById(it) }

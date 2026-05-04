@@ -41,12 +41,13 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.inkwise.music.ui.player.PlayerViewModel
+import com.inkwise.music.ui.theme.extractDominantColor
 import com.inkwise.music.ui.theme.harmonizeToPlayerBackground
+import com.inkwise.music.ui.theme.isColorDark
 import com.inkwise.music.ui.theme.toSoftBackground
 import kotlinx.coroutines.launch
 
@@ -128,19 +129,10 @@ fun playerScreen(
             val drawable = success.result.drawable
             val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return@AsyncImage
 
-            Palette.from(bitmap).generate { palette ->
-                palette?.let { p ->
-                    // 优先取有活力的颜色作为主色，取不到再退化
-                    val pickedColor =
-                        p.getVibrantColor(
-                            p.getMutedColor(
-                                p.getDominantColor(android.graphics.Color.GRAY),
-                            ),
-                        )
-                    primaryColor = Color(pickedColor)
-                    themeColor = harmonizeToPlayerBackground(pickedColor)
-                }
-            }
+            // 方案B：自定义直方图取色算法
+            val dominantColor = extractDominantColor(bitmap)
+            primaryColor = Color(dominantColor)
+            themeColor = harmonizeToPlayerBackground(dominantColor)
         },
     )
 

@@ -1,0 +1,349 @@
+======================================================================
+  Salt Player v11.0.4 - 音频输出功能实现原理分析
+======================================================================
+
+【项目概况】
+  包名: com.salt.music
+  项目类型: APK反编译 (smali代码 + native库)
+  核心音频引擎: Un4seen BASS 2.4 (http://www.un4seen.com/bass.html)
+  配置存储: Tencent MMKV
+
+【使用的库一览】
+
+  ┌─────────────────────┬──────────┬────────────────────────────────┐
+  │ 库名称               │ 类型     │ 说明                           │
+  ├─────────────────────┼──────────┼────────────────────────────────┤
+  │ BASS                 │ 公开库   │ 音频引擎核心，版本2.4，商业授权  │
+  │ BASS_FX              │ 公开库   │ BASS效果扩展(DSP/变速/混响等)  │
+  │ BASSloud             │ 公开库   │ BASS响度测量(EBU R128等)       │
+  │ BASSDSD              │ 公开库   │ BASS DSD格式解码插件           │
+  │ BASSFLAC             │ 公开库   │ BASS FLAC格式插件              │
+  │ BASSAPE              │ 公开库   │ BASS APE格式插件               │
+  │ BASSALAC             │ 公开库   │ BASS ALAC格式插件              │
+  │ BASSWV               │ 公开库   │ BASS WavPack格式插件           │
+  │ BASSOPUS             │ 公开库   │ BASS Opus格式插件              │
+  │ BASS_AAC             │ 公开库   │ BASS AAC格式插件               │
+  │ libsalt-bassfx.so    │ 作者自写 │ 封装BASS FX的native层          │
+  │ libsalt-bassplayer.so│ 作者自写 │ 封装BASS播放器的native层       │
+  │ libsalt-tag.so       │ 作者自写 │ 音频标签读取native层           │
+  │ libext-dsd.so        │ 作者自写 │ DSD解码扩展(可能基于FFmpeg)    │
+  │ libext-flac.so       │ 作者自写 │ FLAC解码扩展                   │
+  │ libext-aac.so        │ 作者自写 │ AAC解码扩展                    │
+  │ libext-alac.so       │ 作者自写 │ ALAC解码扩展                   │
+  │ libext-ape.so        │ 作者自写 │ APE解码扩展                    │
+  │ libext-opus.so       │ 作者自写 │ Opus解码扩展                   │
+  │ libext-wv.so         │ 作者自写 │ WavPack解码扩展                │
+  │ libepic.so           │ 作者自写 │ 未知用途(可能是EQ相关)         │
+  │ libexp82464.so       │ 作者自写 │ 未知用途(可能是扩展精度)       │
+  │ MMKV                 │ 公开库   │ Tencent开源KV存储(配置持久化)  │
+  │ Kotlin Coroutines    │ 公开库   │ 异步/协程框架                  │
+  └─────────────────────┴──────────┴────────────────────────────────┘
+
+【核心类映射 (反混淆后)】
+
+  androidx/core/ڻ.smali  → PlayerEngine / AudioPlayerManager (音频播放核心)
+  androidx/core/Ė.smali  → AudioOutputSettingsScreen (音频输出设置UI)
+  androidx/core/ka1.smali → SongLoader / TrackLoader (歌曲加载+增益处理)
+  com/salt/music/player/bass/Ԩ.smali → ParametricEQManager (参量均衡器)
+  com/salt/music/player/bass/ParametricEQ.smali → ParametricEQ (均衡器数据类)
+
+======================================================================
+  一、压限器 (Compressor)
+======================================================================
+
+【功能说明】
+  动态调整音量电平，使大声段落更安静、安静段落更响亮，实现动态范围控制。
+
+【实现方式】
+  使用 BASS_FX 库的 BASS_BFX_COMPRESSOR2 效果器。
+
+  代码位置:  smali/androidx/core/ڻ.smali
+  方法:      ԭ(Z)V  (即 toggleCompressor / setCompressorEnabled)
+
+  核心调用链:
+  1. 开启: BASS_ChannelSetFX(streamHandle, BASS_FX_BFX_COMPRESSOR2, 0)
+     - 效果ID: 0x10011
+     - 返回: FX效果句柄 (存储在字段 ސ)
+
+  2. 关闭: BASS_ChannelRemoveFX(streamHandle, fxHandle)
+
+  参数结构体: BASS_FX$BASS_BFX_COMPRESSOR2
+    字段         类型    说明               BASS文档参考值
+    ─────────────────────────────────────────────────────
+    fThreshold   float   阈值电平(dB)        典型: -20 ~ 0 dB
+    fGain        float   增益补偿(dB)        典型: 0 ~ 20 dB
+    fRatio       float   压缩比              典型: 1.0 ~ 50.0
+    fAttack      float   启动时间(ms)        典型: 0.01 ~ 1000 ms
+    fRelease     float   释放时间(ms)        典型: 0.01 ~ 5000 ms
+    lChannel     int     应用声道             -1 = 所有声道
+
+【使用的库】
+  BASS_FX (Un4seen BASS扩展库) — 公开库，需要商业授权
+
+【参数来源】
+  用户在"音频输出"设置页面开启/关闭压限器开关，
+  配置以 "enabled_bass_fx_compressor2" 键存储在 MMKV 中。
+  压缩器使用 BASS 默认参数(代码中未自定义参数值，按 BASS 默认值执行)。
+
+======================================================================
+  二、DSD音频增益 (DSD Audio Gain, 0-12dB)
+======================================================================
+
+【功能说明】
+  调整DSD (Direct Stream Digital) 音频格式播放时的增益补偿，
+  范围 0 ~ 12 dB，用于解决DSD文件回放音量偏低的问题。
+
+【实现方式】
+  使用 BASS 核心的 BASS_SetConfig API，设置 DSD 增益配置。
+
+  代码位置:  smali/androidx/core/ڻ.smali (static constructor <clinit>)
+
+  核心调用:
+  BASS_SetConfig(0x10801, gainValue)
+
+  配置ID: 0x10801 (BASS_CONFIG_DSD_GAIN 或类似配置)
+  从 MMKV 读取 "dsd_audio_gain" 键获取值 (默认值: 6 dB)
+  设置时机: BASS 引擎初始化时(static构造函数中)
+
+【使用的库】
+  BASS + BASSDSD — BASS核心(公开) + BASSDSD解码插件(公开)
+
+【参数】
+  - 配置键: dsd_audio_gain
+  - 取值范围: 0 ~ 12 (整数，单位dB)
+  - 默认值: 6
+  - API配置ID: 0x10801
+
+======================================================================
+  三、DSP变速播放 (0.25x ~ 8x Speed)
+======================================================================
+
+【功能说明】
+  不改变音高(pitch)的前提下改变播放速度，支持 0.25倍 ~ 8倍速。
+
+【实现方式】
+  使用 BASS_FX 库的 Tempo 流效果。
+
+  代码位置:  smali/androidx/core/ڻ.smali
+
+  核心调用链:
+  1. 创建Tempo流:
+     BASS_FX_TempoCreate(decodedStreamHandle, BASS_FX_FREESOURCE)
+     → 生成带变速功能的stream (BASS_CTYPE_STREAM_TEMPO = 0x1f200)
+
+  2. 设置播放速度:
+     BASS_ChannelSetAttribute(tempoStreamHandle, BASS_ATTRIB_TEMPO, speedPercent)
+     其中: BASS_ATTRIB_TEMPO = 0x10000
+     speedPercent = (目标速度倍率 - 1.0) * 100
+     例如: 2倍速 → (2.0 - 1.0) * 100 = 100
+
+  3. 抗锯齿滤波器 (Anti-Alias Filter):
+     BASS_ChannelSetAttribute(handle, BASS_ATTRIB_TEMPO_OPTION_USE_AA_FILTER, 1.0)
+     配置ID: 0x10010
+     开关由 "anti_alias_filter" MMKV键控制
+
+  方法:
+  - ՠ(F) → 设置速度 (即 setSpeed / setTempoRate)
+    BASS_ChannelSetAttribute(handle, 0x10000, (speed - 1.0) * 100)
+  - Ԭ(Z) → 设置抗锯齿滤波器开关 (即 setAntiAliasFilter)
+    BASS_ChannelSetAttribute(handle, 0x10010, enabled ? 1.0 : 0.0)
+
+【使用的库】
+  BASS_FX — 公开库
+
+【参数】
+  - BASS_ATTRIB_TEMPO (0x10000): 速度百分比，-90 ~ 5000 (对应0.1x~50x)
+  - BASS_ATTRIB_TEMPO_OPTION_USE_AA_FILTER (0x10010): 抗锯齿滤波开关，0或1
+  - 抗锯齿滤波器相关选项:
+    * 0x10011: AA_FILTER_LENGTH (滤波器长度)
+    * 0x10012: USE_QUICKALGO (快速算法)
+    * 0x10013: SEQUENCE_MS (序列长度ms)
+    * 0x10014: SEEKWINDOW_MS (搜索窗口ms)
+    * 0x10015: OVERLAP_MS (重叠ms)
+    * 0x10016: PREVENT_CLICK (防止点击噪声)
+
+======================================================================
+  四、MaxAudio音乐厅氛围 (Concert Hall Atmosphere)
+======================================================================
+
+【功能说明】
+  模拟音乐厅/音乐厅的混响氛围效果，增加空间感和临场感。
+
+【实现方式】
+  使用 BASS_FX 库的 BASS_BFX_FREEVERB (Freeverb混响算法) 效果器。
+  -- 注意：标签为"MaxAudio"但实际使用的是BASS内置Freeverb效果器，
+     并非真正的 Waves MaxxAudio 技术。
+
+  代码位置:  smali/androidx/core/ڻ.smali
+  方法:      Ԯ(Z)V (即 toggleConcertHallAtmosphere)
+
+  核心调用链:
+  1. 开启:
+     BASS_ChannelSetFX(streamHandle, BASS_FX_BFX_FREEVERB, 0)
+     → 效果ID: 0x10016
+
+  2. 设置参数:
+     BASS_FXSetParameters(fxHandle, freeverbParams)
+
+  参数设置 (在代码中硬编码):
+     ┌──────────────┬──────────┬───────────────────────────┐
+     │ 参数          │ 值       │ BASS说明                  │
+     ├──────────────┼──────────┼───────────────────────────┤
+     │ fDryMix      │ 0.85     │ 干声(原始)混合比例         │
+     │ fWetMix      │ 0.75     │ 湿声(混响)混合比例         │
+     │ fRoomSize    │ 0.9      │ 房间大小 (0.0~1.0)        │
+     │ fDamp        │ 0.4      │ 高频阻尼 (0.0~1.0)        │
+     │ fWidth       │ 0.75     │ 立体声宽度 (0.0~1.0)      │
+     │ lMode        │ 0        │ 模式 (0=普通, 1=冻结)     │
+     │ lChannel     │ -1       │ 声道 ( -1=所有声道)        │
+     └──────────────┴──────────┴───────────────────────────┘
+
+  3. 关闭: BASS_ChannelRemoveFX(streamHandle, fxHandle)
+
+  配置键: "enabled_concert_hall_atmosphere"
+
+【使用的库】
+  BASS_FX — 公开库 (Freeverb算法由Jezar Wakefield开发，公开领域)
+
+======================================================================
+  五、D2P (DSD to PCM转换频率)
+======================================================================
+
+【功能说明】
+  设置DSD音频转换为PCM时的目标采样率(Hz)，控制DSD→PCM转换的输出质量。
+
+【实现方式】
+  D2P (DSD to PCM) 是将1-bit DSD音频流转换为多bit PCM音频的过程。
+  该设置控制转换后的PCM采样率。
+
+  代码位置:  smali/androidx/core/ڻ.smali (static constructor)
+
+  调用链:
+  1. 启动时从MMKV读取 "d2p_hz" 值 (默认: 44100 = 0xAC44)
+  2. 当播放DSD文件时，BASSDSD插件解码DSD为PCM
+  3. 以 BASS_StreamCreateFile 创建流，flags中指定浮点支持:
+     - "float_support_decode" = true → 0x220100 (BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE)
+     - "float_support_decode" = false → 0x220000 (BASS_STREAM_DECODE)
+  4. DSD数据通过BASSDSD插件 → 解码为指定采样率的PCM → 送入DSP处理链
+
+  流创建: BASS_StreamCreateFile(fd, 0, 0, flags)
+  可选频率设置: 如果传入了采样率参数，会通过 BASS_ChannelSetAttribute 设置
+                BASS_ATTRIB_FREQ (0x1)
+
+  配置键: "d2p_hz"
+  默认值: 44100 (0xAC44)
+
+【使用的库】
+  BASS + BASSDSD — 公开库
+
+【参数】
+  - d2p_hz: D2P转换后的PCM采样率(Hz)
+  - 常见取值: 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000
+
+======================================================================
+  六、音频输出采样率 (44100Hz ~ 384000Hz)
+======================================================================
+
+【功能说明】
+  设置音频输出的目标采样率，支持 44100Hz 到 384000Hz。
+
+【实现方式】
+  使用 BASS 的 BASS_ATTRIB_FREQ 属性设置流采样率。
+
+  代码位置:  smali/androidx/core/ڻ.smali
+
+  调用链:
+  1. BASS_StreamCreateFile → 创建原始解码流 (使用BASS_STREAM_DECODE标志)
+  2. BASS_FX_TempoCreate(decodedStream, BASS_FX_FREESOURCE) → 创建带DSP的流
+  3. BASS_ChannelSetAttribute(tempoStream, BASS_ATTRIB_VOL, volume) → 设置音量 (从0到1淡入)
+  4. 采样率在BASS初始化时通过 BASS_Init(device, freq, flags) 设置
+
+  额外配置:
+  - BASS_CONFIG_ANDROID_AAUDIO (0x43): 启用/禁用AAudio输出
+  - "native_output": 控制是否使用原生输出(AAudio/OpenSL ES)
+  - "disabling_aaudio_output": 禁用AAudio，回退到OpenSL ES
+
+  配置键: "initial_sample_rate", "native_output", "disabling_aaudio_output"
+
+【使用的库】
+  BASS — 公开库
+
+【参数】
+  - 采样率范围: 44100 ~ 384000 (通过 BASS_Init 的 freq 参数设置)
+  - 输出模式: AudioTrack / OpenSL ES / AAudio
+  - 位深度: 16-bit 或 32-bit float (由 "float_support_decode" 控制)
+
+======================================================================
+  七、音量平衡 (Volume Balance / Volume Normalization)
+======================================================================
+
+【功能说明】
+  利用音频文件中嵌入的 ReplayGain 标签 (REPLAYGAIN_TRACK_GAIN 和
+  REPLAYGAIN_ALBUM_GAIN) 自动调整播放音量，使不同歌曲的感知响度一致。
+
+【实现方式】
+  两步实现:
+  A. 读取文件的 ReplayGain 标签 → 获取增益值(dB)
+  B. 将增益值应用于 BASS 流的音量属性
+
+  代码位置:  smali/androidx/core/ka1.smali (歌曲加载器)
+             smali/androidx/core/ڻ.smali  (音频播放器)
+             smali/androidx/core/ဢ.smali  (相关标签处理)
+
+  标签读取:
+  - BASS_ChannelGetTags → 获取 ID3v2 / APE / VorbisComment 标签
+  - 解析 "REPLAYGAIN_TRACK_GAIN" 和 "REPLAYGAIN_ALBUM_GAIN" 字段
+  - 增益值通常以 dB 为单位，如 "-7.53 dB"
+
+  增益应用:
+  - 可能使用 BASSloud 的 BASS_Loudness_Start 进行实时响度标准化
+    调用: BASS_Loudness_Start(streamHandle, 4, -10)
+    参数: mode=4 (BASS_LOUDNESS_INTEGRATED), target=-10 LUFS
+  - 或通过 BASS_ChannelSetAttribute(handle, BASS_ATTRIB_VOL, volume)
+    直接调整播放音量
+
+  配置键: "volume_balance"
+  默认值: false (关闭)
+
+【使用的库】
+  BASS (标签读取) + BASSloud (响度标准化) — 公开库
+
+【参数】
+  - BASS_LOUDNESS_INTEGRATED (mode=4): 综合响度测量模式
+  - target level: -10 LUFS (默认目标响度)
+  - ReplayGain 标签来源: ID3v2 (TXXX帧), VorbisComment, APE tag
+
+======================================================================
+  八、补充功能：32位浮点解码 (Float Support)
+======================================================================
+
+  配置键: "float_support_decode", "float_support_dsp"
+  说明: 启用后使用 32-bit 浮点精度进行音频解码和DSP处理
+        StreamCreate flags: 0x220100 (BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE)
+        关闭时: 0x220000 (BASS_STREAM_DECODE only)
+
+======================================================================
+  总结
+======================================================================
+
+  1. 所有音频核心功能均基于 Un4seen BASS 系列库实现，这是一个知名的
+     跨平台商业音频引擎，不是作者自研的。
+
+  2. 作者自写的部分主要在:
+     - 封装层: libsalt-bassfx.so, libsalt-bassplayer.so (BASS的Kotlin/Native桥接)
+     - 标签解析: libsalt-tag.so (音频元数据读取)
+     - 解码扩展: libext-*.so (基于FFmpeg等开源项目封装的各种格式解码器)
+     - 应用层: Kotlin/smali代码中的播放器管理和UI控制逻辑
+
+  3. BASS库本身是公开的商业库(共享软件)，基础功能免费，但商业闭源应用
+     需要购买授权。BASS for Android 的许可费用约为 £950 ~ £2450 (英镑)。
+
+  4. 所有效果的参数配置均通过 MMKV 键值存储持久化，设置在切换歌曲后生效。
+
+  5. "MaxAudio音乐厅氛围" 并非真正的 Waves MaxxAudio 技术授权，而是
+     使用BASS内置的Freeverb混响算法，只是UI上使用了"MaxAudio"这个标签。
+
+======================================================================
+  分析日期: 2026-05-03
+  目标版本: Salt Player v11.0.4-release-2025123102
+======================================================================

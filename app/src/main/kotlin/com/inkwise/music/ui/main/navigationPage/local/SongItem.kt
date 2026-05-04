@@ -48,12 +48,13 @@ fun SongItem(
     multiSelectMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
     val itemClick: () -> Unit = if (multiSelectMode) onToggleSelect else onClick
 
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
                 .clickable(onClick = itemClick),
@@ -70,7 +71,7 @@ fun SongItem(
                 Icon(
                     imageVector = if (isSelected) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
                     contentDescription = if (isSelected) "已选" else "未选",
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray,
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .size(24.dp)
                         .clickable(onClick = onToggleSelect)
@@ -170,13 +171,13 @@ fun SongItem(
                         modifier =
                             Modifier
                                 .size(12.dp)
-                                .background(Color.White, CircleShape),
+                                .background(MaterialTheme.colorScheme.surface, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_add),
                             contentDescription = "添加到队列",
-                            tint = Color.Black.copy(alpha = 0.5f),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             modifier = Modifier.size(10.dp),
                         )
                     }
@@ -188,7 +189,7 @@ fun SongItem(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_more_vert),
                         contentDescription = "菜单",
-                        tint = Color.Black.copy(alpha = 0.5f),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                         modifier = Modifier.size(18.dp),
                     )
                 }

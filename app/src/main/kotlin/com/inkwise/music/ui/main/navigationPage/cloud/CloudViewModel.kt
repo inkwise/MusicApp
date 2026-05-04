@@ -111,12 +111,27 @@ class CloudViewModel @Inject constructor(
         if (response.isSuccessful && response.body() != null) {
             val mappedSongs = response.body()!!.data.map { item -> mapToSong(item, serverUrl) }
 
-            // 为每个歌曲确保 DB 中有记录，获取有效 ID
+            // 更新或插入歌曲，确保使用最新的封面URL和歌词URL
             return mappedSongs.map { song ->
                 if (song.cloudId != null) {
                     val existing = songDao.getSongByCloudId(song.cloudId!!)
                     if (existing != null) {
-                        existing
+                        val updated = existing.copy(
+                            title = song.title,
+                            artist = song.artist,
+                            album = song.album,
+                            duration = song.duration,
+                            codec = song.codec,
+                            sampleRate = song.sampleRate,
+                            channels = song.channels,
+                            bitrate = song.bitrate,
+                            uri = song.uri,
+                            path = song.path,
+                            albumArt = song.albumArt,
+                            lyricsUrl = song.lyricsUrl,
+                        )
+                        songDao.insertSong(updated)
+                        updated
                     } else {
                         val newId = songDao.insertSong(song)
                         song.copy(id = newId)
@@ -142,6 +157,14 @@ class CloudViewModel @Inject constructor(
         loadSongs()
     }
 
+    fun reorderSongsByIndex(from: Int, to: Int) {
+        val current = _uiState.value.songs.toMutableList()
+        val item = current.removeAt(from)
+        current.add(to, item)
+        _uiState.value = _uiState.value.copy(songs = current)
+        // TODO: 若有云端全量排序 API，在此调用
+    }
+
     fun deleteCloudSongs(songIds: List<Long>) {
         viewModelScope.launch {
             if (!prefs.isLoggedInNow()) {
@@ -150,22 +173,29 @@ class CloudViewModel @Inject constructor(
             }
             try {
                 val token = prefs.authToken.first()
-                val cloudIds = songIds.mapNotNull { id ->
-                    songDao.getSongById(id)?.cloudId
-                }
-                if (cloudIds.isNotEmpty()) {
-                    api.deleteMusic(
-                        token = "Bearer ${token ?: ""}",
-                        request = com.inkwise.music.data.network.model.DeleteMusicRequest(ids = cloudIds)
-                    )
-                }
-                // 删除本地记录
+                // 先从服务端删除
                 for (id in songIds) {
+                    val song = songDao.getSongById(id)
+                    val cloudId = song?.cloudId
+                    if (cloudId != null) {
+                        try {
+                            api.deleteMusic(
+                                token = "Bearer ${token ?: ""}",
+                                musicId = cloudId
+                            )
+                        } catch (_: Exception) {
+                        }
+                    }
+                    // 删除本地记录（不调用 loadSongs，避免重新拉回已删除的歌曲）
                     songDao.deleteSongById(id)
                 }
+                // 直接从 UI 状态移除
+                _uiState.value = _uiState.value.copy(
+                    songs = _uiState.value.songs.filter { it.id !in songIds }
+                )
             } catch (_: Exception) {
+                loadSongs()
             }
-            loadSongs()
         }
     }
 
@@ -191,6 +221,15 @@ class CloudViewModel @Inject constructor(
             baseUrl.trimEnd('/') + coverPath
         }
 
+        val lyricsPath = item.lyrics_url ?: ""
+        val fullLyricsUrl = if (lyricsPath.isBlank()) {
+            null
+        } else if (lyricsPath.startsWith("http")) {
+            lyricsPath
+        } else {
+            baseUrl.trimEnd('/') + lyricsPath
+        }
+
         return Song(
             localId = null,
             cloudId = item.id,
@@ -206,6 +245,7 @@ class CloudViewModel @Inject constructor(
             uri = fullStreamUrl,
             path = fullStreamUrl,
             albumArt = fullCoverUrl,
+            lyricsUrl = fullLyricsUrl,
             isLocal = false
         )
     }

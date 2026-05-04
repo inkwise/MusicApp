@@ -17,7 +17,7 @@ class MusicRepository
         private val songDao: SongDao,
         private val playlistDao: PlaylistDao,
     ) {
-        fun getLocalSongs(): Flow<List<Song>> = songDao.getAllSongs()
+        fun getLocalSongs(): Flow<List<Song>> = songDao.getLocalSongsOnly()
 
         fun getSongsByPlaylist(playlistId: Long): Flow<List<Song>> =
             playlistDao

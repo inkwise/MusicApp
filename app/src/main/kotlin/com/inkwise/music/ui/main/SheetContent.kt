@@ -34,16 +34,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
+import com.inkwise.music.di.MusicAppEntryPoint
 import com.inkwise.music.ui.player.PlayerViewModel
 import com.inkwise.music.ui.theme.LocalAppDimens
+import dagger.hilt.android.EntryPointAccessors
 
 // 手柄区域
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -90,6 +96,13 @@ fun MiniPlayerControl(
     val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
     val coverUri = currentSong?.albumArt
+    val context = LocalContext.current
+    val prefs = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            MusicAppEntryPoint::class.java
+        ).prefsManager
+    }
 
     Row(
         modifier =
@@ -118,9 +131,18 @@ fun MiniPlayerControl(
                 update = { imageView ->
                     val uri = coverUri
                     if (uri != null) {
+                        val token = prefs.cachedAuthToken
+                        val model: Any = if (token != null) {
+                            GlideUrl(uri, LazyHeaders.Builder()
+                                .addHeader("Authorization", "Bearer $token")
+                                .build())
+                        } else {
+                            uri
+                        }
                         Glide
                             .with(imageView)
-                            .load(uri)
+                            .load(model)
+                            .error(R.drawable.ic_song_cover)
                             .into(imageView)
                     } else {
                         // 没有封面时，清空 ImageView，避免残影

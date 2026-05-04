@@ -77,7 +77,7 @@ class PlayerViewModel
             if (saveJob != null) return
             saveJob = viewModelScope.launch {
                 while (isActive) {
-                    delay(5_000)
+                    delay(2_000)
                     saveCurrentState()
                 }
             }

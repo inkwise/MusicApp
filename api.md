@@ -113,7 +113,7 @@ POST /music/upload
     "music": {
         "id": 1,
         "title": "歌曲标题",
-        "artist": { "id": 1, "name": "艺术家名" },
+        "artists": [{ "id": 1, "name": "艺术家A" }, { "id": 2, "name": "艺术家B" }],
         "album": "专辑名",
         "genre": "流派",
         "duration": 240.0,
@@ -127,6 +127,7 @@ POST /music/upload
         "lyrics": "",
         "oss_url": "https://...",
         "cover_url": "https://...",
+        "lyrics_url": "https://.../music/xxx_lyrics.lrc?sign=...",
         "download_url": "/api/v1/music/1/proxy-download",
         "stream_url": "/api/v1/music/1/stream"
     }
@@ -163,13 +164,17 @@ GET /music/list
         {
             "id": 1,
             "title": "歌曲标题",
-            "artist": { "id": 1, "name": "艺术家名" },
+            "artists": [{ "id": 1, "name": "艺术家A" }, { "id": 2, "name": "艺术家B" }],
             "album": "专辑名",
             "genre": "流行",
             "duration": 240.0,
+            "bitrate": 320,
+            "sample_rate": 44100,
+            "channels": 2,
             "format": "mp3",
             "oss_url": "https://...",
             "cover_url": "https://...",
+            "lyrics_url": "https://.../music/xxx_lyrics.lrc?sign=...",
             "download_url": "/api/v1/music/1/proxy-download",
             "stream_url": "/api/v1/music/1/stream"
         }
@@ -200,13 +205,17 @@ GET /music/:id
     "music": {
         "id": 1,
         "title": "歌曲标题",
-        "artist": { "id": 1, "name": "艺术家名" },
+        "artists": [{ "id": 1, "name": "艺术家A" }],
         "album": "专辑名",
         "genre": "流行",
         "duration": 240.0,
+        "bitrate": 320,
+        "sample_rate": 44100,
+        "channels": 2,
         "format": "mp3",
         "oss_url": "https://...",
         "cover_url": "https://...",
+        "lyrics_url": "https://.../music/xxx_lyrics.lrc?sign=...",
         "download_url": "/api/v1/music/1/proxy-download",
         "stream_url": "/api/v1/music/1/stream"
     },
@@ -228,7 +237,7 @@ PUT /music/:id
 ```json
 {
     "title": "新标题 (可选)",
-    "artist": "新艺术家名 (可选)",
+    "artists": ["艺术家A", "艺术家B"],
     "album": "新专辑名 (可选)",
     "genre": "新流派 (可选)",
     "lyrics": "新歌词 (可选)"
@@ -242,7 +251,7 @@ PUT /music/:id
     "music": {
         "id": 1,
         "title": "新标题",
-        "artist": { "id": 1, "name": "新艺术家名" },
+        "artists": [{ "id": 1, "name": "艺术家A" }, { "id": 2, "name": "艺术家B" }],
         "album": "新专辑名",
         "genre": "新流派",
         "lyrics": "新歌词",
@@ -250,6 +259,7 @@ PUT /music/:id
         "format": "mp3",
         "oss_url": "https://...",
         "cover_url": "https://...",
+        "lyrics_url": "https://...",
         "download_url": "/api/v1/music/1/proxy-download",
         "stream_url": "/api/v1/music/1/stream"
     }
@@ -316,7 +326,87 @@ GET /music/:id/refresh-url
 {
     "url": "https://...",
     "cover_url": "https://...",
+    "lyrics_url": "https://...",
     "expire_in": "1小时"
+}
+```
+
+---
+
+### 更新音乐封面
+
+```
+PUT /music/:id/cover
+```
+
+**请求头**: `Authorization: Bearer <token>`
+
+**请求体**: `multipart/form-data`
+- `cover`: 图片文件 (支持: jpg, jpeg, png, gif, webp)
+
+**响应**:
+```json
+{
+    "message": "封面更新成功",
+    "cover_url": "https://..."
+}
+```
+
+---
+
+### 更新音乐歌词
+
+```
+PUT /music/:id/lyrics
+```
+
+**请求头**: `Authorization: Bearer <token>`
+
+**请求体**: `application/json`
+```json
+{
+    "lyrics": "歌词内容"
+}
+```
+
+或者 `multipart/form-data`
+- `lyrics`: 歌词文件 (.lrc, .txt)
+
+**响应**:
+```json
+{
+    "message": "歌词更新成功",
+    "lyrics_url": "https://..."
+}
+```
+
+---
+
+### 设置音乐歌手
+
+```
+PUT /music/:id/artists
+```
+
+**请求头**: `Authorization: Bearer <token>`
+
+**请求体**:
+```json
+{
+    "artists": ["歌手A", "歌手B"]
+}
+```
+
+**说明**: 数组中的歌手名如果不存在会自动创建，传入的数组将替换歌曲的所有歌手关联。
+
+**响应**:
+```json
+{
+    "message": "歌手设置成功",
+    "artists": [
+        { "id": 1, "name": "歌手A" },
+        { "id": 2, "name": "歌手B" }
+    ]
 }
 ```
 
@@ -525,7 +615,7 @@ GET /playlists/:id
             {
                 "id": 1,
                 "title": "歌曲标题",
-                "artist": { "id": 1, "name": "艺术家名" },
+                "artists": [{ "id": 1, "name": "艺术家名" }],
                 "album": "专辑名",
                 "duration": 240.0
             }
@@ -674,7 +764,7 @@ GET /playlists/:id/music
         {
             "id": 1,
             "title": "歌曲标题",
-            "artist": { "id": 1, "name": "艺术家名" },
+            "artists": [{ "id": 1, "name": "艺术家名" }],
             "album": "专辑名",
             "duration": 240.0,
             "format": "mp3"

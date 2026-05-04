@@ -9,6 +9,9 @@ interface SongDao {
     @Query("SELECT * FROM songs ORDER BY title ASC")
     fun getAllSongs(): Flow<List<Song>>
 
+    @Query("SELECT * FROM songs WHERE is_local = 1 ORDER BY title ASC")
+    fun getLocalSongsOnly(): Flow<List<Song>>
+
     @Query("SELECT * FROM songs WHERE id = :id LIMIT 1")
     suspend fun getSongById(id: Long): Song?
 

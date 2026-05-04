@@ -13,4 +13,9 @@
         <domain includeSubdomains="true">127.0.0.1</domain>
     </domain-config>
 
+    <!-- 允许阿里云 OSS HTTP 访问（封面图等静态资源） -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">aliyuncs.com</domain>
+    </domain-config>
+
 </network-security-config>

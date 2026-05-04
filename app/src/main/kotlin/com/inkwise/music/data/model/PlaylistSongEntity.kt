@@ -1,5 +1,6 @@
 package com.inkwise.music.data.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -26,4 +27,6 @@ import androidx.room.Index
 data class PlaylistSongEntity(
     val playlistId: Long,
     val songId: Long,
+    @ColumnInfo(name = "sort_order")
+    val sortOrder: Int = 0,
 )

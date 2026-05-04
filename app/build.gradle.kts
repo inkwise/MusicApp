@@ -143,6 +143,6 @@ dependencies {
 	implementation("com.squareup.okhttp3:okhttp:4.12.0")
 	implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-	// DataStore for persistent preferences
-	implementation("androidx.datastore:datastore-preferences:1.0.0")
+	// MMKV for persistent key-value storage
+	implementation("com.tencent:mmkv:1.3.5")
 }

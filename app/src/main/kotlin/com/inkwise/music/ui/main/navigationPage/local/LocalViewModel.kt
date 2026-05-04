@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,6 +63,16 @@ class LocalViewModel
 
         fun setSortMode(mode: SortMode) {
             _sortMode.value = mode
+        }
+
+        fun reorderSongsByIndex(from: Int, to: Int) {
+            val current = _localSongs.value.toMutableList()
+            val item = current.removeAt(from)
+            current.add(to, item)
+            _localSongs.value = current
+            if (_sortMode.value == SortMode.CUSTOM) {
+                _rawSongs.value = current
+            }
         }
 
         private fun applySort(songs: List<Song>, mode: SortMode): List<Song> =
@@ -115,6 +126,8 @@ class LocalViewModel
                 _isScanning.value = true
                 try {
                     val songs = mutableListOf<Song>()
+                    // 临时负数ID，避免与 DB 自增 ID 或 currentSong 冲突
+                    var tempId = -1L
                     val projection =
                         arrayOf(
                             MediaStore.Audio.Media._ID,
@@ -190,6 +203,7 @@ class LocalViewModel
                                 }
                                 val song =
                                     Song(
+                                        id = tempId--,
                                         localId = id,
                                         title = title,
                                         artist = artist,
@@ -232,6 +246,7 @@ class LocalViewModel
                 _isScanning.value = true
                 try {
                     val songs = mutableListOf<Song>()
+                    val tempId = AtomicLong(-1L)
                     val audioExtensions = setOf("mp3", "flac", "wav", "aac", "ogg", "m4a", "wma", "opus")
                     val scanDirs = listOf(
                         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
@@ -242,7 +257,7 @@ class LocalViewModel
                     val retriever = MediaMetadataRetriever()
 
                     for (dir in scanDirs) {
-                        scanDir(dir, audioExtensions, analyzer, retriever) { song ->
+                        scanDir(dir, audioExtensions, analyzer, retriever, tempId) { song ->
                             songs += song
                         }
                     }
@@ -262,12 +277,13 @@ class LocalViewModel
             extensions: Set<String>,
             analyzer: AudioAnalyzer,
             retriever: MediaMetadataRetriever,
+            tempId: AtomicLong,
             onSong: (Song) -> Unit,
         ) {
             val files = dir.listFiles() ?: return
             for (file in files) {
                 if (file.isDirectory) {
-                    scanDir(file, extensions, analyzer, retriever, onSong)
+                    scanDir(file, extensions, analyzer, retriever, tempId, onSong)
                 } else if (file.extension.lowercase() in extensions) {
                     try {
                         retriever.setDataSource(file.absolutePath)
@@ -304,6 +320,7 @@ class LocalViewModel
                         }
 
                         val song = Song(
+                            id = tempId.getAndDecrement(),
                             title = title,
                             artist = artist,
                             album = album,

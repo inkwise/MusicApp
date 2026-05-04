@@ -1,0 +1,927 @@
+======================================================================
+  Salt Player v11.0.4 - 播放器页面背景/主题色 完整实现指南
+======================================================================
+
+【实现概述】
+
+  播放器页面背景随专辑封面动态变化，按钮/控件颜色跟随封面主题色。
+  整个系统由三部分组成：
+    1. 封面颜色提取算法
+    2. 背景特效渲染（5种样式可选）
+    3. UI控件主题色同步
+
+======================================================================
+  第一步：颜色提取 - 从封面图片提取主题色
+======================================================================
+
+【方案选择】
+
+  Salt Player 使用自定义的颜色提取算法（非 AndroidX Palette 库）。
+  推荐使用 AndroidX Palette 库来实现，效果相近且更简单。
+
+【方案A：使用 AndroidX Palette（推荐）】
+
+  依赖：implementation "androidx.palette:palette-ktx:1.0.0"
+
+  ```kotlin
+  fun extractColors(bitmap: Bitmap): CoverColors {
+      return Palette.from(bitmap).generate().let { palette ->
+          CoverColors(
+              // 主色调（鲜艳）— 用作按钮/强调色
+              vibrant = palette.getVibrantColor(Color.GRAY),
+              // 暗色调（柔和）— 用作背景色
+              darkVibrant = palette.getDarkVibrantColor(Color.DKGRAY),
+              // 柔和亮色 — 用作文字背景
+              lightVibrant = palette.getLightVibrantColor(Color.LTGRAY),
+              // 柔和暗色 — 用作大背景
+              muted = palette.getMutedColor(Color.GRAY),
+              darkMuted = palette.getDarkMutedColor(Color.DKGRAY),
+              lightMuted = palette.getLightMutedColor(Color.LTGRAY),
+              // 主色样本 — 获取文字颜色
+              dominantSwatch = palette.dominantSwatch
+          )
+      }
+  }
+
+  data class CoverColors(
+      val vibrant: Int,       // 鲜艳色 → 按钮、高亮控件
+      val darkVibrant: Int,   // 深鲜艳色 → 顶部栏
+      val lightVibrant: Int,  // 浅鲜艳色 → 次要背景
+      val muted: Int,         // 柔和色 → 背景主色
+      val darkMuted: Int,     // 深柔和色 → 背景暗部
+      val lightMuted: Int,    // 浅柔和色 → 卡片背景
+      val dominantSwatch: Palette.Swatch? // 主导色样本
+  )
+  ```
+
+【方案B：自定义取色算法（与Salt Player更接近）】
+
+  Salt Player 的实际做法更接近以下步骤：
+
+  ```kotlin
+  fun extractDominantColor(bitmap: Bitmap): Int {
+      // 1. 缩小图片到 100x100（减少计算量）
+      val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false)
+
+      // 2. 统计像素颜色直方图
+      val colorCount = mutableMapOf<Int, Int>()
+      for (x in 0 until scaledBitmap.width) {
+          for (y in 0 until scaledBitmap.height) {
+              val pixel = scaledBitmap.getPixel(x, y)
+              // 量化颜色（去掉低4位减少颜色数）
+              val quantizedColor = quantizeColor(pixel)
+              colorCount[quantizedColor] = (colorCount[quantizedColor] ?: 0) + 1
+          }
+      }
+
+      // 3. 按出现频率排序，取前几个作为候选色
+      val sortedColors = colorCount.entries
+          .sortedByDescending { it.value }
+          .map { it.key }
+
+      // 4. 从候选色中选出"最优"主题色
+      //    跳过太暗/太亮/太灰的颜色
+      val dominantColor = sortedColors.firstOrNull { color ->
+          val hsl = rgbToHsl(color)
+          hsl[2] in 0.15f..0.85f  // 亮度在15%-85%之间
+              && hsl[1] > 0.1f     // 饱和度大于10%
+      } ?: sortedColors.first()
+
+      // 5. 清理
+      scaledBitmap.recycle()
+      return dominantColor
+  }
+
+  // 颜色量化：将RGB各通道低4位置零，减少颜色数量
+  fun quantizeColor(color: Int): Int {
+      val r = ((color shr 16) and 0xFF) and 0xF0.inv()
+      val g = ((color shr 8) and 0xFF) and 0xF0.inv()
+      val b = (color and 0xFF) and 0xF0.inv()
+      return (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+  }
+
+  // RGB转HSL
+  fun rgbToHsl(color: Int): FloatArray {
+      val r = ((color shr 16) and 0xFF) / 255f
+      val g = ((color shr 8) and 0xFF) / 255f
+      val b = (color and 0xFF) / 255f
+      val max = maxOf(r, g, b)
+      val min = minOf(r, g, b)
+      val l = (max + min) / 2f
+      val s = if (max == min) 0f else {
+          if (l > 0.5f) (max - min) / (2f - max - min)
+          else (max - min) / (max + min)
+      }
+      var h = if (max == min) 0f else {
+          when (max) {
+              r -> ((g - b) / (max - min)) + (if (g < b) 6f else 0f)
+              g -> ((b - r) / (max - min)) + 2f
+              else -> ((r - g) / (max - min)) + 4f
+          }
+      }
+      h /= 6f
+      return floatArrayOf(h, s, l)
+  }
+  ```
+
+======================================================================
+  第二步：ViewModel 状态管理
+======================================================================
+
+```kotlin
+class PlayerViewModel : ViewModel() {
+
+    // ===== 封面颜色相关状态 =====
+
+    // 封面提取的突出/主色调 (ARGB int)
+    private val _prominentColor = MutableStateFlow(Color.rgb(100, 100, 100))
+    val prominentColor: StateFlow<Int> = _prominentColor
+
+    // 当前实际的背景色（可被用户调整偏移）
+    private val _color = MutableStateFlow(Color.rgb(100, 100, 100))
+    val color: StateFlow<Int> = _color
+
+    // ===== 背景样式设置 =====
+
+    // 背景特效类型：None, BlurryGlass, Acrylic, Mica, Premium
+    private val _backgroundType = MutableStateFlow(BackgroundType.BlurryGlass)
+    val backgroundType: StateFlow<BackgroundType> = _backgroundType
+
+    // 是否启用圆形封面
+    private val _circlePlaybackCover = MutableStateFlow(false)
+    val circlePlaybackCover: StateFlow<Boolean> = _circlePlaybackCover
+
+    // ===== 颜色变体（派生状态）=====
+
+    // 暗色变体（用于背景暗部）
+    val darkColor: StateFlow<Int> = _prominentColor.map { color ->
+        darkenColor(color, 0.3f)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, Color.DKGRAY)
+
+    // 亮色变体（用于高亮元素）
+    val lightColor: StateFlow<Int> = _prominentColor.map { color ->
+        lightenColor(color, 0.2f)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, Color.LTGRAY)
+
+    // 标题文字颜色（根据背景亮度自动选黑/白）
+    val titleTextColor: StateFlow<Int> = _prominentColor.map { color ->
+        if (isColorDark(color)) Color.WHITE else Color.BLACK
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, Color.WHITE)
+
+    // 副文字颜色
+    val subtitleTextColor: StateFlow<Int> = _prominentColor.map { color ->
+        if (isColorDark(color))
+            Color.WHITE.copy(alpha = 0.6f)
+        else
+            Color.BLACK.copy(alpha = 0.6f)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, Color.GRAY)
+
+    // ===== 更新颜色 =====
+
+    fun updateCoverColors(bitmap: Bitmap) {
+        viewModelScope.launch(Dispatchers.Default) {
+            val colors = extractColors(bitmap)
+            _prominentColor.value = colors.vibrant
+            _color.value = colors.darkMuted
+        }
+    }
+
+    fun setBackgroundType(type: BackgroundType) {
+        _backgroundType.value = type
+        // 持久化到 MMKV
+        MMKV.defaultMMKV().encode("player_background_type", type.ordinal)
+    }
+}
+
+// 背景类型枚举
+enum class BackgroundType {
+    None,          // 无特效
+    BlurryGlass,   // 毛玻璃（默认）
+    Acrylic,       // 亚克力材质
+    Mica,          // 云母材质
+    Premium        // 高级效果
+}
+
+// 颜色辅助函数
+fun darkenColor(color: Int, factor: Float): Int {
+    val r = ((color shr 16) and 0xFF) * (1f - factor)
+    val g = ((color shr 8) and 0xFF) * (1f - factor)
+    val b = (color and 0xFF) * (1f - factor)
+    return Color.rgb(r.toInt(), g.toInt(), b.toInt())
+}
+
+fun lightenColor(color: Int, factor: Float): Int {
+    val r = ((color shr 16) and 0xFF) + ((255 - ((color shr 16) and 0xFF)) * factor)
+    val g = ((color shr 8) and 0xFF) + ((255 - ((color shr 8) and 0xFF)) * factor)
+    val b = (color and 0xFF) + ((255 - (color and 0xFF)) * factor)
+    return Color.rgb(r.toInt(), g.toInt(), b.toInt())
+}
+
+fun isColorDark(color: Int): Boolean {
+    val r = (color shr 16) and 0xFF
+    val g = (color shr 8) and 0xFF
+    val b = color and 0xFF
+    // 计算感知亮度
+    val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
+    return luminance < 0.5
+}
+```
+
+======================================================================
+  第三步：Compose UI - 背景特效实现
+======================================================================
+
+【5种背景特效的实现代码】
+
+```kotlin
+@Composable
+fun PlayerBackground(
+    coverBitmap: Bitmap?,
+    backgroundType: BackgroundType,
+    prominentColor: Int,
+    modifier: Modifier = Modifier
+) {
+    when (backgroundType) {
+        BackgroundType.None -> {
+            // 纯色背景
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color(prominentColor))
+            )
+        }
+
+        BackgroundType.BlurryGlass -> {
+            // 毛玻璃效果：模糊封面图 + 半透明颜色叠加
+            Box(modifier = modifier.fillMaxSize()) {
+                // 第一层：放大缩放的封面图
+                if (coverBitmap != null) {
+                    Image(
+                        bitmap = coverBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scale(1.5f)           // 放大1.5倍填充
+                            .blur(radius = 25.dp)   // 高斯模糊 25dp
+                            .alpha(0.6f),           // 透明度 60%
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+
+                // 第二层：半透明主色覆盖
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Color(prominentColor).copy(alpha = 0.35f)
+                        )
+                )
+
+                // 第三层：顶部渐变暗色
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.3f),
+                                    Color.Transparent,
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.2f)
+                                )
+                            )
+                        )
+                )
+            }
+        }
+
+        BackgroundType.Acrylic -> {
+            // 亚克力效果：模糊 + 噪点纹理 + 色调映射
+            Box(modifier = modifier.fillMaxSize()) {
+                // 模糊封面层
+                if (coverBitmap != null) {
+                    Image(
+                        bitmap = coverBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scale(1.3f)
+                            .blur(radius = 30.dp)
+                            .alpha(0.5f),
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+
+                // 噪点纹理层（模拟亚克力噪点）
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val noisePaint = Paint().apply {
+                        alpha = 15  // 极低透明度
+                        isAntiAlias = false
+                    }
+                    val random = Random(42)
+                    repeat(2000) {
+                        val x = random.nextFloat() * size.width
+                        val y = random.nextFloat() * size.height
+                        noisePaint.color = if (random.nextBoolean())
+                            Color.White.toArgb() else Color.Black.toArgb()
+                        drawCircle(
+                            android.graphics.Paint().apply {
+                                this.color = noisePaint.color
+                                this.alpha = noisePaint.alpha
+                            },
+                            1.5f,
+                            Offset(x, y)
+                        )
+                    }
+                }
+
+                // 色调叠加
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Color(prominentColor).copy(alpha = 0.3f)
+                        )
+                )
+            }
+        }
+
+        BackgroundType.Mica -> {
+            // 云母效果：轻微模糊 + 桌面取色风格
+            Box(modifier = modifier.fillMaxSize()) {
+                // 轻微模糊的封面
+                if (coverBitmap != null) {
+                    Image(
+                        bitmap = coverBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scale(1.2f)
+                            .blur(radius = 20.dp)
+                            .alpha(0.45f),
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+
+                // 亮度提升层
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Color(prominentColor)
+                                .copy(alpha = 0.45f)
+                                .compositeOver(Color.White.copy(alpha = 0.1f))
+                        )
+                )
+            }
+        }
+
+        BackgroundType.Premium -> {
+            // 高级效果：多层渐变 + 模糊封面
+            Box(modifier = modifier.fillMaxSize()) {
+                if (coverBitmap != null) {
+                    Image(
+                        bitmap = coverBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scale(1.6f)
+                            .blur(radius = 28.dp)
+                            .alpha(0.65f),
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+
+                // 多色渐变叠加
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(prominentColor).copy(alpha = 0.5f),
+                                    Color(prominentColor)
+                                        .copy(alpha = 0.25f)
+                                        .compositeOver(Color.White.copy(alpha = 0.05f)),
+                                    Color(prominentColor)
+                                        .copy(alpha = 0.35f)
+                                        .compositeOver(Color.Black.copy(alpha = 0.1f)),
+                                    Color(prominentColor).copy(alpha = 0.5f)
+                                )
+                            )
+                        )
+                )
+            }
+        }
+    }
+}
+```
+
+======================================================================
+  第四步：完整的播放器页面 Compose UI
+======================================================================
+
+```kotlin
+@Composable
+fun PlayerScreen(
+    song: Song,
+    playerViewModel: PlayerViewModel = viewModel()
+) {
+    // 订阅状态
+    val prominentColor by playerViewModel.prominentColor.collectAsState()
+    val bgColor by playerViewModel.color.collectAsState()
+    val backgroundType by playerViewModel.backgroundType.collectAsState()
+    val titleTextColor by playerViewModel.titleTextColor.collectAsState()
+    val subtitleTextColor by playerViewModel.subtitleTextColor.collectAsState()
+    val lightColor by playerViewModel.lightColor.collectAsState()
+
+    // 加载封面
+    val coverBitmap by produceState<Bitmap?>(null) {
+        // 使用 Coil 加载专辑封面
+        val loader = ImageLoader.Builder(LocalContext.current).build()
+        val request = ImageRequest.Builder(LocalContext.current)
+            .data(song.albumArtUri)
+            .size(512, 512)
+            .build()
+        val result = loader.execute(request)
+        value = (result.drawable as? BitmapDrawable)?.bitmap
+        // 提取颜色
+        value?.let { playerViewModel.updateCoverColors(it) }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // ========== 第一层：动态背景 ==========
+        PlayerBackground(
+            coverBitmap = coverBitmap,
+            backgroundType = backgroundType,
+            prominentColor = prominentColor,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // ========== 第二层：内容 ==========
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+        ) {
+            // --- 顶部栏 ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 返回按钮 - 使用全局白色
+                IconButton(onClick = { /* 返回 */ }) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "返回",
+                        tint = titleTextColor
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // 歌曲信息（居中）
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = song.title,
+                        color = titleTextColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = song.artist,
+                        color = subtitleTextColor,
+                        fontSize = 11.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // 更多按钮
+                IconButton(onClick = { /* 菜单 */ }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = "更多",
+                        tint = titleTextColor
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // --- 专辑封面 ---
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .padding(horizontal = 48.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // 封面阴影
+                if (coverBitmap != null) {
+                    Image(
+                        bitmap = coverBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp))
+                            .shadow(
+                                elevation = 20.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                ambientColor = Color(prominentColor).copy(alpha = 0.4f),
+                                spotColor = Color(prominentColor).copy(alpha = 0.6f)
+                            ),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // --- 进度条 ---
+            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                Slider(
+                    value = playerViewModel.currentPosition,
+                    onValueChange = { playerViewModel.seekTo(it) },
+                    valueRange = 0f..playerViewModel.duration,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = titleTextColor,
+                        activeTrackColor = titleTextColor,
+                        inactiveTrackColor = subtitleTextColor.copy(alpha = 0.3f)
+                    )
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = formatTime(playerViewModel.currentPosition),
+                        color = subtitleTextColor,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = formatTime(playerViewModel.duration),
+                        color = subtitleTextColor,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
+            // --- 播放控制按钮 ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 随机播放
+                IconButton(onClick = { /* 随机 */ }) {
+                    Icon(
+                        Icons.Default.Shuffle,
+                        contentDescription = "随机",
+                        tint = subtitleTextColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                // 上一曲
+                IconButton(onClick = { /* 上一曲 */ }) {
+                    Icon(
+                        Icons.Default.SkipPrevious,
+                        contentDescription = "上一曲",
+                        tint = titleTextColor,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+
+                // 播放/暂停 - 使用高亮色
+                FloatingActionButton(
+                    onClick = { /* 播放/暂停 */ },
+                    containerColor = Color(prominentColor),
+                    contentColor = if (isColorDark(prominentColor))
+                        Color.White else Color.Black,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Icon(
+                        if (playerViewModel.isPlaying) Icons.Default.Pause
+                        else Icons.Default.PlayArrow,
+                        contentDescription = "播放",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+
+                // 下一曲
+                IconButton(onClick = { /* 下一曲 */ }) {
+                    Icon(
+                        Icons.Default.SkipNext,
+                        contentDescription = "下一曲",
+                        tint = titleTextColor,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+
+                // 循环模式
+                IconButton(onClick = { /* 循环 */ }) {
+                    Icon(
+                        Icons.Default.Repeat,
+                        contentDescription = "循环",
+                        tint = subtitleTextColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            // --- 底部附加按钮 ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // 收藏按钮
+                IconButton(onClick = { /* 收藏 */ }) {
+                    Icon(
+                        Icons.Default.Favorite,
+                        contentDescription = "收藏",
+                        tint = subtitleTextColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                // 下载
+                IconButton(onClick = { /* 下载 */ }) {
+                    Icon(
+                        Icons.Default.Download,
+                        contentDescription = "下载",
+                        tint = subtitleTextColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                // 分享
+                IconButton(onClick = { /* 分享 */ }) {
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = "分享",
+                        tint = subtitleTextColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                // 定时
+                IconButton(onClick = { /* 定时 */ }) {
+                    Icon(
+                        Icons.Default.Timer,
+                        contentDescription = "定时",
+                        tint = subtitleTextColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                // 音效
+                IconButton(onClick = { /* 音效 */ }) {
+                    Icon(
+                        Icons.Default.Equalizer,
+                        contentDescription = "音效",
+                        tint = subtitleTextColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+```
+
+======================================================================
+  第五步：颜色变体生成规则
+======================================================================
+
+Salt Player 从封面提取一个主色后，派生以下颜色变体用于不同UI元素：
+
+  ┌─────────────────────┬──────────────────────────┬─────────────────┐
+  │ 用途                │ 颜色来源                  │ alpha/变体系数  │
+  ├─────────────────────┼──────────────────────────┼─────────────────┤
+  │ 大背景底色           │ prominentColor暗色变体    │ 原色 + 0.3暗化  │
+  │ 模糊叠加层           │ prominentColor            │ alpha = 0.35    │
+  │ 播放/暂停按钮        │ prominentColor            │ 原色(实心)      │
+  │ 顶部栏图标/标题      │ 根据亮度自动黑/白         │ opacity = 1.0   │
+  │ 副标题/次要文字      │ 根据亮度自动黑/白         │ alpha = 0.6     │
+  │ 次要按钮(收藏/下载)  │ 根据亮度自动黑/白         │ alpha = 0.65    │
+  │ 进度条已播放         │ 标题文字色                │ alpha = 1.0     │
+  │ 进度条未播放         │ 标题文字色                │ alpha = 0.3     │
+  │ 封面阴影             │ prominentColor            │ ambientAlpha=0.4│
+  │ 滑块圆点             │ 标题文字色                │ alpha = 1.0     │
+  └─────────────────────┴──────────────────────────┴─────────────────┘
+
+  【感知亮度计算公式】
+  luminance = 0.299*R + 0.587*G + 0.114*B  (每通道0-255)
+  - luminance < 128 → 深色背景 → 白色文字
+  - luminance >= 128 → 浅色背景 → 黑色文字
+
+======================================================================
+  第六步：设置页面 - 背景样式选择器
+======================================================================
+
+```kotlin
+@Composable
+fun BackgroundStyleSelector(viewModel: PlayerViewModel) {
+    val currentType by viewModel.backgroundType.collectAsState()
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("背景样式", style = MaterialTheme.typography.titleMedium)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 样式预览卡片行
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            BackgroundType.entries.forEach { type ->
+                // 预览卡片
+                Column(
+                    modifier = Modifier
+                        .width(80.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (type == currentType)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        .clickable { viewModel.setBackgroundType(type) }
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // 缩略图预览
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                when (type) {
+                                    BackgroundType.None ->
+                                        Brush.linearGradient(listOf(Color.Red, Color.Blue))
+                                    BackgroundType.BlurryGlass ->
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color(0xFFE91E63),
+                                                Color(0xFF9C27B0),
+                                                Color(0xFF3F51B5)
+                                            )
+                                        )
+                                    BackgroundType.Acrylic ->
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color(0xFF4CAF50),
+                                                Color(0xFF2196F3)
+                                            )
+                                        )
+                                    BackgroundType.Mica ->
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color(0xFFFF9800),
+                                                Color(0xFFFF5722)
+                                            )
+                                        )
+                                    BackgroundType.Premium ->
+                                        Brush.verticalGradient(
+                                            listOf(
+                                                Color(0xFF673AB7),
+                                                Color(0xFF00BCD4),
+                                                Color(0xFF8BC34A)
+                                            )
+                                        )
+                                }
+                            )
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = when (type) {
+                            BackgroundType.None -> "无"
+                            BackgroundType.BlurryGlass -> "毛玻璃"
+                            BackgroundType.Acrylic -> "亚克力"
+                            BackgroundType.Mica -> "云母"
+                            BackgroundType.Premium -> "高级"
+                        },
+                        fontSize = 11.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+```
+
+======================================================================
+  第七步：完整实现步骤（按顺序）
+======================================================================
+
+  步骤1: 添加依赖 (build.gradle.kts)
+  ─────────────────────────────────
+  dependencies {
+      // Compose
+      implementation("androidx.compose.ui:ui:1.6.0")
+      implementation("androidx.compose.material3:material3:1.2.0")
+      implementation("androidx.compose.ui:ui-graphics:1.6.0")
+
+      // Palette (取色)
+      implementation("androidx.palette:palette-ktx:1.0.0")
+
+      // Coil (图片加载)
+      implementation("io.coil-kt:coil-compose:2.5.0")
+
+      // ViewModel
+      implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+      // 配置存储 (推荐 MMKV，与Salt Player一致)
+      implementation("com.tencent:mmkv:1.3.4")
+  }
+
+  步骤2: 创建数据类
+  ─────────────────────────────────
+  - CoverColors (颜色容器)
+  - BackgroundType (枚举: None/BlurryGlass/Acrylic/Mica/Premium)
+  - Song (歌曲数据类: title, artist, albumArtUri, duration等)
+
+  步骤3: 创建 PlayerViewModel
+  ─────────────────────────────────
+  - 定义 StateFlow: prominentColor, color, backgroundType, circlePlaybackCover
+  - 实现 updateCoverColors(bitmap) 方法
+  - 实现颜色变体派生 (darkColor, lightColor, titleTextColor)
+  - 实现背景样式持久化 (MMKV)
+
+  步骤4: 实现颜色提取
+  ─────────────────────────────────
+  - 方案A: Palette.from(bitmap).generate() (推荐)
+  - 方案B: 自定义直方图统计算法
+
+  步骤5: 实现背景特效
+  ─────────────────────────────────
+  - PlayerBackground Composable
+  - 5种背景样式的 when 分支
+  - BlurryGlass 需要 Modifier.blur() (Compose 1.6+)
+
+  步骤6: 实现播放器页面
+  ─────────────────────────────────
+  - PlayerScreen Composable
+  - 顶部栏（歌曲信息）
+  - 封面区域（带动态阴影）
+  - 进度条（跟随主题色）
+  - 控制按钮（播放/暂停用主色，其他用文字色）
+  - 底部附加按钮
+
+  步骤7: 加载封面 + 触发颜色提取
+  ─────────────────────────────────
+  - Coil ImageLoader 加载封面Bitmap
+  - produceState 中获取 Bitmap 后调用 extractColors
+  - 更新 ViewModel 的 StateFlow
+
+
+======================================================================
+  关键技术参数对照表（与Salt Player一致）
+======================================================================
+
+  ┌─────────────────────────┬───────────────┬────────────────────────┐
+  │ 参数                     │ Salt Player值  │ 说明                   │
+  ├─────────────────────────┼───────────────┼────────────────────────┤
+  │ 封面缩放尺寸(取色用)     │ 约100×100px   │ createScaledBitmap参数 │
+  │ 模糊半径(BlurryGlass)    │ ~25dp         │ Modifier.blur()        │
+  │ 模糊半径(Acrylic)        │ ~30dp         │ 更强的模糊             │
+  │ 模糊半径(Mica)           │ ~20dp         │ 更轻的模糊             │
+  │ 封面透明度(BlurryGlass)  │ 0.6f          │ alpha                  │
+  │ 颜色叠加透明度           │ 0.35f         │ 主色叠加层             │
+  │ 标题文字透明度           │ 1.0f          │ 不透明                 │
+  │ 副标题文字透明度         │ 0.6f          │ 半透明                 │
+  │ 初始默认颜色             │ RGB(100,100,100)│ #646464 灰色          │
+  │ 颜色变体暗化系数         │ 0.3f          │ darkenColor factor     │
+  │ 颜色变体亮化系数         │ 0.2f          │ lightenColor factor    │
+  │ 噪点数量(Acrylic)        │ ~2000个       │ 随机分布               │
+  │ 噪点透明度(Acrylic)      │ 15            │ 0-255, 极低            │
+  │ 配置存储                 │ MMKV          │ Tencent MMKV           │
+  └─────────────────────────┴───────────────┴────────────────────────┘
+
+======================================================================
+  完成检查清单
+======================================================================
+
+  [ ] 封面加载后能自动提取主题色
+  [ ] 背景随封面颜色变化
+  [ ] 5种背景样式可切换
+  [ ] 播放按钮使用主色填充
+  [ ] 次要按钮使用文字色半透明
+  [ ] 文字颜色根据背景亮度自动选黑/白
+  [ ] 进度条跟随主题色
+  [ ] 封面阴影使用主色
+  [ ] 设置可持久化（MMKV或DataStore）
+  [ ] 切换歌曲时平滑过渡颜色
+
+======================================================================
+  分析日期: 2026-05-03
+  目标版本: Salt Player v11.0.4-release-2025123102
+======================================================================

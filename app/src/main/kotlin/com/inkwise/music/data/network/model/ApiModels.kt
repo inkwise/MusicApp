@@ -42,6 +42,7 @@ data class MusicItem(
     val format: String?,
     val oss_url: String?,
     val cover_url: String?,
+    val lyrics_url: String? = null,
     val download_url: String?,
     val stream_url: String?,
     val size: Long? = null,
@@ -93,11 +94,44 @@ data class PlaylistListResponse(
     val pagination: Pagination
 )
 
-data class DeleteMusicRequest(
-    val ids: List<Long>
+data class BatchDeleteMusicRequest(
+    val music_ids: List<Long>
 )
 
-data class DeleteMusicResponse(
+data class BatchDeleteMusicResponse(
     val message: String,
-    val deleted_count: Int? = null
+    val added: Int? = null,
+    val skipped: Int? = null
+)
+
+data class AddMusicToPlaylistRequest(
+    val music_id: Long
+)
+
+data class AddMusicToPlaylistResponse(
+    val message: String
+)
+
+// 歌单中的歌曲列表
+data class PlaylistSongItem(
+    val id: Long,
+    val title: String,
+    val artists: List<ArtistInfo>?,
+    val album: String?,
+    val duration: Double,
+    val format: String?
+)
+
+data class PlaylistSongsResponse(
+    val songs: List<PlaylistSongItem>,
+    val total: Int
+)
+
+// 歌单歌曲排序
+data class ReorderPlaylistRequest(
+    val music_ids: List<Long>
+)
+
+data class ReorderPlaylistResponse(
+    val message: String
 )

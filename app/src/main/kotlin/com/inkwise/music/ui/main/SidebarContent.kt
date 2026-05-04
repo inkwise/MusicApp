@@ -1,5 +1,6 @@
 package com.inkwise.music.ui.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,10 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Settings
@@ -25,24 +26,37 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.inkwise.music.data.prefs.PreferencesManager
-import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+data class DrawerNavItem(
+    val route: String,
+    val icon: ImageVector,
+    val label: String,
+)
+
+private val drawerItems = listOf(
+    DrawerNavItem("home", Icons.Default.Home, "主页"),
+    DrawerNavItem("local", Icons.Default.MusicNote, "本地音乐"),
+    DrawerNavItem("cloud", Icons.Default.Cloud, "云端音乐"),
+    DrawerNavItem("settings", Icons.Default.Settings, "设置"),
+)
 
 @Composable
 fun SidebarContent(
     onNavigate: (String) -> Unit,
+    currentRoute: String? = "home",
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    // 直接从 Application 获取 PreferencesManager 单例，确保状态一致
     val entryPoint = dagger.hilt.android.EntryPointAccessors.fromApplication(
         context,
         com.inkwise.music.data.prefs.PreferencesManagerEntryPoint::class.java
@@ -55,15 +69,18 @@ fun SidebarContent(
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 24.dp)
     ) {
-        // 用户信息区域 - 顶部
+        // ── 用户信息区域 ──
+        val shape = RoundedCornerShape(12.dp)
         if (isLoggedIn) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     .clickable(onClick = { onNavigate("profile") })
-                    .padding(vertical = 8.dp),
+                    .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -80,13 +97,13 @@ fun SidebarContent(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "已登录 - 查看资料",
+                        text = "查看资料",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 TextButton(onClick = {
-                    scope.launch { prefs.clearAuthData() }
+                    kotlinx.coroutines.MainScope().launch { prefs.clearAuthData() }
                 }) {
                     Text("退出", fontSize = 12.sp)
                 }
@@ -95,7 +112,9 @@ fun SidebarContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -123,69 +142,71 @@ fun SidebarContent(
             }
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-        Text(
-            text = "菜单",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(vertical = 16.dp)
-        )
-
-        HorizontalDivider()
-
         Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(8.dp))
 
-        DrawerMenuItem(
-            icon = Icons.Default.Home,
-            text = "主页",
-            onClick = { onNavigate("home") }
-        )
-
-        DrawerMenuItem(
-            icon = Icons.Default.MusicNote,
-            text = "本地音乐",
-            onClick = { onNavigate("local") }
-        )
-
-        DrawerMenuItem(
-            icon = Icons.Default.Cloud,
-            text = "云端音乐",
-            onClick = { onNavigate("cloud") }
-        )
-
-        DrawerMenuItem(
-            icon = Icons.Default.Favorite,
-            text = "我的收藏",
-            onClick = { onNavigate("favorites") }
-        )
-
-        DrawerMenuItem(
-            icon = Icons.Default.Settings,
-            text = "设置",
-            onClick = { onNavigate("settings") }
-        )
+        // ── 导航菜单 ──
+        drawerItems.forEach { item ->
+            val isActive = currentRoute == item.route
+            DrawerMenuItem(
+                icon = item.icon,
+                text = item.label,
+                isActive = isActive,
+                onClick = { onNavigate(item.route) }
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
-        // 避免被底部播放器控件遮挡
         Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
 @Composable
-fun DrawerMenuItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun DrawerMenuItem(
+    icon: ImageVector,
     text: String,
-    onClick: () -> Unit
+    isActive: Boolean,
+    onClick: () -> Unit,
 ) {
+    val shape = RoundedCornerShape(12.dp)
+    val containerColor = if (isActive) {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    val contentColor = if (isActive) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+    val iconColor = if (isActive) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(shape)
+            .background(containerColor)
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 8.dp),
+            .padding(vertical = 14.dp, horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = text)
+        Icon(
+            icon,
+            contentDescription = text,
+            tint = iconColor,
+            modifier = Modifier.size(24.dp)
+        )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
+            color = contentColor,
+        )
     }
 }

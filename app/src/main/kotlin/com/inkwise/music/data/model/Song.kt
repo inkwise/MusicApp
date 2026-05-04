@@ -50,6 +50,9 @@ data class Song(
     // 封面url
     @ColumnInfo(name = "album_art")
     val albumArt: String? = null, // 专辑封面 URI 转 String 存储
+    // 歌词url
+    @ColumnInfo(name = "lyrics_url")
+    val lyricsUrl: String? = null,
     // 是否本地
     @ColumnInfo(name = "is_local")
     val isLocal: Boolean = true, // 本地标记

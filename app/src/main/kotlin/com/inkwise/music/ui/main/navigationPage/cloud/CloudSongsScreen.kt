@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,11 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.inkwise.music.R
 import com.inkwise.music.data.model.Song
+import com.inkwise.music.ui.main.navigationPage.components.DragReorderState
 import com.inkwise.music.ui.main.navigationPage.components.MultiSelectBottomBar
 import com.inkwise.music.ui.main.navigationPage.components.PlaylistPickerSheet
 import com.inkwise.music.ui.main.navigationPage.components.SongActionSheet
 import com.inkwise.music.ui.main.navigationPage.components.SortBottomSheet
 import com.inkwise.music.ui.main.navigationPage.components.SortMode
+import com.inkwise.music.ui.main.navigationPage.components.rememberDragReorderState
 import com.inkwise.music.ui.main.navigationPage.home.HomeViewModel
 import com.inkwise.music.ui.main.navigationPage.local.SongItem
 import com.inkwise.music.ui.main.navigationPage.local.formatTime
@@ -70,9 +74,23 @@ fun CloudSongsScreen(
 ) {
     val uiState by cloudViewModel.uiState.collectAsState()
     val playbackState by playerViewModel.playbackState.collectAsState()
-    val playlists by homeViewModel.playlists.collectAsState()
+    val allPlaylists by homeViewModel.playlists.collectAsState()
+    // 云端歌曲只能添加到云端歌单
+    val cloudPlaylists = allPlaylists.filter { it.playlist.cloudId != null }
     val pullToRefreshState = rememberPullToRefreshState()
     val context = LocalContext.current
+
+    // ── 拖拽排序状态 ──
+    val isCustomSort = uiState.sortBy == CloudSortBy.CUSTOM
+    val listState = rememberLazyListState()
+    val dragReorderState = rememberDragReorderState(
+        listState = listState,
+        itemCount = uiState.songs.size,
+        onMove = { from, to ->
+            cloudViewModel.reorderSongsByIndex(from, to)
+        },
+        onDragEnd = { }
+    )
 
     var showSortSheet by remember { mutableStateOf(false) }
     var actionSong by remember { mutableStateOf<Song?>(null) }
@@ -106,12 +124,12 @@ fun CloudSongsScreen(
                 TextButton(onClick = { toggleSelectAll() }) {
                     Text(
                         if (selectedIds.size == uiState.songs.size) "取消全选" else "全选",
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 Text(text = "已选 ${selectedIds.size} 首", color = MaterialTheme.colorScheme.primary)
                 TextButton(onClick = { exitMultiSelect() }) {
-                    Text("取消", color = Color.Black)
+                    Text("取消", color = MaterialTheme.colorScheme.onSurface)
                 }
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -122,7 +140,7 @@ fun CloudSongsScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_player_random),
                             contentDescription = "随机播放",
-                            tint = Color.Black,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -137,7 +155,7 @@ fun CloudSongsScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_sort),
                             contentDescription = "排序",
-                            tint = Color.Black,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -149,7 +167,7 @@ fun CloudSongsScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_multiple_choice),
                             contentDescription = "选择",
-                            tint = Color.Black,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -170,8 +188,8 @@ fun CloudSongsScreen(
                     state = pullToRefreshState,
                     isRefreshing = uiState.isRefreshing,
                     modifier = Modifier.align(Alignment.TopCenter),
-                    containerColor = Color.White,
-                    color = Color.Blue
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         ) {
@@ -184,19 +202,19 @@ fun CloudSongsScreen(
                 uiState.error != null && uiState.songs.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = uiState.error ?: "", color = Color.Red)
+                            Text(text = uiState.error ?: "", color = MaterialTheme.colorScheme.error)
                             Spacer(modifier = Modifier.padding(top = 8.dp))
                             Text(
                                 text = "点击重试",
-                                color = Color.Blue,
+                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.clickable { cloudViewModel.loadSongs() }
                             )
                         }
                     }
                 }
                 else -> {
-                    LazyColumn {
-                        itemsIndexed(uiState.songs) { index, song ->
+                    LazyColumn(state = listState) {
+                        itemsIndexed(uiState.songs, key = { _, song -> song.id }) { index, song ->
                             SongItem(
                                 song = song,
                                 isPlaying = playbackState.currentSong?.id == song.id,
@@ -210,7 +228,12 @@ fun CloudSongsScreen(
                                         selectedIds - song.id
                                     else
                                         selectedIds + song.id
-                                }
+                                },
+                                modifier = if (isCustomSort) {
+                                    Modifier
+                                        .offset { dragReorderState.itemOffset(index) }
+                                        .then(dragReorderState.dragModifier(index))
+                                } else Modifier
                             )
                         }
                     }
@@ -251,7 +274,7 @@ fun CloudSongsScreen(
     // ── 歌单选择器 ──
     if (showPlaylistPicker) {
         PlaylistPickerSheet(
-            playlists = playlists,
+            playlists = cloudPlaylists,
             onSelect = { playlistId ->
                 selectedIds.forEach { songId ->
                     homeViewModel.addSongToPlaylist(playlistId, songId)
@@ -267,7 +290,7 @@ fun CloudSongsScreen(
     actionSong?.let { song ->
         SongActionSheet(
             song = song,
-            playlists = playlists,
+            playlists = cloudPlaylists,
             isInPlaylist = false,
             onDismiss = { actionSong = null },
             onPlayNext = {

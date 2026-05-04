@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,11 +49,13 @@ import com.inkwise.music.R
 import com.inkwise.music.data.model.Song
 import com.inkwise.music.hasAllFilesPermission
 import com.inkwise.music.requestAllFilesPermission
+import com.inkwise.music.ui.main.navigationPage.components.DragReorderState
 import com.inkwise.music.ui.main.navigationPage.components.MultiSelectBottomBar
 import com.inkwise.music.ui.main.navigationPage.components.PlaylistPickerSheet
 import com.inkwise.music.ui.main.navigationPage.components.SongActionSheet
 import com.inkwise.music.ui.main.navigationPage.components.SortBottomSheet
 import com.inkwise.music.ui.main.navigationPage.components.SortMode
+import com.inkwise.music.ui.main.navigationPage.components.rememberDragReorderState
 import com.inkwise.music.ui.main.navigationPage.home.HomeViewModel
 import com.inkwise.music.ui.player.PlayerViewModel
 
@@ -73,8 +77,22 @@ fun LocalSongsScreen(
     val songs by localViewModel.localSongs.collectAsState()
     val isScanning by localViewModel.isScanning.collectAsState()
     val sortMode by localViewModel.sortMode.collectAsState()
-    val playlists by homeViewModel.playlists.collectAsState()
+    val allPlaylists by homeViewModel.playlists.collectAsState()
+    // 本地歌曲只能添加到本地歌单
+    val localPlaylists = allPlaylists.filter { it.playlist.cloudId == null }
     val pullToRefreshState = rememberPullToRefreshState()
+
+    // ── 拖拽排序状态 ──
+    val isCustomSort = sortMode == SortMode.CUSTOM
+    val listState = rememberLazyListState()
+    val dragReorderState = rememberDragReorderState(
+        listState = listState,
+        itemCount = songs.size,
+        onMove = { from, to ->
+            localViewModel.reorderSongsByIndex(from, to)
+        },
+        onDragEnd = { }
+    )
 
     var actionSong by remember { mutableStateOf<Song?>(null) }
     var showScanDialog by remember { mutableStateOf(false) }
@@ -140,7 +158,7 @@ fun LocalSongsScreen(
                     TextButton(onClick = { toggleSelectAll() }) {
                         Text(
                             if (selectedIds.size == songs.size) "取消全选" else "全选",
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Text(
@@ -148,7 +166,7 @@ fun LocalSongsScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                     TextButton(onClick = { exitMultiSelect() }) {
-                        Text("取消", color = Color.Black)
+                        Text("取消", color = MaterialTheme.colorScheme.onSurface)
                     }
                 } else {
                     // 普通工具栏
@@ -160,7 +178,7 @@ fun LocalSongsScreen(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_player_random),
                                 contentDescription = "随机播放",
-                                tint = Color.Black,
+                                tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -175,7 +193,7 @@ fun LocalSongsScreen(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_sort),
                                 contentDescription = "排序",
-                                tint = Color.Black,
+                                tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -187,7 +205,7 @@ fun LocalSongsScreen(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_multiple_choice),
                                 contentDescription = "选择",
-                                tint = Color.Black,
+                                tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -208,8 +226,8 @@ fun LocalSongsScreen(
                         state = pullToRefreshState,
                         isRefreshing = isScanning,
                         modifier = Modifier.align(Alignment.TopCenter),
-                        containerColor = Color.White,
-                        color = Color.Blue
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             ) {
@@ -218,8 +236,8 @@ fun LocalSongsScreen(
                         CircularProgressIndicator()
                     }
                 } else {
-                    LazyColumn {
-                        itemsIndexed(songs) { index, song ->
+                    LazyColumn(state = listState) {
+                        itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
                             SongItem(
                                 song = song,
                                 isPlaying = playbackState.currentSong?.id == song.id,
@@ -233,7 +251,12 @@ fun LocalSongsScreen(
                                         selectedIds - song.id
                                     else
                                         selectedIds + song.id
-                                }
+                                },
+                                modifier = if (isCustomSort) {
+                                    Modifier
+                                        .offset { dragReorderState.itemOffset(index) }
+                                        .then(dragReorderState.dragModifier(index))
+                                } else Modifier
                             )
                         }
                     }
@@ -274,7 +297,7 @@ fun LocalSongsScreen(
     // ── 歌单选择器 ──
     if (showPlaylistPicker) {
         PlaylistPickerSheet(
-            playlists = playlists,
+            playlists = localPlaylists,
             onSelect = { playlistId ->
                 selectedIds.forEach { songId ->
                     homeViewModel.addSongToPlaylist(playlistId, songId)
@@ -319,7 +342,7 @@ fun LocalSongsScreen(
     actionSong?.let { song ->
         SongActionSheet(
             song = song,
-            playlists = playlists,
+            playlists = localPlaylists,
             isInPlaylist = false,
             onDismiss = { actionSong = null },
             onPlayNext = {

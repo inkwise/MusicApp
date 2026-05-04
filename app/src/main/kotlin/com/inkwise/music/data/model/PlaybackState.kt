@@ -5,6 +5,7 @@ data class PlaybackState(
     val currentSong: Song? = null,
     val currentPosition: Long = 0L,
     val duration: Long = 0L,
+    val bufferedPosition: Long = 0L,
     val playbackSpeed: Float = 1f,
     val playMode: PlayMode = PlayMode.LIST,
 )

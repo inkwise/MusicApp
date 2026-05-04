@@ -1,22 +1,30 @@
 package com.inkwise.music.data.network
 
+import com.inkwise.music.data.network.model.AddMusicToPlaylistRequest
+import com.inkwise.music.data.network.model.AddMusicToPlaylistResponse
 import com.inkwise.music.data.network.model.AuthResponse
-import com.inkwise.music.data.network.model.DeleteMusicRequest
-import com.inkwise.music.data.network.model.DeleteMusicResponse
+import com.inkwise.music.data.network.model.BatchDeleteMusicRequest
+import com.inkwise.music.data.network.model.BatchDeleteMusicResponse
 import com.inkwise.music.data.network.model.HealthResponse
 import com.inkwise.music.data.network.model.LoginRequest
 import com.inkwise.music.data.network.model.CreatePlaylistRequest
 import com.inkwise.music.data.network.model.MusicListResponse
 import com.inkwise.music.data.network.model.PlaylistListResponse
 import com.inkwise.music.data.network.model.PlaylistResponse
+import com.inkwise.music.data.network.model.PlaylistSongsResponse
 import com.inkwise.music.data.network.model.ProfileResponse
 import com.inkwise.music.data.network.model.RegisterRequest
+import com.inkwise.music.data.network.model.ReorderPlaylistRequest
+import com.inkwise.music.data.network.model.ReorderPlaylistResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.HTTP
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -55,9 +63,42 @@ interface ApiService {
         @Query("page_size") pageSize: Int = 50
     ): Response<PlaylistListResponse>
 
-    @HTTP(method = "DELETE", path = "/music", hasBody = true)
+    @DELETE("/music/{id}")
     suspend fun deleteMusic(
         @Header("Authorization") token: String,
-        @Body request: DeleteMusicRequest
-    ): Response<DeleteMusicResponse>
+        @Path("id") musicId: Long
+    ): Response<Unit>
+
+    @HTTP(method = "DELETE", path = "/playlists/music/batch", hasBody = true)
+    suspend fun deleteMusicBatch(
+        @Header("Authorization") token: String,
+        @Body request: BatchDeleteMusicRequest
+    ): Response<BatchDeleteMusicResponse>
+
+    @DELETE("/playlists/{playlistId}/music/{musicId}")
+    suspend fun removeMusicFromPlaylist(
+        @Header("Authorization") token: String,
+        @Path("playlistId") playlistId: Long,
+        @Path("musicId") musicId: Long
+    ): Response<Unit>
+
+    @POST("/playlists/{id}/music")
+    suspend fun addMusicToPlaylist(
+        @Header("Authorization") token: String,
+        @Path("id") playlistId: Long,
+        @Body request: AddMusicToPlaylistRequest
+    ): Response<AddMusicToPlaylistResponse>
+
+    @GET("/playlists/{id}/music")
+    suspend fun getPlaylistSongs(
+        @Header("Authorization") token: String,
+        @Path("id") playlistId: Long
+    ): Response<PlaylistSongsResponse>
+
+    @PUT("/playlists/{id}/music/reorder")
+    suspend fun reorderPlaylistSongs(
+        @Header("Authorization") token: String,
+        @Path("id") playlistId: Long,
+        @Body request: ReorderPlaylistRequest
+    ): Response<ReorderPlaylistResponse>
 }

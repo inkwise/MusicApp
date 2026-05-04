@@ -1,0 +1,153 @@
+================================================================================
+  Salt Player 音频效果引擎 —— 实现说明文档
+  作用范围: V3 混响 (Reverb) / 动态压缩 (Compressor) 
+作者注：
+本文档基于 Salt Player v11.0.4 (build 2025123102) 的反编译分析编写。
+================================================================================
+一、总体架构
+================================================================================
+
+音频引擎方案: un4seen BASS v2.4 (http://www.un4seen.com/)
+原生加载库 (在 App 启动时加载):
+  System.loadLibrary("salt-bassplayer")   — BASS 核心封装
+  System.loadLibrary("salt-bassfx")       — BASS_FX 效果扩展
+  System.loadLibrary("salt-tag")          — 标签解析
+  System.loadLibrary("bassloud")          — 响度处理 (EBU R128)
+  System.loadLibrary("exp82464")          — 扩展功能
+
+播放链路:
+  BASS_StreamCreateFile(...)
+    → BASS_FX_TempoCreate(stream, flag)    // 创建变速解码流
+      → BASS_ChannelSetFX(chan, type, priority)  // 添加效果器
+
+持久化方案:
+  Tencent MMKV (高性能 key-value 存储)
+  每个效果有一个独立的 boolean key，值为 "true"/"false"
+
+================================================================================
+二、V3 混响 (V3 Reverb)
+================================================================================
+
+2.1 效果类型
+  BASS DX8 Reverb (BASS 内置 DirectX 8 混响效果)
+  常量值: 8 (BASS_FX_DX8_REVERB)
+
+2.2 开关实现
+
+  === 开启 ===
+  val fxHandle = BASS_ChannelSetFX(channel, 8, 0)  // channel = 音频通道 handle
+  if (fxHandle == 0) {
+      // 开启失败，输出日志 "混响开启失败"
+  }
+
+  === 关闭 ===
+  BASS_ChannelRemoveFX(channel, fxHandle)
+
+  === 持久化 ===
+  MMKV key: "enabled_bass_dx8_reverb"
+  默认值: false
+  每次播放启动时从 MMKV 读取状态并恢复。
+
+2.3 当前实现说明
+  当前 Salt Player 的 V3 混响仅为开关控制，没有在代码中对 DX8 Reverb 参数进行微调。
+  效果器以 BASS 默认参数运行。
+三、动态压缩 (Compressor)
+
+3.1 效果类型
+  BASS_FX_BFX_COMPRESSOR2 (BASS_FX 扩展的压缩器效果)
+  常量值: 0x10011
+
+3.2 开关实现
+
+  === 开启 ===
+  val fxHandle = BASS_ChannelSetFX(channel, 0x10011, 0)
+  if (fxHandle == 0) {
+      // 检查 BASS_ErrorGetCode()
+      // 错误码 5 (BASS_ERROR_HANDLE) 说明 handle 无效，可忽略
+      // 输出日志 "Compressor 开启失败"
+  }
+
+  === 关闭 ===
+  BASS_ChannelRemoveFX(channel, fxHandle)
+
+  === 持久化 ===
+  MMKV key: "enabled_bass_fx_compressor2"
+  默认值: false
+
+3.3 当前实现说明
+  当前 Salt Player 的压缩器仅为开关控制，开启后**未调用 BASS_FXSetParameters**，
+  效果器以 BASS 默认参数运行。
+
+3.4 可调节参数 (BASS_BFX_COMPRESSOR2 结构体)
+
+  如果需要支持参数微调，Compressor2 提供以下参数：
+
+  Java 类: com.un4seen.bass.BASS_FX.BASS_BFX_COMPRESSOR2
+
+  float fThreshold    // 阈值 (dB)。超过此电平的信号被压缩。默认 0.0
+  float fRatio        // 压缩比。如 3.0 = 3:1 压缩。默认 3.0
+  float fAttack       // 启动时间 (秒)。信号超过阈值后多久开始压缩。默认 0.01
+  float fRelease      // 释放时间 (秒)。信号回落到阈值以下后多久停止压缩。默认 0.2
+  float fGain         // 输出增益 (dB)。压缩后的信号放大/衰减。默认 0.0
+  int   lChannel      // 声道控制。默认 -1 (全部声道)
+
+  设置方法:
+  val params = BASS_BFX_COMPRESSOR2()
+  params.fThreshold = -20.0f
+  params.fRatio = 4.0f
+  params.fAttack = 0.005f
+  params.fRelease = 0.1f
+  params.fGain = 3.0f
+  params.lChannel = -1
+  BASS_FXSetParameters(fxHandle, params)
+
+  常用场景参考值:
+  - 轻压缩 (轻力度): Threshold -20dB, Ratio 2:1, Attack 10ms, Release 100ms
+  - 中压缩 (人声/混音): Threshold -30dB, Ratio 4:1, Attack 5ms, Release 150ms
+      - 强压缩 (限制器风格): Threshold -40dB, Ratio 8:1, Attack 1ms, Release 200ms
+
+
+4.4 BASS 原生参数结构
+  Java 类: com.un4seen.bass.BASS_FX.BASS_BFX_PEAKEQ
+
+  float fBandwidth    // 带宽 (octaves)。控制频带宽度。与 fQ 互斥，设置了带宽则 Q 值自动计算
+  float fCenter       // 中心频率 (Hz)。对应 Item.Fc
+  float fGain         // 增益 (dB)。对应 Item.Gain
+  float fQ            // Q 值。对应 Item.Q。与 fBandwidth 互斥
+  int   lBand         // 频段索引 (0-based)
+  int   lChannel      // 声道控制。默认 -1 (全部声道)
+
+  fQ 与 fBandwidth 的换算关系:
+    fBandwidth = 2 / (log(2) * asinh(0.5 / fQ))
+    或简化近似: fBandwidth ≈ 1 / fQ (当 fQ >= 1 时)
+
+
+这是另一个与 V3 混响类似的效果，使用 FREEVERB (0x10016)，
+已实现完整的参数调优，可供 V3 混响改造参考。
+
+效果类型: BASS_FX_BFX_FREEVERB = 0x10016
+
+参数设置:
+  float fDryMix = 0.85f    // 干声比例 (干湿混合中的干声音量)
+  float fWetMix = 0.75f    // 湿声比例 (混响声)
+  float fRoomSize = 0.9f   // 房间大小 (0.0 ~ 1.0)
+  float fDamp = 0.4f       // 阻尼系数 (高频衰减)
+  float fWidth = 0.75f     // 立体声宽度
+  int   lMode = 0          // 模式: 0=普通, 1=冻结 (FREEVERB_MODE_FREEZE)
+  int   lChannel = -1      // 声道: -1=全部
+
+================================================================================
+六、常见问题与注意事项
+================================================================================
+
+效果器生命周期
+  - 效果器与 BASS channel 绑定，channel 释放时效果器自动销毁
+  - 每次新播放开始时 (新歌曲)，需要重新创建 channel 并重新添加效果器
+  - BASS_FXSetParameters 可以在播放中随时调用，实时生效
+
+
+  - 每个 BASS_ChannelSetFX 调用增加 DSP 处理链路长度
+  - Parametric EQ 多段均衡建议不要超过 31 段 (BASS 限制)
+  - 压缩器使用 COMPRESSOR2 而非 COMPRESSOR (0x1000f)，前者算法更好更稳定
+
+  - MMKV 初始化需要在 Application.onCreate() 中完成
