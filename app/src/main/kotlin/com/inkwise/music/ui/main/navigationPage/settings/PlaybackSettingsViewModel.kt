@@ -3,7 +3,7 @@ package com.inkwise.music.ui.main.navigationPage.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inkwise.music.data.prefs.PreferencesManager
-import com.inkwise.music.player.MusicPlayerManager
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +30,6 @@ class PlaybackSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             prefs.setAudioFocusEnabled(enabled)
         }
-        MusicPlayerManager.applyAudioFocus()
     }
 
     fun setFadeEnabled(enabled: Boolean) {

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.inkwise.music.data.prefs.PreferencesManager
 import com.inkwise.music.data.repository.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,15 @@ class MainViewModel
         private val prefs: PreferencesManager,
     ) : ViewModel() {
         val loginRequiredEvents: SharedFlow<Unit> = prefs.loginRequiredEvents
+
+        private val _navigateToAudioEffectEvents = MutableSharedFlow<Unit>()
+        val navigateToAudioEffectEvents: SharedFlow<Unit> = _navigateToAudioEffectEvents
+
+        fun navigateToAudioEffect() {
+            viewModelScope.launch {
+                _navigateToAudioEffectEvents.emit(Unit)
+            }
+        }
 
         private val _uiState = MutableStateFlow(MainUiState())
         val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()

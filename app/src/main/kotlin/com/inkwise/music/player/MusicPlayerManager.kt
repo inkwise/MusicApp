@@ -1,18 +1,7 @@
 package com.inkwise.music.player
 
-import android.content.ComponentName
 import android.content.Context
-import android.net.Uri
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
+import android.content.Intent
 import com.un4seen.bass.BASS
 import com.inkwise.music.data.audio.AudioEffectManager
 import com.inkwise.music.data.model.PlayMode
@@ -34,11 +23,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 object MusicPlayerManager {
-    // 进度条协程
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var progressJob: Job? = null
-    private var mediaController: MediaController? = null
-    private var controllerFuture: ListenableFuture<MediaController>? = null
 
     private val _playbackState = MutableStateFlow(PlaybackState())
     val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
@@ -46,6 +33,7 @@ object MusicPlayerManager {
     private val _playQueue = MutableStateFlow<List<Song>>(emptyList())
     val playQueue: StateFlow<List<Song>> = _playQueue.asStateFlow()
 
+    // 当前播放的队列索引 (index into _playQueue)
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex: StateFlow<Int> = _currentIndex.asStateFlow()
 
@@ -55,18 +43,23 @@ object MusicPlayerManager {
     var audioEffectManager: AudioEffectManager? = null
         private set
 
-    var exoPlayer: ExoPlayer? = null
+    // 播放模式
+    private var playMode: PlayMode = PlayMode.LIST
+    // shuffleOrder[i] = index into _playQueue；shufflePosition = 当前在 shuffleOrder 中的位置
+    private var shuffleOrder: MutableList<Int> = mutableListOf()
+    private var shufflePosition: Int = 0
+    private var isPlaying: Boolean = false
+    private var serviceStarted: Boolean = false
 
     // 睡眠定时
     private var sleepJob: Job? = null
     private var sleepMode: SleepMode = SleepMode.STOP_IMMEDIATELY
     private var exitAppCallback: (() -> Unit)? = null
 
-    // 定时器剩余时间
     private val _sleepRemaining = MutableStateFlow<Long?>(null)
     val sleepRemaining: StateFlow<Long?> = _sleepRemaining
 
-    // 待恢复的进度（controller 就绪后执行 seek）
+    // 待恢复的进度
     private var pendingSeekPosition: Long = -1L
 
     fun init(context: Context, prefs: PreferencesManager? = null, effectManager: AudioEffectManager? = null) {
@@ -75,157 +68,56 @@ object MusicPlayerManager {
             if (prefs != null) appPrefs = prefs
             if (effectManager != null) {
                 audioEffectManager = effectManager
-                // Reload track when tempo mode changes (normal ↔ tempo stream)
-                effectManager.onTempoModeChanged = { loadCurrentTrackIntoBass() }
             }
             BassEngine.init(appContext)
             BassEngine.setOnEndCallback { onBassTrackEnded() }
-            initializeController()
         }
     }
 
-    fun restorePlaybackState(
-        songs: List<Song>,
-        index: Int,
-        position: Long,
-    ) {
+    fun restorePlaybackState(songs: List<Song>, index: Int, position: Long) {
         if (songs.isEmpty()) return
         val safeIndex = index.coerceIn(0, songs.lastIndex)
-        setPlayQueue(songs, safeIndex)
         if (position > 0) {
             pendingSeekPosition = position
         }
+        setPlayQueue(songs, safeIndex)
     }
 
-    private fun initializeController() {
-        val sessionToken =
-            SessionToken(
-                appContext,
-                ComponentName(appContext, MusicService::class.java),
-            )
+    // ── 播放队列管理 ────────────────────────────────────────────
 
-        controllerFuture = MediaController.Builder(appContext, sessionToken).buildAsync()
-        controllerFuture?.addListener({
-            mediaController = controllerFuture?.get()
-            mediaController?.addListener(PlayerListener())
-            // 如果恢复时有队列但 controller 还没收到，现在推送
-            val queue = _playQueue.value
-            if (queue.isNotEmpty() && mediaController?.mediaItemCount == 0) {
-                val mediaItems = queue.map { song ->
-                    MediaItem.Builder()
-                        .setMediaId(song.id.toString())
-                        .setUri(song.uri)
-                        .setMediaMetadata(
-                            MediaMetadata.Builder()
-                                .setTitle(song.title)
-                                .setArtist(song.artist)
-                                .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
-                                .build()
-                        ).build()
-                }
-                val startPos = if (pendingSeekPosition > 0) pendingSeekPosition else 0L
-                mediaController?.setMediaItems(mediaItems, _currentIndex.value, startPos)
-                mediaController?.prepare()
-                pendingSeekPosition = -1L
-            }
-        }, MoreExecutors.directExecutor())
-    }
-
-    fun startSleepTimer(
-        durationMillis: Long,
-        mode: SleepMode,
-        onExitApp: () -> Unit,
-    ) {
-        cancelSleepTimer()
-
-        sleepMode = mode
-        exitAppCallback = onExitApp
-
-        sleepJob =
-            scope.launch {
-                var remaining = durationMillis
-                _sleepRemaining.value = remaining
-
-                while (remaining > 0) {
-                    delay(1000)
-                    remaining -= 1000
-                    _sleepRemaining.value = remaining
-                }
-
-                _sleepRemaining.value = null
-
-                when (sleepMode) {
-                    SleepMode.STOP_IMMEDIATELY -> stopAndExit()
-                    SleepMode.STOP_AFTER_SONG -> waitForSongFinishThenExit()
-                }
-            }
-    }
-
-    private suspend fun waitForSongFinishThenExit() {
-        val controller = mediaController ?: return
-
-        while (true) {
-            val remaining = controller.duration - controller.currentPosition
-            if (remaining <= 1000) break
-            delay(1000)
-        }
-
-        stopAndExit()
-    }
-
-    private fun stopAndExit() {
-        mediaController?.stop()
-        BassEngine.stop()
-        exitAppCallback?.invoke()
-    }
-
-    fun cancelSleepTimer() {
-        sleepJob?.cancel()
-        sleepJob = null
-        _sleepRemaining.value = null
-    }
-
-    // 设置播放队列
-    fun setPlayQueue(
-        songs: List<Song>,
-        startIndex: Int = 0,
-    ) {
+    fun setPlayQueue(songs: List<Song>, startIndex: Int = 0) {
         _playQueue.value = songs
-        _currentIndex.value = startIndex
-
-        val mediaItems = songs.map { song ->
-            MediaItem.Builder()
-                .setMediaId(song.id.toString())
-                .setUri(song.uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(song.title)
-                        .setArtist(song.artist)
-                        .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
-                        .build(),
-                ).build()
-        }
-
-        mediaController?.apply {
-            setMediaItems(mediaItems, startIndex, 0)
-            prepare()
-        }
-
+        _currentIndex.value = startIndex.coerceIn(0, (songs.size - 1).coerceAtLeast(0))
+        rebuildShuffleOrder(currentTrackFirst = true)
         loadCurrentTrackIntoBass()
     }
 
+    private fun rebuildShuffleOrder(currentTrackFirst: Boolean = false) {
+        val queue = _playQueue.value
+        if (queue.isEmpty()) {
+            shuffleOrder = mutableListOf()
+            shufflePosition = 0
+            return
+        }
+        shuffleOrder = queue.indices.toMutableList().also { it.shuffle() }
+        if (currentTrackFirst) {
+            val current = _currentIndex.value
+            shuffleOrder.remove(current)
+            shuffleOrder.add(0, current)
+        }
+        shufflePosition = 0
+    }
+
     private fun loadCurrentTrackIntoBass() {
-        val song = _playQueue.value.getOrNull(_currentIndex.value) ?: return
+        val queue = _playQueue.value
+        val song = queue.getOrNull(_currentIndex.value) ?: return
         val fx = audioEffectManager
         audioEffectManager?.onChannelFreeing()
 
-        // Apply config-level settings BEFORE stream creation
         fx?.dsdGain?.let { BassEngine.setDSDGain(it) }
 
-        // Only use tempo stream when DSP speed or anti-alias filter is enabled
-        // (tempo streams add overhead and can cause playback issues)
         val floatEnabled = fx?.isFloatDecodeEnabled ?: false
-        val tempoNeeded = fx?.isTempoNeeded ?: false
+        val tempoNeeded = true
         val flags = if (floatEnabled) BASS.BASS_SAMPLE_FLOAT else 0
         val ok = BassEngine.load(song.uri, flags, useTempo = tempoNeeded)
         if (ok) {
@@ -234,313 +126,264 @@ object MusicPlayerManager {
                 BassEngine.seekTo(pendingSeekPosition)
                 pendingSeekPosition = -1L
             }
-            // Resume BASS playback if ExoPlayer is already playing (skip next/prev)
-            if (mediaController?.isPlaying == true) {
+            if (isPlaying) {
                 BassEngine.play()
             }
+        }
+        updatePlaybackState()
+    }
+
+    // ── 播放控制 ────────────────────────────────────────────────
+
+    fun playPause() {
+        if (isPlaying) pause() else play()
+    }
+
+    fun play() {
+        if (_playQueue.value.isEmpty()) return
+        ensureServiceStarted()
+        BassEngine.play()
+        isPlaying = true
+        startProgressUpdates()
+        updatePlaybackState()
+    }
+
+    fun pause() {
+        BassEngine.pause()
+        isPlaying = false
+        stopProgressUpdates()
+        updatePlaybackState()
+    }
+
+    fun seekTo(position: Long) {
+        BassEngine.seekTo(position)
+        updatePlaybackState()
+    }
+
+    // ── 曲目切换 ────────────────────────────────────────────────
+
+    fun skipToNext() {
+        advanceToNext()
+    }
+
+    fun skipToPrevious() {
+        advanceToPrevious()
+    }
+
+    fun skipToIndex(index: Int) {
+        val queue = _playQueue.value
+        if (index < 0 || index >= queue.size) return
+        _currentIndex.value = index
+        if (playMode == PlayMode.SHUFFLE) {
+            syncShufflePositionToCurrent()
+        }
+        loadCurrentTrackIntoBass()
+        if (isPlaying) {
+            BassEngine.play()
+            startProgressUpdates()
+        }
+        updatePlaybackState()
+    }
+
+    private fun advanceToNext() {
+        val queue = _playQueue.value
+        if (queue.isEmpty()) return
+
+        _currentIndex.value = computeNextIndex()
+        if (playMode == PlayMode.SHUFFLE) {
+            syncShufflePositionToCurrent()
+        }
+        loadCurrentTrackIntoBass()
+        if (isPlaying) {
+            BassEngine.play()
+            startProgressUpdates()
+        }
+        updatePlaybackState()
+    }
+
+    private fun advanceToPrevious() {
+        val queue = _playQueue.value
+        if (queue.isEmpty()) return
+
+        _currentIndex.value = computePreviousIndex()
+        if (playMode == PlayMode.SHUFFLE) {
+            syncShufflePositionToCurrent()
+        }
+        loadCurrentTrackIntoBass()
+        if (isPlaying) {
+            BassEngine.play()
+            startProgressUpdates()
+        }
+        updatePlaybackState()
+    }
+
+    private fun computeNextIndex(): Int {
+        val queue = _playQueue.value
+        if (queue.isEmpty()) return 0
+
+        return when (playMode) {
+            PlayMode.SINGLE -> _currentIndex.value
+            PlayMode.SHUFFLE -> {
+                if (shuffleOrder.isEmpty()) return 0
+                shufflePosition++
+                if (shufflePosition >= shuffleOrder.size) {
+                    rebuildShuffleOrder()
+                }
+                shuffleOrder.getOrElse(shufflePosition) { 0 }
+            }
+            PlayMode.LIST -> {
+                val next = _currentIndex.value + 1
+                if (next < queue.size) next else 0
+            }
+        }
+    }
+
+    private fun computePreviousIndex(): Int {
+        val queue = _playQueue.value
+        if (queue.isEmpty()) return 0
+
+        return when (playMode) {
+            PlayMode.SINGLE -> _currentIndex.value
+            PlayMode.SHUFFLE -> {
+                if (shuffleOrder.isEmpty()) return 0
+                shufflePosition--
+                if (shufflePosition < 0) {
+                    shufflePosition = shuffleOrder.size - 1
+                }
+                shuffleOrder.getOrElse(shufflePosition) { 0 }
+            }
+            PlayMode.LIST -> {
+                val prev = _currentIndex.value - 1
+                if (prev >= 0) prev else queue.size - 1
+            }
+        }
+    }
+
+    // 当前播放的队列索引变了（比如 skipToIndex 直接设了 _currentIndex）时，
+    // 在 shuffleOrder 中找到这个索引并更新 shufflePosition
+    private fun syncShufflePositionToCurrent() {
+        val pos = shuffleOrder.indexOf(_currentIndex.value)
+        if (pos >= 0) {
+            shufflePosition = pos
+        } else {
+            // 索引不在 shuffleOrder 中：插入到当前位置
+            shuffleOrder.add(shufflePosition.coerceAtMost(shuffleOrder.size), _currentIndex.value)
         }
     }
 
     private fun onBassTrackEnded() {
-        scope.launch {
-            skipToNextInternal()
+        if (playMode == PlayMode.SINGLE) {
+            loadCurrentTrackIntoBass()
+            if (isPlaying) BassEngine.play()
+            return
         }
+        scope.launch { advanceToNext() }
     }
 
-    private fun skipToNextInternal() {
-        mediaController?.let { controller ->
-            val currentIndex = controller.currentMediaItemIndex
-            val count = controller.mediaItemCount
-            if (count <= 1) {
-                controller.seekTo(0)
-            } else if (currentIndex < count - 1) {
-                controller.seekToDefaultPosition(currentIndex + 1)
-            } else {
-                controller.seekToDefaultPosition(0)
-            }
-        }
-    }
+    // ── 播放模式 ────────────────────────────────────────────────
 
-    // 播放/暂停（带淡入淡出）
-    fun playPause() {
-        mediaController?.let { controller ->
-            if (controller.isPlaying) {
-                if (appPrefs?.fadeEnabled == true) {
-                    scope.launch {
-                        fadeVolume(controller, controller.volume, 0f, 150L)
-                        BassEngine.pause()
-                        controller.pause()
-                        controller.setVolume(1f)
-                    }
-                } else {
-                    BassEngine.pause()
-                    controller.pause()
-                }
-            } else {
-                if (appPrefs?.fadeEnabled == true) {
-                    controller.setVolume(0f)
-                    controller.play()
-                    BassEngine.play()
-                    scope.launch {
-                        fadeVolume(controller, 0f, 1f, 200L)
-                    }
-                } else {
-                    controller.play()
-                    BassEngine.play()
-                }
-            }
-            applyAudioFocus()
-        }
-    }
-
-    // 播放
-    fun play() {
-        mediaController?.let { controller ->
-            if (appPrefs?.fadeEnabled == true) {
-                controller.setVolume(0f)
-                controller.play()
-                BassEngine.play()
-                scope.launch {
-                    fadeVolume(controller, 0f, 1f, 200L)
-                }
-            } else {
-                controller.play()
-                BassEngine.play()
-            }
-            applyAudioFocus()
-        }
-    }
-
-    // 暂停
-    fun pause() {
-        mediaController?.let { controller ->
-            if (appPrefs?.fadeEnabled == true) {
-                scope.launch {
-                    fadeVolume(controller, controller.volume, 0f, 150L)
-                    BassEngine.pause()
-                    controller.pause()
-                    controller.setVolume(1f)
-                }
-            } else {
-                BassEngine.pause()
-                controller.pause()
-            }
-        }
-    }
-
-    private suspend fun fadeVolume(controller: MediaController, from: Float, to: Float, durationMs: Long) {
-        val steps = 10
-        val stepTime = durationMs / steps
-        for (i in 1..steps) {
-            val volume = from + (to - from) * (i.toFloat() / steps)
-            controller.setVolume(volume)
-            delay(stepTime)
-        }
-    }
-
-    fun applyAudioFocus() {
-        val handleFocus = appPrefs?.audioFocusEnabled ?: true
-        exoPlayer?.setAudioAttributes(
-            AudioAttributes.Builder()
-                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-                .setUsage(C.USAGE_MEDIA)
-                .build(),
-            handleFocus,
-        )
-    }
-
-    // 下一曲
-    fun skipToNext() {
-        skipToNextInternal()
-    }
-
-    // 上一曲
-    fun skipToPrevious() {
-        mediaController?.let { controller ->
-            val currentIndex = controller.currentMediaItemIndex
-            val count = controller.mediaItemCount
-            if (count <= 1) {
-                controller.seekTo(0)
-            } else if (currentIndex > 0) {
-                controller.seekToDefaultPosition(currentIndex - 1)
-            } else {
-                controller.seekToDefaultPosition(count - 1)
-            }
-        }
-    }
-
-    // 跳转到指定歌曲
-    fun skipToIndex(index: Int) {
-        mediaController?.seekToDefaultPosition(index)
-    }
-
-    // 跳转到指定位置
-    fun seekTo(position: Long) {
-        mediaController?.seekTo(position)
-        BassEngine.seekTo(position)
-    }
-
-    // 切换随机播放
     fun togglePlayMode() {
-        mediaController?.let { controller ->
-            val newMode =
-                when (_playbackState.value.playMode) {
-                    PlayMode.LIST -> PlayMode.SINGLE
-                    PlayMode.SINGLE -> PlayMode.SHUFFLE
-                    PlayMode.SHUFFLE -> PlayMode.LIST
-                }
-
-            when (newMode) {
-                PlayMode.LIST -> {
-                    controller.repeatMode = Player.REPEAT_MODE_ALL
-                    controller.shuffleModeEnabled = false
-                }
-
-                PlayMode.SINGLE -> {
-                    controller.repeatMode = Player.REPEAT_MODE_ONE
-                    controller.shuffleModeEnabled = false
-                }
-
-                PlayMode.SHUFFLE -> {
-                    controller.repeatMode = Player.REPEAT_MODE_ALL
-                    controller.shuffleModeEnabled = true
-                }
-            }
-
-            _playbackState.value = _playbackState.value.copy(playMode = newMode)
+        playMode = when (playMode) {
+            PlayMode.LIST -> PlayMode.SINGLE
+            PlayMode.SINGLE -> PlayMode.SHUFFLE
+            PlayMode.SHUFFLE -> PlayMode.LIST
         }
+
+        if (playMode == PlayMode.SHUFFLE) {
+            rebuildShuffleOrder(currentTrackFirst = true)
+        }
+
+        _playbackState.value = _playbackState.value.copy(playMode = playMode)
     }
 
     fun setPlayQueueShuffle(songs: List<Song>) {
         if (songs.isEmpty()) return
 
         _playQueue.value = songs
-
-        val mediaItems = songs.map { song ->
-            MediaItem.Builder()
-                .setMediaId(song.id.toString())
-                .setUri(song.uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(song.title)
-                        .setArtist(song.artist)
-                        .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
-                        .build(),
-                ).build()
-        }
-
-        val randomIndex = (songs.indices).random()
-        _currentIndex.value = randomIndex
-
-        mediaController?.apply {
-            setMediaItems(mediaItems, randomIndex, 0)
-            prepare()
-            shuffleModeEnabled = true
-            repeatMode = Player.REPEAT_MODE_ALL
-            _playbackState.value = _playbackState.value.copy(playMode = PlayMode.SHUFFLE)
-            play()
-        }
+        playMode = PlayMode.SHUFFLE
+        rebuildShuffleOrder()
+        _currentIndex.value = shuffleOrder.getOrElse(0) { 0 }
 
         loadCurrentTrackIntoBass()
+        play()
+
+        _playbackState.value = _playbackState.value.copy(playMode = PlayMode.SHUFFLE)
     }
+
+    // ── 队列操作 ────────────────────────────────────────────────
 
     fun addToQueue(song: Song) {
-        val controller = mediaController ?: return
-
-        val currentIndex = controller.currentMediaItemIndex
-        val insertIndex = currentIndex + 1
-
         val currentQueue = _playQueue.value.toMutableList()
-        if (insertIndex <= currentQueue.size) {
-            currentQueue.add(insertIndex, song)
-        } else {
-            currentQueue.add(song)
-        }
+        val currentQueueIdx = _currentIndex.value
+        val insertIndex = (currentQueueIdx + 1).coerceAtMost(currentQueue.size)
+        currentQueue.add(insertIndex, song)
         _playQueue.value = currentQueue
 
-        val mediaItem = MediaItem.Builder()
-            .setMediaId(song.id.toString())
-            .setUri(song.uri)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.title)
-                    .setArtist(song.artist)
-                    .setAlbumTitle(song.album)
-                    .setArtworkUri(song.albumArt?.let { Uri.parse(it) })
-                    .build(),
-            ).build()
-
-        controller.addMediaItem(insertIndex, mediaItem)
+        if (insertIndex <= _currentIndex.value) {
+            _currentIndex.value += 1
+        }
+        rebuildShuffleOrder(currentTrackFirst = playMode == PlayMode.SHUFFLE)
     }
 
-    // 从队列移除歌曲
     fun removeFromQueue(index: Int) {
         val currentQueue = _playQueue.value.toMutableList()
-        if (index in currentQueue.indices) {
-            currentQueue.removeAt(index)
-            _playQueue.value = currentQueue
-            mediaController?.removeMediaItem(index)
-        }
-    }
+        if (index !in currentQueue.indices) return
 
-    // 播放器监听器
-    private class PlayerListener : Player.Listener {
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            if (isPlaying) {
-                startProgressUpdates()
-                if (BassEngine.getChannelHandle() != 0) {
-                    BassEngine.play()
-                }
-            } else {
-                stopProgressUpdates()
-            }
+        val removedSong = currentQueue[index]
+        currentQueue.removeAt(index)
+        _playQueue.value = currentQueue
+
+        if (currentQueue.isEmpty()) {
+            _currentIndex.value = 0
+            BassEngine.stop()
+            isPlaying = false
+            stopProgressUpdates()
             updatePlaybackState()
+            return
         }
 
-        override fun onMediaItemTransition(
-            mediaItem: MediaItem?,
-            reason: Int,
-        ) {
-            mediaController?.currentMediaItemIndex?.let { index ->
-                _currentIndex.value = index
-                updatePlaybackState()
+        // 调整 currentIndex
+        if (index < _currentIndex.value) {
+            _currentIndex.value -= 1
+        } else if (index == _currentIndex.value) {
+            // 当前播放的被删了，如果超出范围则归零
+            if (_currentIndex.value >= currentQueue.size) {
+                _currentIndex.value = 0
             }
             loadCurrentTrackIntoBass()
+            if (isPlaying) BassEngine.play()
         }
 
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            updatePlaybackState()
-        }
+        rebuildShuffleOrder(currentTrackFirst = playMode == PlayMode.SHUFFLE)
     }
 
+    // ── 进度更新 ────────────────────────────────────────────────
+
     private fun updatePlaybackState() {
-        mediaController?.let { controller ->
-            val currentSong = _playQueue.value.getOrNull(controller.currentMediaItemIndex)
+        val queue = _playQueue.value
+        val currentSong = queue.getOrNull(_currentIndex.value)
 
-            val playMode =
-                when {
-                    controller.shuffleModeEnabled -> PlayMode.SHUFFLE
-                    controller.repeatMode == Player.REPEAT_MODE_ONE -> PlayMode.SINGLE
-                    else -> PlayMode.LIST
-                }
-
-            // Use BASS position when available (reflects actual audio output)
-            val pos = if (BassEngine.getChannelHandle() != 0) {
-                BassEngine.getPosition()
-            } else {
-                controller.currentPosition
-            }
-
-            _playbackState.value = PlaybackState(
-                isPlaying = controller.isPlaying,
-                currentSong = currentSong,
-                currentPosition = pos,
-                duration = controller.duration.coerceAtLeast(0),
-                bufferedPosition = controller.bufferedPosition.coerceAtLeast(0),
-                playbackSpeed = controller.playbackParameters.speed,
-                playMode = playMode,
-            )
+        val pos = if (BassEngine.getChannelHandle() != 0) {
+            BassEngine.getPosition()
+        } else {
+            0L
         }
+
+        val dur = if (BassEngine.getChannelHandle() != 0) {
+            BassEngine.getDuration()
+        } else {
+            currentSong?.duration ?: 0L
+        }
+
+        _playbackState.value = PlaybackState(
+            isPlaying = isPlaying,
+            currentSong = currentSong,
+            currentPosition = pos,
+            duration = dur.coerceAtLeast(0),
+            bufferedPosition = 0L,
+            playbackSpeed = BassEngine.getSpeed(),
+            playMode = playMode,
+        )
     }
 
     private fun startProgressUpdates() {
@@ -558,13 +401,73 @@ object MusicPlayerManager {
         progressJob = null
     }
 
+    // ── 睡眠定时器 ──────────────────────────────────────────────
+
+    fun startSleepTimer(durationMillis: Long, mode: SleepMode, onExitApp: () -> Unit) {
+        cancelSleepTimer()
+        sleepMode = mode
+        exitAppCallback = onExitApp
+
+        sleepJob = scope.launch {
+            var remaining = durationMillis
+            _sleepRemaining.value = remaining
+
+            while (remaining > 0) {
+                delay(1000)
+                remaining -= 1000
+                _sleepRemaining.value = remaining
+            }
+
+            _sleepRemaining.value = null
+
+            when (sleepMode) {
+                SleepMode.STOP_IMMEDIATELY -> stopAndExit()
+                SleepMode.STOP_AFTER_SONG -> waitForSongFinishThenExit()
+            }
+        }
+    }
+
+    private suspend fun waitForSongFinishThenExit() {
+        while (true) {
+            val remaining = BassEngine.getDuration() - BassEngine.getPosition()
+            if (remaining <= 1000) break
+            delay(1000)
+        }
+        stopAndExit()
+    }
+
+    private fun stopAndExit() {
+        pause()
+        BassEngine.stop()
+        stopService()
+        exitAppCallback?.invoke()
+    }
+
+    fun cancelSleepTimer() {
+        sleepJob?.cancel()
+        sleepJob = null
+        _sleepRemaining.value = null
+    }
+
+    // ── Service 管理 ────────────────────────────────────────────
+
+    private fun ensureServiceStarted() {
+        if (!serviceStarted) {
+            val intent = Intent(appContext, MusicService::class.java)
+            appContext.startForegroundService(intent)
+            serviceStarted = true
+        }
+    }
+
+    private fun stopService() {
+        val intent = Intent(appContext, MusicService::class.java)
+        appContext.stopService(intent)
+        serviceStarted = false
+    }
+
     fun release() {
         stopProgressUpdates()
         scope.cancel()
-        mediaController?.release()
-        controllerFuture?.let {
-            MediaController.releaseFuture(it)
-        }
         BassEngine.release()
     }
 }

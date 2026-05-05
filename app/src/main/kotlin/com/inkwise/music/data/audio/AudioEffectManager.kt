@@ -86,21 +86,10 @@ class AudioEffectManager @Inject constructor() {
     val speed: Float
         get() = mmkv.decodeFloat(KEY_SPEED, DEFAULT_SPEED)
 
-    /** Whether a tempo stream is needed (speed != 1.0 or antiAlias on). */
-    val isTempoNeeded: Boolean
-        get() = speed != 1.0f || isAntiAliasFilterEnabled
-
-    /** Callback invoked when tempo mode changes (needs track reload). */
-    var onTempoModeChanged: (() -> Unit)? = null
-
     fun setSpeed(value: Float) {
-        val oldNeeded = isTempoNeeded
         val clamped = value.coerceIn(0.25f, 8.0f)
         mmkv.encode(KEY_SPEED, clamped)
         BassEngine.setSpeed(clamped)
-        if (isTempoNeeded != oldNeeded) {
-            onTempoModeChanged?.invoke()
-        }
     }
 
     // ── Anti-Alias Filter for Tempo ─────────────────────────────────
@@ -109,12 +98,8 @@ class AudioEffectManager @Inject constructor() {
         get() = mmkv.decodeBool(KEY_ANTI_ALIAS_FILTER, false)
 
     fun setAntiAliasFilterEnabled(enabled: Boolean) {
-        val oldNeeded = isTempoNeeded
         mmkv.encode(KEY_ANTI_ALIAS_FILTER, enabled)
         BassEngine.setAntiAliasFilter(enabled)
-        if (isTempoNeeded != oldNeeded) {
-            onTempoModeChanged?.invoke()
-        }
     }
 
     // ── D2P (DSD to PCM conversion frequency) ──────────────────────

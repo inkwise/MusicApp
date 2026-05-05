@@ -207,6 +207,7 @@ class PlayerViewModel
         // 从队列移除
         fun removeFromQueue(index: Int) {
             MusicPlayerManager.removeFromQueue(index)
+            viewModelScope.launch { saveCurrentState() }
         }
 
         override fun onCleared() {

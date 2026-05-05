@@ -79,6 +79,14 @@ fun NavigationContent(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.navigateToAudioEffectEvents.collect {
+            navController.navigate("audio-effect-settings")
+            pagerState.scrollToPage(0)
+            sheetState.partialExpand()
+        }
+    }
+
     LaunchedEffect(uiState.sidebarOpen) {
         if (uiState.sidebarOpen) {
             drawerState.open()

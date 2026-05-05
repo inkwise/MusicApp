@@ -1,14 +1,12 @@
 package com.inkwise.music.ui.main
 
-// painterResource
 import androidx.compose.ui.res.painterResource
-
-// Color
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.fillMaxSize
-// 如果你使用 R.drawable
 import com.inkwise.music.R
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.widget.ImageView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,6 +48,7 @@ import com.inkwise.music.di.MusicAppEntryPoint
 import com.inkwise.music.ui.player.PlayerViewModel
 import com.inkwise.music.ui.theme.LocalAppDimens
 import dagger.hilt.android.EntryPointAccessors
+import java.io.File
 
 // 手柄区域
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -121,6 +120,14 @@ fun MiniPlayerControl(
                     .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
         ) {
+            // 占位图标作为背景
+            Icon(
+                painter = painterResource(R.drawable.ic_song_cover),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                tint = Color.Unspecified,
+            )
+
             AndroidView(
                 modifier = Modifier.matchParentSize(),
                 factory = { context ->
@@ -130,36 +137,34 @@ fun MiniPlayerControl(
                 },
                 update = { imageView ->
                     val uri = coverUri
-                    if (uri != null) {
+                    if (!uri.isNullOrBlank()) {
                         val token = prefs.cachedAuthToken
-                        val model: Any = if (token != null) {
-                            GlideUrl(uri, LazyHeaders.Builder()
-                                .addHeader("Authorization", "Bearer $token")
-                                .build())
-                        } else {
-                            uri
-                        }
+                        val model: Any =
+                            if (token != null && (uri.startsWith("http://") || uri.startsWith("https://"))) {
+                                GlideUrl(
+                                    uri,
+                                    LazyHeaders.Builder()
+                                        .addHeader("Authorization", "Bearer $token")
+                                        .build(),
+                                )
+                            } else {
+                                uri
+                            }
                         Glide
                             .with(imageView)
                             .load(model)
                             .error(R.drawable.ic_song_cover)
                             .into(imageView)
                     } else {
-                        // 没有封面时，清空 ImageView，避免残影
-                        imageView.setImageDrawable(null)
+                        val embedded = extractEmbeddedArt(currentSong)
+                        if (embedded != null) {
+                            imageView.setImageBitmap(embedded)
+                        } else {
+                            imageView.setImageDrawable(null)
+                        }
                     }
                 },
             )
-
-            // 🎵 Icon 占位（只在没封面时显示）
-            if (coverUri == null) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_song_cover),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    tint = Color.Unspecified,
-                )
-            }
         }
         // 中间撑开
         Spacer(modifier = Modifier.weight(1f))
@@ -185,7 +190,7 @@ fun MiniPlayerControl(
         // 右侧第二个 Icon
         Icon(
             painter = painterResource(id = R.drawable.ic_play_queue),
-            contentDescription = "下一首",
+            contentDescription = "播放列表",
             modifier =
                 Modifier
                     .size(28.dp)
@@ -193,5 +198,30 @@ fun MiniPlayerControl(
                         showPlayQueue()
                     },
         )
+    }
+}
+
+private fun extractEmbeddedArt(song: com.inkwise.music.data.model.Song?): android.graphics.Bitmap? {
+    if (song == null || !song.isLocal) return null
+    val path = song.path.ifBlank { null } ?: run {
+        val uri = song.uri
+        if (uri.startsWith("file://")) {
+            android.net.Uri.parse(uri).path
+        } else if (!uri.startsWith("http")) {
+            uri
+        } else {
+            null
+        }
+    } ?: return null
+    if (!File(path).exists()) return null
+    val retriever = MediaMetadataRetriever()
+    return try {
+        retriever.setDataSource(path)
+        val picture = retriever.embeddedPicture
+        if (picture != null) BitmapFactory.decodeByteArray(picture, 0, picture.size) else null
+    } catch (_: Exception) {
+        null
+    } finally {
+        retriever.release()
     }
 }

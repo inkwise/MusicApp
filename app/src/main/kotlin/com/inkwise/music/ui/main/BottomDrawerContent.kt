@@ -67,6 +67,7 @@ fun BottomDrawerContent(
     pagerState: PagerState,
     animatedThemeColor: Color,
     playerViewModel: PlayerViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(),
 ) {
     val playbackState by playerViewModel.playbackState.collectAsState()
     val currentSong = playbackState.currentSong
@@ -372,7 +373,7 @@ fun BottomDrawerContent(
                 }
             }
 
-            IconButton(onClick = { /* 音效 */ }) {
+            IconButton(onClick = { mainViewModel.navigateToAudioEffect() }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_audio_effect),
                     contentDescription = "音效",

@@ -107,14 +107,7 @@ dependencies {
     
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
     
-    val media3Version = "1.2.1"
-    implementation("androidx.media3:media3-exoplayer:$media3Version")
-    implementation("androidx.media3:media3-session:$media3Version")
-    implementation("androidx.media3:media3-ui:$media3Version")
-    implementation("androidx.media3:media3-common:$media3Version")
-    
     implementation("androidx.lifecycle:lifecycle-service:2.7.0")
-    implementation("com.google.guava:guava:31.1-android")
     //图片
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("jp.wasabeef:glide-transformations:4.3.0")

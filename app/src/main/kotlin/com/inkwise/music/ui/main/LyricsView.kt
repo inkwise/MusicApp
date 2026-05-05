@@ -105,17 +105,55 @@ fun MiniLyricsView(
     val lyricsState by viewModel.lyricsState.collectAsState()
     val lyrics = lyricsState.lyrics?.lines.orEmpty()
     val highlight = lyricsState.highlight
+    val currentIndex = highlight?.lineIndex ?: 0
 
     val listState = rememberLazyListState()
-    val lineHeight = 28.dp
     var containerHeight by remember { mutableStateOf(0) }
     val density = LocalDensity.current
     val fadeHeightDp = 5.dp
     val fadeHeightPx = with(density) { fadeHeightDp.toPx() }
 
+    // Scroll synchronization: dynamic duration, same logic as LyricsView
+    LaunchedEffect(highlight?.lineIndex) {
+        val index = highlight?.lineIndex ?: return@LaunchedEffect
+        if (index !in lyrics.indices) return@LaunchedEffect
+
+        val currentLineTime = lyrics[index].timeMs
+        val nextLineTime = lyrics.getOrNull(index + 1)?.timeMs
+
+        val dynamicDuration =
+            if (nextLineTime != null) {
+                (nextLineTime - currentLineTime).toInt().coerceIn(10, 1200)
+            } else {
+                500
+            }
+
+        val layoutInfo = listState.layoutInfo
+        val visibleItem = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
+
+        if (visibleItem != null) {
+            val viewportStart = layoutInfo.viewportStartOffset
+            val viewportHeight = layoutInfo.viewportEndOffset - viewportStart
+            val targetOffset = viewportStart + viewportHeight / 3
+
+            val itemCenter = visibleItem.offset + visibleItem.size / 2
+            val scrollDelta = itemCenter - targetOffset
+
+            listState.animateScrollBy(
+                scrollDelta.toFloat(),
+                animationSpec = tween(
+                    durationMillis = dynamicDuration,
+                    easing = LinearOutSlowInEasing,
+                ),
+            )
+        } else {
+            listState.scrollToItem(index)
+        }
+    }
+
     Box(modifier = modifier.onSizeChanged { containerHeight = it.height }) {
         if (containerHeight > 0) {
-            val centerPadding = with(density) { ((containerHeight.toDp() / 2) - (lineHeight / 2)).coerceAtLeast(0.dp) }
+            val topPadding = with(density) { (containerHeight.toDp() / 3).coerceAtLeast(0.dp) }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -134,26 +172,31 @@ fun MiniLyricsView(
                         drawRect(brush = gradient, blendMode = BlendMode.DstIn)
                     },
             ) {
-                LazyColumn(state = listState, contentPadding = PaddingValues(vertical = centerPadding)) {
+                LazyColumn(state = listState, contentPadding = PaddingValues(top = topPadding)) {
                     itemsIndexed(items = lyrics, key = { i, _ -> i }) { index, line ->
                         val isHighlighted = highlight?.lineIndex == index
+                        val dist = abs(index - currentIndex)
+
+                        val targetAlpha = when {
+                            isHighlighted -> 1f
+                            dist <= 3 -> 0.7f
+                            else -> 0.4f
+                        }
+                        val alpha by animateFloatAsState(
+                            targetValue = targetAlpha,
+                            animationSpec = tween(300),
+                            label = "lyrics_alpha",
+                        )
+
                         Text(
                             text = line.text,
                             modifier = Modifier.fillMaxWidth(),
-                            color = if (isHighlighted) animatedThemeColor
-                                    else animatedThemeColor.copy(alpha = 0.5f),
+                            color = if (isHighlighted) animatedThemeColor.copy(alpha = alpha)
+                                    else animatedThemeColor.copy(alpha = 0.5f * alpha),
                             fontSize = 12.sp,
                             lineHeight = 20.sp,
                             fontWeight = FontWeight.Normal,
                         )
-                    }
-                }
-            }
-
-            LaunchedEffect(highlight?.lineIndex) {
-                highlight?.lineIndex?.let { index ->
-                    if (index in lyrics.indices) {
-                        listState.animateScrollToItem(index)
                     }
                 }
             }

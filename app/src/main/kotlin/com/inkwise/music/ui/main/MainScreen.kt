@@ -107,10 +107,10 @@ fun MainScreen() {
                     },
                     showPlayQueue = {
                         scope.launch {
-                            // 展开 Sheet
+                            // 立即切到播放列表页，再展开 Sheet，避免先闪现播放器主页
+                            savedPage.intValue = 1
+                            pagerState.scrollToPage(1)
                             scaffoldState.bottomSheetState.expand()
-                            // 直接切第二页
-                            pagerState.animateScrollToPage(1)
                         }
                     },
                 )
